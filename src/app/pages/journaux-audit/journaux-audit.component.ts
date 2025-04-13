@@ -33,15 +33,7 @@ interface AuditLog {
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Niveau</label>
-            <select class="form-control">
-              <option value="">Tous</option>
-              <option value="info">Info</option>
-              <option value="warning">Avertissement</option>
-              <option value="error">Erreur</option>
-            </select>
-          </div>
+         
 
           <div class="form-group">
             <label>Utilisateur</label>

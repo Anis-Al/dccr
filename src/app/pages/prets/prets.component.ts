@@ -441,8 +441,8 @@ export class PretsComponent {
   creditSelectionne: Credit | null = null;
   
   pageActuelle: number = 1;
-  lignesParPage: number = 10;
-  totalPages: number = 1;
+  lignesParPage: number = 5;
+  totalPages: number = 2;
   paginatedPrets: Credit[] = [];
   filteredPrets: Credit[] = [];
 
