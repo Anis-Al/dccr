@@ -62,8 +62,6 @@ interface AuditLog {
               <th>Utilisateur</th>
               <th>Action</th>
               <th>Ressource</th>
-              <th>Détails</th>
-              <th>Niveau</th>
             </tr>
           </thead>
           <tbody>
@@ -72,12 +70,7 @@ interface AuditLog {
               <td>{{ log.utilisateur }}</td>
               <td>{{ log.action }}</td>
               <td>{{ log.ressource }}</td>
-              <td>{{ log.details }}</td>
-              <td>
-                <span class="niveau-badge" [class]="log.niveau.toLowerCase()">
-                  {{ log.niveau }}
-                </span>
-              </td>
+              
             </tr>
           </tbody>
         </table>
@@ -164,39 +157,21 @@ export class JournauxAuditComponent {
   journaux: AuditLog[] = [
     {
       id: '1',
-      utilisateur: 'Marie Dubois',
+      utilisateur: 'Cheb Khaled',
       action: 'Création',
-      ressource: 'Prêt #12345',
-      details: 'Nouveau prêt créé pour le client Jean Martin',
+      ressource: 'Credit #cr.20250304.0001',
+      details: 'Nouveau crédit créé',
       date: new Date('2024-03-20T15:30:00'),
       niveau: 'Info'
     },
     {
       id: '2',
-      utilisateur: 'Pierre Martin',
+      utilisateur: 'Alim Anis',
       action: 'Export',
-      ressource: 'Fichier XML',
+      ressource: 'Déclaration BA #CREM.021.........',
       details: 'Export SEPA généré pour mars 2024',
       date: new Date('2024-03-20T14:45:00'),
       niveau: 'Info'
-    },
-    {
-      id: '3',
-      utilisateur: 'Sophie Bernard',
-      action: 'Modification',
-      ressource: 'Prêt #12340',
-      details: 'Modification du taux d\'intérêt de 3.5% à 3.2%',
-      date: new Date('2024-03-20T13:15:00'),
-      niveau: 'Avertissement'
-    },
-    {
-      id: '4',
-      utilisateur: 'Système',
-      action: 'Import',
-      ressource: 'Fichier Excel',
-      details: 'Échec de l\'import - Format invalide',
-      date: new Date('2024-03-20T12:30:00'),
-      niveau: 'Erreur'
     }
   ];
 } 

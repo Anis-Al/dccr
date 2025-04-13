@@ -25,27 +25,20 @@ import { User } from '../../core/models/user.model';
         <div class="form-grid">
           <div class="form-group">
             <label>Rechercher</label>
-            <input type="text" class="form-control" placeholder="Nom ou email">
+            <input type="text" class="form-control" placeholder="Nom ou matricule">
           </div>
 
           <div class="form-group">
             <label>Rôle</label>
             <select class="form-control">
               <option value="">Tous les rôles</option>
-              <option value="admin">Admin</option>
-              <option value="gestionnaire">Gestionnaire</option>
-              <option value="analyste">Analyste</option>
+              <option value="admin">Integrateur</option>
+              <option value="gestionnaire">Validateur</option>
+              <option value="analyste">Consultant</option>
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Statut</label>
-            <select class="form-control">
-              <option value="">Tous les statuts</option>
-              <option value="actif">Actif</option>
-              <option value="inactif">Inactif</option>
-            </select>
-          </div>
+        
         </div>
       </div>
 
