@@ -1,9 +1,7 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8080/api',
+  apiBaseUrl: 'https://localhost:44307/api',
   endpoints: {
-    credits: '/credits',
-    validate: '/validate',
-    process: '/process'
+    integration: '/Excel/importer',
   }
 };

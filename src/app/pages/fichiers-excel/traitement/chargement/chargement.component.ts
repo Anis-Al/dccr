@@ -1,8 +1,10 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { finalize, delay } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { ApiService } from '../../../../core/services/api.service';
+import { ReponseIntegrationDto } from '../../../../core/dtos/integration-response.dto';
+import { DemandeIntegrationDto } from '../../../../core/dtos/demande-integration.dto';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-upload-fichier',
@@ -106,7 +108,10 @@ import { of } from 'rxjs';
 export class ChargementComponent { 
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   isLoading = false;
-  constructor(private router: Router) {}
+  resultatIntegration?: ReponseIntegrationDto;
+  erreurApi?: string;
+
+  constructor(private router: Router, private apiService: ApiService) {}
 
   triggerFileBrowse() {
     this.fileInputRef.nativeElement.click();
@@ -114,15 +119,23 @@ export class ChargementComponent {
 
   private processFile(file: File) {
     this.isLoading = true;
-    
-    // Simulate API call with 2 second delay
-    of(null).pipe(
-      delay(2000),
-      finalize(() => {
-        this.isLoading = false;
-        this.router.navigate(['/fichiers-excel/resultat'], { queryParams: { fileName: file.name } });
-      })
-    ).subscribe();
+    this.resultatIntegration = undefined;
+    this.erreurApi = undefined;
+    const demande: DemandeIntegrationDto = { file, userId: 'anis2002' };
+    this.apiService.processFile(demande)
+      .pipe(
+        finalize(() => { this.isLoading = false; })
+      )
+      .subscribe({
+        next: (result: ReponseIntegrationDto) => {
+          this.resultatIntegration = result;
+          console.log('Réponse du service d\'intégration:', result);
+          this.router.navigate(['/fichiers-excel/resultat'], { queryParams: { result: JSON.stringify(result), fileName: file.name } });
+        },
+        error: (error: any) => {
+          this.erreurApi = error?.message || 'Erreur lors du traitement du fichier.';
+        }
+      });
   }
 
   onFileSelected(event: Event) {

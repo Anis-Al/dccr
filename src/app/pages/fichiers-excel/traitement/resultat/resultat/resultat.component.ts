@@ -4,6 +4,8 @@ import { Credit } from '../../../../../core/models/credits';
 import { Router } from '@angular/router';
 import { GenererDonneesFictivesService } from '../../../../../core/services/generer-donnees-fictives.service';
 import { ViewStateService } from '../../../../../core/services/view-state.service';
+import { ActivatedRoute } from '@angular/router';
+import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-response.dto';
 
 @Component({
   selector: 'app-resultat',
@@ -15,10 +17,10 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
        <button class="back-btn" (click)="goBack()" title="Retour à l'intégration">
          <i class="fas fa-arrow-left"></i>
        </button>
-       <h1>Résultats pour : <span class="file-name">PeuImporte.xlsx</span></h1>
+       <h1>Résultats pour : <span class="file-name">{{ result.idExcel || fileName }}</span></h1>
      </div>
 
-   <ng-template #errorCase>
+   <ng-container *ngIf="result?.contientErreurs; else noErrorCase">
     <div class="error-modal-overlay" *ngIf="showErrorPopup">
       <div class="error-modal">
         <div class="modal-content">
@@ -43,19 +45,17 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
       <table class="table-invalid">
         <thead>
           <tr>
-            <th>#</th>
             <th>Ligne</th>
             <th>Erreurs</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let row of invalidRows | slice: (currentInvalidPage - 1) * itemsPerPage : currentInvalidPage * itemsPerPage; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ row.rowIndex }}</td>
+          <tr *ngFor="let row of erreurs;">
+            <td>{{ row.ligne }}</td>
             <td>
-              <ul>
-                <li *ngFor="let err of row.errors">{{ err }}</li>
-              </ul>
+              <ol>
+                <li *ngFor="let err of row.messages">{{ err }}</li>
+              </ol>
             </td>
           </tr>
         </tbody>
@@ -69,14 +69,14 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
         <span>Page {{ currentInvalidPage }}</span>
         <button class="page-button" 
                 (click)="changeInvalidPage(currentInvalidPage + 1)"
-                [disabled]="currentInvalidPage * itemsPerPage >= invalidRows.length">
+                [disabled]="currentInvalidPage * itemsPerPage >= erreurs.length">
           Suivant
         </button>
       </div>
     </div>
-  </ng-template>
+  </ng-container>
 
-  <ng-template #correctCase>
+  <ng-template #noErrorCase>
     <div class="valid-credits-container">
       <h2 class="section-title vert">Contenu de ce fichier</h2>
 
@@ -102,79 +102,91 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
             </tr>
           </thead>
           <tbody>
-            <ng-container *ngFor="let credit of mockCredits; let i = index">
+            <ng-container *ngFor="let credit of apercuDonnees; let i = index">
               <tr (click)="toggleRow(i)">
                 <td>
                   <i class="fas" [class.fa-chevron-right]="!expandedRows[i]" [class.fa-chevron-down]="expandedRows[i]"></i>
                 </td>
                 <td>{{ i + 1 }}</td>
-                <td>{{ credit.numContrat }}</td>
+                <td>{{ credit.numeroContrat || 'vide' }}</td>
               </tr>
-              
+      
               <tr *ngIf="expandedRows[i]" class="expanded-row">
                 <td colspan="3">
                   <div class="details-container">
                     <div class="detail-section">
-                      <h4>Détails du crédit #{{i + 1}} - {{credit.numContrat}}</h4>
+                      <h4>Détails du crédit #{{i + 1}} - {{credit.numeroContrat}}</h4>
                       <div class="detail-grid">
-                        <div><strong>Type:</strong> {{ credit.libelleTypeCredit }}</div>
-                        <div><strong>Statut:</strong> {{ credit.libelleSituation }}</div>
-                        <div><strong>Montant:</strong> {{ credit.creditsAccorde }}</div>
-                        <div><strong>Agence:</strong> {{ credit.libelleAgence }}</div>
-                        <div><strong>Date octroi:</strong> {{ credit.dateOctroi | date:'dd/MM/yyyy' }}</div>
-                        <div><strong>Date expiration:</strong> {{ credit.dateExpiration | date:'dd/MM/yyyy' }}</div>
-                        <div><strong>Mensualité:</strong> {{ credit.mensualite }}</div>
-                        <div><strong>Activité:</strong> {{ credit.libelleActivite }}</div>
-                        <div><strong>Taux:</strong> {{ credit.tauxInterets | number:'1.2-2' }}%</div>
-                        <div><strong>Durée initiale:</strong> {{ credit.libelleDureeInitiale }}</div>
-                        <div><strong>Durée restante:</strong> {{ credit.libelleDureeRestante }}</div>
-                        <div><strong>Retard:</strong> {{ credit.libelleClasseRetard || 'Aucun' }}</div>
-                        <div><strong>Plafond:</strong> {{ credit.plafondAccorde ? 'Oui' : 'Non' }}</div>
-                        <div><strong>Numéro plafond:</strong> {{ credit.numeroPlafond || '-' }}</div>
+                        <div><strong>Date déclaration:</strong> {{ credit.dateDeclaration || 'vide' }}</div>
+                        <div><strong>Type:</strong> {{ credit.typeCredit || 'vide' }}</div>
+                        <div><strong>Statut:</strong> {{ credit.situationCredit || 'vide' }}</div>
+                        <div><strong>Montant accordé:</strong> {{ credit.creditAccorde || 'vide' }}</div>
+                        <div><strong>Solde restant:</strong> {{ credit.soldeRestant || 'vide' }}</div>
+                        <div><strong>Taux:</strong> {{ credit.taux || 'vide' }}</div>
+                        <div><strong>Classe retard:</strong> {{ credit.classeRetard || 'vide' }}</div>
+                        <div><strong>Nombre échéances impayées:</strong> {{ credit.nombreEcheancesImpayes || 'vide' }}</div>
+                        <div><strong>Durée initiale:</strong> {{ credit.dureeInitiale || 'vide' }}</div>
+                        <div><strong>Durée restante:</strong> {{ credit.dureeRestante || 'vide' }}</div>
+                        <div><strong>Monnaie:</strong> {{ credit.monnaie || 'vide' }}</div>
+                        <div><strong>Montant intérêts courus:</strong> {{ credit.montantInteretsCourus || 'vide' }}</div>
+                        <div><strong>Montant intérêts retard:</strong> {{ credit.montantInteretsRetard || 'vide' }}</div>
+                        <div><strong>Montant capital retard:</strong> {{ credit.montantCapitalRetard || 'vide' }}</div>
+                        <div><strong>Mensualité:</strong> {{ credit.mensualite || 'vide' }}</div>
+                        <div><strong>Motif:</strong> {{ credit.motif || 'vide' }}</div>
+                        <div><strong>Date exécution:</strong> {{ credit.dateExecution || 'vide' }}</div>
+                        <div><strong>Date constatation:</strong> {{ credit.dateConstatation || 'vide' }}</div>
+                        <div><strong>Date rejet:</strong> {{ credit.dateRejet || 'vide' }}</div>
+                        <div><strong>ID plafond:</strong> {{ credit.idPlafond || 'vide' }}</div>
+                        <div><strong>Coût total crédit:</strong> {{ credit.coutTotalCredit || 'vide' }}</div>
+                        <div><strong>Activité crédit:</strong> {{ credit.activiteCredit || 'vide' }}</div>
                       </div>
                     </div>
-                    
                     <div class="detail-section">
-                      <h4>Debiteurs</h4>
+                      <h4>Lieu</h4>
+                      <div class="detail-grid">
+                        <div><strong>Agence:</strong> {{ credit.codeAgence || 'vide' }}</div>
+                        <div><strong>Code pays:</strong> {{ credit.codePays || 'vide' }}</div>
+                        <div><strong>Code wilaya:</strong> {{ credit.codeWilaya || 'vide' }}</div>
+                      </div>
+                    </div>
+                    <div class="detail-section">
+                      <h4>Participants</h4>
                       <table class="sub-table">
                         <thead>
                           <tr>
-                            <th>Rôle</th>
-                            <th>Cle</th>
-                            <th>Type</th>
+                            <th>Clé</th>
+                            <th>CLI</th>
                             <th>NIF</th>
                             <th>RIB</th>
-                            <th>Solde</th>
+                            <th>Type</th>
+                            <th>Rôle</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let intervenant of credit.intervenants">
-                            <td>{{ intervenant.libelleNiveauResponsabilite }}</td>
-                            <td>{{ intervenant.cle }}</td>
-                            <td>{{ intervenant.typeCle }}</td>
-                            <td>{{ intervenant.nif }}</td>
-                            <td>{{ intervenant.rib }}</td>
-                            <td>{{ intervenant.soldeRestant }}</td>
+                          <tr *ngFor="let participant of credit.participants">
+                            <td>{{ participant.participantCle || 'vide' }}</td>
+                            <td>{{ participant.participantCli || 'vide' }}</td>
+                            <td>{{ participant.participantNif || 'vide' }}</td>
+                            <td>{{ participant.participantRib || 'vide' }}</td>
+                            <td>{{ participant.participantType || 'vide' }}</td>
+                            <td>{{ participant.roleNiveauResponsabilite || 'vide' }}</td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                    
                     <div class="detail-section">
                       <h4>Garanties</h4>
                       <table class="sub-table">
                         <thead>
                           <tr>
                             <th>Type</th>
-                            <th>Debiteur</th>
                             <th>Montant</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr *ngFor="let garantie of credit.garanties">
-                            <td>{{ garantie.libelleType }}</td>
-                            <td>{{ garantie.intervenant }}</td>
-                            <td>{{ garantie.montant }}</td>
+                            <td>{{ garantie.typeGarantie || 'vide' }}</td>
+                            <td>{{ garantie.montantGarantie || 'vide' }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -188,7 +200,7 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
       </div>
       
       <div class="credit-count">
-        Total : {{ mockCredits.length }}
+        Total : {{ apercuDonnees.length }}
       </div>
       
       <div class="confirmation-actions">
@@ -199,8 +211,6 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
     </div>
    
   </ng-template>
-  
-  <ng-container *ngIf="showErrorCase; then errorCase; else correctCase"></ng-container>
 </div>
 
   `,
@@ -265,9 +275,7 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
     background-color: #f7f7f7;
   }
 
-  tr:hover {
-    background-color: #f2f2f2;
-  }
+  
 
   .table-invalid tr:hover {
     background-color: #fff1f1;
@@ -311,10 +319,7 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
     margin: 0 0.2rem;
     transition: background-color 0.2s, color 0.2s;
   
-    &:hover:not([disabled]) {
-      background-color: #eef4ff;
-      border-color: #b3c8e3;
-    }
+    
   
     &[disabled] {
       background: #f9f9f9;
@@ -486,10 +491,18 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
     padding-right: 10px;
   }
 
-  .table-valid th {
+  .table-valid th, .sub-table th {
+    background: #fff !important;
+    color: #222;
     white-space: nowrap;
     padding: 8px 12px;
     font-size: 0.9rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .table-valid th:hover, .sub-table th:hover, .table-valid tr:hover, .sub-table tr:hover {
+    background: inherit !important;
+    cursor: default;
   }
 
   .table-valid td {
@@ -523,13 +536,9 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
     margin-bottom: 15px;
   }
   
-  .sub-table th, .sub-table td {
+  .sub-table td {
     padding: 8px;
     border: 1px solid #dee2e6;
-  }
-  
-  .sub-table th {
-    background-color: #e9ecef;
   }
   
   .credit-count {
@@ -558,9 +567,13 @@ import { ViewStateService } from '../../../../../core/services/view-state.servic
   `
 })
 export class ResultatComponent implements OnInit {
+  result!: ReponseIntegrationDto;
+  fileName: string = '';
   showErrorCase = true;
+  apercuDonnees: any[] = [];
   
   constructor(
+    private route: ActivatedRoute,
     private viewState: ViewStateService,
     private router: Router,
     private mockDataService: GenererDonneesFictivesService
@@ -569,6 +582,10 @@ export class ResultatComponent implements OnInit {
   }
 
   mockCredits: Credit[];
+
+  get erreurs() {
+    return this.result?.erreurs || [];
+  }
 
   invalidRows: { rowIndex: number, errors: string[] }[] = [
     { rowIndex: 2, errors: ['Champ "typeCredit" manquant', 'Code activité invalide'] },
@@ -582,6 +599,21 @@ export class ResultatComponent implements OnInit {
   showSuccess = false;
   successMessage = '';
   expandedRows: boolean[] = [];
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['result']) {
+        this.result = JSON.parse(params['result']);
+        this.apercuDonnees = this.result?.apercuDonnees || [];
+      }
+      if (params['fileName']) {
+        this.fileName = params['fileName'];
+      }
+    });
+    const lastView = sessionStorage.getItem('lastResultView');
+    this.showErrorCase = lastView !== 'correct';
+    sessionStorage.setItem('lastResultView', this.showErrorCase ? 'correct' : 'error');
+  }
 
   changeValidPage(page: number) {
     this.currentValidPage = page;
@@ -616,11 +648,5 @@ export class ResultatComponent implements OnInit {
 
   toggleRow(index: number) {
     this.expandedRows[index] = !this.expandedRows[index];
-  }
-
-  ngOnInit() {
-    const lastView = sessionStorage.getItem('lastResultView');
-    this.showErrorCase = lastView !== 'correct';
-    sessionStorage.setItem('lastResultView', this.showErrorCase ? 'correct' : 'error');
   }
 }
