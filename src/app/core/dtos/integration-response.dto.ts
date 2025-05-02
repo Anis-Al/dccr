@@ -8,4 +8,5 @@ export interface ReponseIntegrationDto {
   erreurs: ErreurIntegration[];
   apercuDonnees: any[];
   idExcel: number;
+  NomFichierExcel: string;
 }

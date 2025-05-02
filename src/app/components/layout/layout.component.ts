@@ -19,7 +19,7 @@ interface NavItem {
     <div class="layout" [class.sidebar-collapsed]="sidebarCollapsed">
       <aside class="sidebar">
         <div class="sidebar-header">
-          <img src="/assets/sga-logo.png" alt="Logo" class="logo">
+          <img src="assets/sga-logo.png" alt="Logo" class="logo">
           <button class="collapse-btn" (click)="toggleSidebar()">
             <i [class]="sidebarCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
           </button>
@@ -62,7 +62,7 @@ interface NavItem {
 
         <div class="sidebar-footer" style="padding-bottom: 0.75rem; margin-bottom: 0;">
           <div class="user-info" style="margin-bottom: 1rem;">
-            <img src="/assets/default-avatar.svg" alt="Avatar" class="avatar">
+            <img src="assets/default-avatar.svg" alt="Avatar" class="avatar">
             <div class="user-details" *ngIf="!sidebarCollapsed">
               <span class="user-name">Alim Anis</span>
               <span class="user-role">Validateur</span>

@@ -6,6 +6,8 @@ import { GenererDonneesFictivesService } from '../../../../../core/services/gene
 import { ViewStateService } from '../../../../../core/services/view-state.service';
 import { ActivatedRoute } from '@angular/router';
 import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-response.dto';
+import { ApiService } from '../../../../../core/services/api.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-resultat',
@@ -17,7 +19,7 @@ import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-resp
        <button class="back-btn" (click)="goBack()" title="Retour à l'intégration">
          <i class="fas fa-arrow-left"></i>
        </button>
-       <h1>Résultats pour : <span class="file-name">{{ result.idExcel || fileName }}</span></h1>
+       <h1>Résultats pour : <span class="file-name">{{ result.NomFichierExcel || fileName }}</span></h1>
      </div>
 
    <ng-container *ngIf="result?.contientErreurs; else noErrorCase">
@@ -37,7 +39,7 @@ import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-resp
     
     <div class="error-table-header">
       <h2 class="section-title rouge">Tableau des erreurs</h2>
-      <button class="export-btn" (click)="exportErrors()">
+      <button class="export-btn" (click)="telechargerFichierErreurs()">
         <i class="fas fa-file-export"></i> Exporter
       </button>
     </div>
@@ -571,13 +573,15 @@ export class ResultatComponent implements OnInit {
   fileName: string = '';
   showErrorCase = true;
   apercuDonnees: any[] = [];
-  
+  idExcel:number=0;
   constructor(
     private route: ActivatedRoute,
     private viewState: ViewStateService,
     private router: Router,
-    private mockDataService: GenererDonneesFictivesService
-  ) {
+    private mockDataService: GenererDonneesFictivesService,
+    private aps:ApiService
+  ) 
+  {
     this.mockCredits = this.mockDataService.getMockCredits(5);
   }
 
@@ -605,6 +609,8 @@ export class ResultatComponent implements OnInit {
       if (params['result']) {
         this.result = JSON.parse(params['result']);
         this.apercuDonnees = this.result?.apercuDonnees || [];
+        this.idExcel = this.result?.idExcel; 
+
       }
       if (params['fileName']) {
         this.fileName = params['fileName'];
@@ -648,5 +654,71 @@ export class ResultatComponent implements OnInit {
 
   toggleRow(index: number) {
     this.expandedRows[index] = !this.expandedRows[index];
+  }
+
+  telechargerFichierErreurs(): void {
+    console.log("telechargerFichierErreurs called");
+    if (!this.idExcel) {
+      console.warn("idExcel is falsy!", this.idExcel);
+      return;
+    }
+    console.log("About to call this.aps.telechargerFichierErreursExcel with idExcel:", this.idExcel);
+    this.aps.telechargerFichierErreursExcel(this.idExcel).subscribe({
+      next: (response: HttpResponse<Blob>) => {
+        const blob = response.body;
+        console.log('Blob:', blob);
+        // Log all headers for debugging
+        if (response.headers) {
+          const headersObj: any = {};
+          response.headers.keys().forEach(key => {
+            headersObj[key] = response.headers.get(key);
+          });
+          console.log('Response Headers:', headersObj);
+        } else {
+          console.warn('No headers found in response!');
+        }
+
+        if (!blob || blob.size === 0) {
+          console.warn(`No error data found or empty file received for File ID: ${this.idExcel}.`);
+          alert(`No errors found to download for File ID: ${this.idExcel}.`); // User feedback
+          return;
+        }
+
+        const filename = this.extraireNomFichier(response) ?? `erreurs_${this.result.NomFichierExcel}.xlsx`;
+        this.declencherTelechargement(blob, filename);
+        console.log(`Download triggered for: ${filename}`);
+      },
+      error: (err) => {
+        console.error("Error downloading file:", err);
+        alert(err.status); 
+      }
+    });
+  }
+  private extraireNomFichier(reponse: HttpResponse<Blob>): string | null {
+    const contentDisposition = reponse.headers.get('content-disposition');
+    if (!contentDisposition) return null;
+
+    const matches = /filename[^;=\n]*=(?:(['"])(.*?)\1|([^;\n]*))/i.exec(contentDisposition);
+    let nomFichier = (matches && matches[3] ? matches[3].trim() : (matches && matches[2] ? matches[2].trim() : null));
+
+    if (nomFichier) {
+      try {
+        return decodeURIComponent(nomFichier);
+      } catch (e) {
+        return nomFichier;
+      }
+    }
+    return null; 
+  }
+  private declencherTelechargement(blob: Blob, nomFichier: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const ancre = document.createElement('a');
+    ancre.href = url;
+    ancre.download = nomFichier;
+    ancre.style.display = 'none';
+    document.body.appendChild(ancre);
+    ancre.click();
+    document.body.removeChild(ancre);
+    window.URL.revokeObjectURL(url);
   }
 }

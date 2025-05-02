@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { Credit } from '../models/credits';
 import { ReponseIntegrationDto } from '../dtos/integration-response.dto';
 import { DemandeIntegrationDto } from '../dtos/demande-integration.dto';
 
@@ -14,20 +13,20 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  // getCredits(): Observable<Credit[]> {
-  //   return this.http.get<Credit[]>(`${this.baseUrl}${environment.endpoints.credits}`);
-  // }
-
-  // validateData(data: any): Observable<any> {
-  //   return this.http.post(`${this.baseUrl}${environment.endpoints.validate}`, data);
-  // }
-
   processFile(demande: DemandeIntegrationDto): Observable<ReponseIntegrationDto> {
     const formData = new FormData();
-    formData.append('fichier', demande.file); // Backend expects 'fichier'
-    formData.append('matricule_utilisateur', demande.userId); // Backend expects 'matricule_utilisateur'
-    // Debug: log form data
-   
-    return this.http.post<ReponseIntegrationDto>(`${this.baseUrl}${environment.endpoints.integration}`, formData);
+    formData.append('fichier', demande.file); 
+    formData.append('matricule_utilisateur', demande.userId); 
+    return this.http.post<ReponseIntegrationDto>(`${this.baseUrl}${environment.endpoints.excel.integrationPart1}`, formData);
   }
+
+  telechargerFichierErreursExcel(idExcel: number): Observable<HttpResponse<Blob>> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.exportationErreurs}/${idExcel}`;
+  
+    return this.http.get(url, {
+      observe: 'response',
+      responseType: 'blob'
+    });
+  }
+
 }

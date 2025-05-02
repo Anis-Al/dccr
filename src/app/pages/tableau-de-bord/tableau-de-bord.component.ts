@@ -32,7 +32,7 @@ interface StatCard {
               [options]="excelChartOptions">
             </canvas>
           </div>
-        </div>
+            </div>
 
         <div class="chart-card card">
           <h2>Erreurs plus fréquentes</h2>
@@ -52,8 +52,8 @@ interface StatCard {
               [type]="creditsChartType"
               [options]="creditsChartOptions2">
             </canvas>
-          </div>
         </div>
+      </div>
 
       
 

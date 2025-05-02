@@ -44,7 +44,7 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
           <table>
             <thead>
               <tr>
-                <th class="sticky-column">N° Contrat</th>     
+                <th class="sticky-column">N° Contrat</th>
                 <th>Date Déclaration</th>
                 <th>Emprunteur Principal</th>
                 <th>Situation</th>
