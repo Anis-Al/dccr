@@ -321,10 +321,7 @@ export class LayoutComponent {
       label: 'Crédits',
       icon: 'fa-money-bill-transfer',
       expanded: false,
-      children: [
-        { label: 'Nouveau', route: '/credits/nouveau', icon: 'fa-plus' },
-        { label: 'En cours', route: '/credits', icon: 'fa-spinner', routerLinkActiveOptions: { exact: true } }
-      ]
+      route: '/credits'
     },
     {
       label: 'Déclarations BA',

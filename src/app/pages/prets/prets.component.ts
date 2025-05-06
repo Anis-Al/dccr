@@ -17,6 +17,10 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
       <div class="prets-list">
         <div class="header">
           <h1>Crédits En Cours</h1>
+          <button class="btn header-btn" (click)="nouveauCredit()">
+            <span>Nouveau</span>
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
 
         <div class="filters">
@@ -25,16 +29,18 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
             <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
           </div>
           <div class="filter-buttons">
-            <button class="btn" [class.active]="currentFilter === 'all'" (click)="filterLoans('all')">
+            <button class="btn" [class.active]="currentFilter === 'all'" (click)="filtrerCredit('all')">
               Tous
             </button>
-            <button class="btn" [class.active]="currentFilter === 'active'" (click)="filterLoans('active')">
-              En Cours
+            <button class="btn" [class.active]="currentFilter === 'lastMonth'" (click)="filtrerCredit('lastMonth')">
+              Dernier mois
             </button>
-            <button class="btn" [class.active]="currentFilter === 'late'" (click)="filterLoans('late')">
-              En Retard
+            <button class="btn" [class.active]="currentFilter === 'lastQuarter'" (click)="filtrerCredit('lastQuarter')">
+              Dernier trimestre
             </button>
-            
+            <button class="btn" [class.active]="currentFilter === 'lastYear'" (click)="filtrerCredit('lastYear')">
+              Dernière année
+            </button>
           </div>
         </div>
 
@@ -50,7 +56,6 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
               </tr>
             </thead>
             <tbody>
-              <div >
                 <tr *ngFor="let credit of CreditsPagines"
                     (click)="selectionnerCredit(credit)"
                     [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit"
@@ -62,7 +67,6 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
                   <td>{{credit.libelle_activite}}</td>
 
                 </tr>
-            </div>
             </tbody>
           </table>
         </div>
@@ -406,6 +410,17 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
       }
     }
 
+    .header-btn {
+      margin-left: auto;
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+
     .table-container table {
       thead tr {
         background-color: #f8f9fa !important;
@@ -464,9 +479,41 @@ export class PretsComponent implements OnInit {
     this.updatePagination();
   }
 
-  filterLoans(filter: string) {
+  filtrerCredit(filter: string) {
     this.currentFilter = filter;
     this.pageActuelle = 1;
+    
+    // Reset search term when changing filter
+    if (filter !== 'all') {
+      this.searchTerm = '';
+    }
+
+    // Apply date filters based on the selection
+    const currentDate = new Date();
+    const filteredCredits = this.TousLesCredits.filter(credit => {
+      if (filter === 'all') return true;
+      
+      // Skip if there's no date declaration
+      if (!credit.date_declaration) return false;
+      
+      const creditDate = new Date(credit.date_declaration);
+      
+      // Skip if the date is invalid
+      if (isNaN(creditDate.getTime())) return false;
+      
+      switch (filter) {
+        case 'lastMonth':
+          return creditDate >= new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+        case 'lastQuarter':
+          return creditDate >= new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+        case 'lastYear':
+          return creditDate >= new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+        default:
+          return true;
+      }
+    });
+
+    this.filteredPrets = filteredCredits;
     this.updatePagination();
   }
 
@@ -519,7 +566,7 @@ export class PretsComponent implements OnInit {
   }
 
   nouveauCredit() {
-    this.router.navigate(['/prets/nouveau']);
+    this.router.navigate(['/credits/nouveau']);
   }
 
   selectionnerCredit(credit: CreditDto): void {
@@ -533,6 +580,8 @@ export class PretsComponent implements OnInit {
   fermerDetails(): void {
       this.creditSelectionne = null;
   } 
+
+ 
 
   loadCredits(): void {
     this.isLoading = true;      
