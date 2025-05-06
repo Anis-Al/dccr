@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GenererDonneesFictivesService } from '../../core/services/generer-donnees-fictives.service';
-import { Credit } from '../../core/models/credits';
+
 
 @Component({
   selector: 'app-archives',
@@ -24,15 +23,13 @@ import { Credit } from '../../core/models/credits';
             <div class="search-container">
               <input 
                 type="text" 
-                [(ngModel)]="searchQuery" 
-                (input)="applyFilter()"
                 placeholder="Rechercher..."
                 class="search-input"
               >
               <i class="fas fa-search search-icon"></i>
             </div>
             <div class="button-group">
-              <button class="export-btn" (click)="exportTable()" title="Exporter les données au format Excel">
+              <button class="export-btn"  title="Exporter les données au format Excel">
                 <i class="fas fa-file-excel"></i> Exporter
               </button>
             </div>
@@ -52,12 +49,7 @@ import { Credit } from '../../core/models/credits';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let fichier of filteredExcelFiles">
-                    <td>{{ fichier.nom }}</td>
-                    <td>{{ fichier.chemin }}</td>
-                    <td>{{ fichier.dateIntegration | date:'dd/MM/yyyy HH:mm' }}</td>
-                    <td>{{ fichier.integrateur }}</td>
-                  </tr>
+                
                 </tbody>
               </table>
             </div>
@@ -87,42 +79,7 @@ import { Credit } from '../../core/models/credits';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let credit of filteredCredits">
-                    <td class="sticky-column">{{credit.numContrat}}</td>
-                    <td>{{credit.libelleTypeCredit}}</td>
-                    <td>{{credit.plafondAccorde ? credit.numeroPlafond || 'Oui' : 'Non'}}</td>
-                    <td>{{credit.libelleActivite}}</td>
-                    <td>{{credit.libelleSituation}}</td>
-                    <td>{{credit.libelleAgence}}</td>
-                    <td>{{credit.libelleWilaya}}</td>
-                    <td>{{credit.creditsAccorde | currency}}</td>
-                    <td>{{credit.libelleDev}}</td>
-                    <td>{{credit.tauxInterets | number:'1.2-2'}}%</td>
-                    <td>{{credit.libelleDureeInitiale}}</td>
-                    <td>{{credit.mensualite | currency}}</td>
-                    <td>
-                      <span *ngIf="credit.libelleClasseRetard">
-                        {{credit.libelleClasseRetard}} ({{credit.nombreEcheancesImpayes}} éch.)
-                      </span>
-                      <span *ngIf="!credit.libelleClasseRetard">Aucun</span>
-                    </td>
-                    <td>
-                      <div>Octroi: {{credit.dateOctroi | date:'shortDate'}}</div>
-                      <div>Expiration: {{credit.dateExpiration | date:'shortDate'}}</div>
-                    </td>
-                    <td>
-                      <div *ngFor="let intervenant of credit.intervenants">
-                        {{intervenant.libelleNiveauResponsabilite}}: {{intervenant.cle}}
-                      </div>
-                    </td>
-                    <td>
-                      <div *ngFor="let garantie of credit.garanties || []">
-                        {{garantie.libelleType}}: {{garantie.montant | currency}}
-                      </div>
-                      <div *ngIf="!credit.garanties?.length">Aucune</div>
-                    </td>
-                    <td>{{credit.source.fileName || 'Manuel'}}</td>
-                  </tr>
+                
                 </tbody>
               </table>
             </div>
@@ -139,12 +96,7 @@ import { Credit } from '../../core/models/credits';
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let fichier of filteredXmlFiles">
-                    <td>{{ fichier.nom }}</td>
-                    <td>{{fichier.fichierSource}}</td>
-                    <td>{{ fichier.nombreCredits }}</td>
-                    <td>{{ fichier.integrateur }}</td>
-                  </tr>
+                
                 </tbody>
               </table>
             </div>
@@ -321,102 +273,6 @@ import { Credit } from '../../core/models/credits';
 })
 export class ArchivesComponent {
   selectedTable: 'excel' | 'prets' | 'xml' = 'excel';
-  searchQuery = '';
   
-  // Mock data for Excel files
-  mockExcelFiles = [
-    {
-      id: '1',
-      nom: 'clients_mars_2024.xlsx',
-      chemin: 'Downloads/clients_mars_2024.xlsx',
-      dateIntegration: new Date('2024-03-20T14:30:00'),
-      integrateur: 'Alim Anis'
-    },
-    {
-      id: '2',
-      nom: 'clients_fevrier_2024.xlsx',
-      chemin: 'Downloads/clients_fevrier_2024.xlsx',
-      dateIntegration: new Date('2024-02-15T09:00:00'),
-      integrateur: 'Alim Anis'
-    }
-  ];
-
-  get filteredExcelFiles() {
-    return this.mockExcelFiles.filter(fichier => 
-      fichier.nom.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      fichier.chemin.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      fichier.integrateur.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
-  }
-
-  credits: Credit[] = [];
-
-  get filteredCredits() {
-    return this.credits.filter(credit => 
-      credit.numContrat.toString().includes(this.searchQuery) ||
-      credit.libelleTypeCredit.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.libelleActivite.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.libelleSituation.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.libelleAgence.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.libelleWilaya.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.creditsAccorde.toString().includes(this.searchQuery) ||
-      credit.libelleDev.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.tauxInterets.toString().includes(this.searchQuery) ||
-      credit.libelleDureeInitiale.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.mensualite.toString().includes(this.searchQuery) ||
-      credit.libelleClasseRetard?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      credit.dateOctroi.toString().includes(this.searchQuery) ||
-      credit.dateExpiration.toString().includes(this.searchQuery) ||
-      credit.intervenants.some(intervenant => intervenant.libelleNiveauResponsabilite.toLowerCase().includes(this.searchQuery.toLowerCase()) || intervenant.cle.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-      credit.garanties?.some(garantie => garantie.libelleType.toLowerCase().includes(this.searchQuery.toLowerCase()) || garantie.montant.toString().includes(this.searchQuery)) ||
-      credit.source?.fileName?.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
-  }
-
-  constructor(private genererDonneesFictivesService: GenererDonneesFictivesService) {
-    this.credits = this.genererDonneesFictivesService.getMockCredits(20);
-  }
-
-  // Mock data for XML files
-  mockXmlFiles = [
-    {
-      id: '1',
-      nom: 'credits_mars_1_2025.xml',
-      fichierSource: 'credits_mars_1_2025.xlsx',
-      nombreCredits: 24,
-      integrateur: 'Anis'
-    }
-  ];
-
-  get filteredXmlFiles() {
-    return this.mockXmlFiles.filter(fichier => 
-      fichier.nom.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      fichier.fichierSource.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      fichier.integrateur.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
-  }
-
-  getEmprunteurPrincipal(credit: any): string {
-    const emprunteur = credit.intervenants.find((i: any) => i.libelleNiveauResponsabilite === 'Emprunteur');
-    return emprunteur ? `${emprunteur.cle}` : 'N/A';
-  }
-
-  applyFilter() {
-    // No need to do anything here, the filtered data is already computed in the getters
-  }
-
-  exportTable() {
-    let data: any[] = [];
-    switch(this.selectedTable) {
-      case 'excel':
-        data = this.filteredExcelFiles;
-        break;
-      case 'prets':
-        data = this.filteredCredits;
-        break;
-      case 'xml':
-        data = this.filteredXmlFiles;
-        break;
-    }
-  }
+  
 }

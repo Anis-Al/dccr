@@ -1,9 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Credit } from '../../../core/models/credits';
-import { Garantie } from '../../../core/models/credits';
-import { Intervenant } from '../../../core/models/credits';
+import { CreditDto } from '../../../core/models/credits';
+
 
 
 @Component({
@@ -16,7 +15,7 @@ import { Intervenant } from '../../../core/models/credits';
         <h1>
           <i class="fas fa-file-invoice-dollar"></i>
           Détails du Crédit
-          <span class="contract-number">{{pret.numContrat}}</span>
+          <span class="contract-number">{{pret.num_contrat_credit}}</span>
         </h1>
         <div class="actions">
           <button class="btn btn-secondary" (click)="onClose()">
@@ -31,7 +30,6 @@ import { Intervenant } from '../../../core/models/credits';
       </div>
 
       <div class="details-grid">
-        <!-- Informations Générales -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-info-circle"></i>
@@ -40,27 +38,27 @@ import { Intervenant } from '../../../core/models/credits';
           <div class="details-content">
             <div class="detail-item">
               <span class="label">N° Contrat</span>
-              <span class="value">{{pret.numContrat}}</span>
+              <span class="value">{{pret.num_contrat_credit}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Type de Crédit</span>
-              <span class="value">{{getTypeCreditLabel(pret.libelleTypeCredit)}}</span>
+              <span class="value">{{pret.libelle_type_credit}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Plafond Accordé</span>
-              <span class="value">{{pret.plafondAccorde ? 'Oui' : 'Non'}}</span>
+              <span class="value">{{pret.est_plafond_accorde ? 'Oui' : 'Non'}}</span>
             </div>
             <div class="detail-item">
               <span class="label">N° Plafond</span>
-              <span class="value">{{pret.numeroPlafond}}</span>
+              <span class="value">{{pret.id_plafond}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Code Activité</span>
-              <span class="value">{{pret.codeActivite}}</span>
+              <span class="value">{{pret.libelle_activite}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Situation</span>
-              <span class="value">{{getSituationLabel(pret.situation)}}</span>
+              <span class="value">{{pret.libelle_situation}}</span>
             </div>
             <div class="detail-item" *ngIf="pret.motif">
               <span class="label">Motif</span>
@@ -69,7 +67,6 @@ import { Intervenant } from '../../../core/models/credits';
           </div>
         </div>
 
-        <!-- Intervenants -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-users"></i>
@@ -79,7 +76,7 @@ import { Intervenant } from '../../../core/models/credits';
             <div class="intervenant-list">
               <div *ngFor="let intervenant of pret.intervenants" class="intervenant-item card">
                 <div class="intervenant-header">
-                  <h3>{{intervenant.niveauResponsabilite}}</h3>
+                  <h3>{{intervenant.niveau_responsabilite}}</h3>
                 </div>
                 <div class="intervenant-details">
                   <div class="detail-item">
@@ -88,7 +85,7 @@ import { Intervenant } from '../../../core/models/credits';
                   </div>
                   <div class="detail-item">
                     <span class="label">Type</span>
-                    <span class="value">{{intervenant.typeCle}}</span>
+                    <span class="value">{{intervenant.type_cle}}</span>
                   </div>
                   <div class="detail-item">
                     <span class="label">NIF</span>
@@ -102,39 +99,34 @@ import { Intervenant } from '../../../core/models/credits';
                     <span class="label">Client</span>
                     <span class="value">{{intervenant.cli}}</span>
                   </div>
-                  <div class="detail-item">
-                    <span class="label">Solde Restant</span>
-                    <span class="value">{{intervenant.soldeRestant | currency:pret.libelleDev}}</span>
-                  </div>
+                  
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Localisation -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-map-marker-alt"></i>
-            Localisation
+            Lieu
           </h2>
           <div class="details-content">
             <div class="detail-item">
               <span class="label">Agence</span>
-              <span class="value">{{pret.codeAgence}}</span>
+              <span class="value">{{pret.libelle_agence}} ({{pret.code_agence}}) </span>
             </div>
             <div class="detail-item">
               <span class="label">Wilaya</span>
-              <span class="value">{{pret.codeWilaya}}</span>
+              <span class="value">{{pret.libelle_wilaya}} ({{pret.code_wilaya}}) </span>
             </div>
             <div class="detail-item">
               <span class="label">Pays</span>
-              <span class="value">{{pret.codePays}}</span>
+              <span class="value">{{pret.libelle_pays}} ({{pret.code_pays}}) </span>
             </div>
           </div>
         </div>
 
-        <!-- Conditions Financières -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-euro-sign"></i>
@@ -142,25 +134,28 @@ import { Intervenant } from '../../../core/models/credits';
           </h2>
           <div class="details-content">
             <div class="detail-item">
-              <span class="label">Montant Accordé</span>
-              <span class="value">{{pret.creditsAccorde}}</span>
+              <span class="label">Crédit Accordé</span>
+              <span class="value">{{pret.credit_accorde ? (pret.credit_accorde | currency:(pret.monnaie || '')) : ''}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Devise</span>
-              <span class="value">{{pret.libelleDev}}</span>
+              <span class="value">{{pret.libelle_monnaie}} ({{pret.monnaie}})</span>
             </div>
             <div class="detail-item">
               <span class="label">Taux d'Intérêt</span>
-              <span class="value">{{pret.tauxInterets}}%</span>
+              <span class="value">{{pret.taux_interets}}%</span>
             </div>
             <div class="detail-item">
               <span class="label">Coût Total</span>
-              <span class="value">{{pret.coutCredits | currency:pret.libelleDev}}</span>
+              <span class="value">{{pret.cout_total_credit ? (pret.cout_total_credit | currency:(pret.monnaie || '')) : ''}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Solde restant</span>
+              <span class="value">{{pret.solde_restant ? (pret.solde_restant | currency:(pret.monnaie || '')) : ''}}</span>
             </div>
           </div>
         </div>
 
-        <!-- Remboursement -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-calendar-check"></i>
@@ -169,15 +164,15 @@ import { Intervenant } from '../../../core/models/credits';
           <div class="details-content">
             <div class="detail-item">
               <span class="label">Mensualité</span>
-              <span class="value">{{pret.mensualite | currency:pret.libelleDev}}</span>
+              <span class="value">{{pret.mensualite !== null && pret.monnaie ? (pret.mensualite | currency:pret.monnaie) : ''}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Durée Initiale</span>
-              <span class="value">{{pret.dureeInit}} mois</span>
+              <span class="value">{{pret.libelle_duree_initiale}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Durée Restante</span>
-              <span class="value">{{pret.dureeRestante}} mois</span>
+              <span class="value">{{pret.libelle_duree_restante}}</span>
             </div>
           </div>
         </div>
@@ -191,36 +186,35 @@ import { Intervenant } from '../../../core/models/credits';
           <div class="details-content">
             <div class="detail-item">
               <span class="label">Classe de Retard</span>
-              <span class="value" [class.warning]="pret.classeRetard > 0">
-                {{getClasseRetardLabel(pret.classeRetard)}}
+              <span class="value" >
+                {{pret.libelle_classe_retard}}
               </span>
             </div>
             <div class="detail-item">
               <span class="label">Échéances Impayées</span>
-              <span class="value" [class.warning]="pret.nombreEcheancesImpayes > 0">
-                {{pret.nombreEcheancesImpayes}}
+              <span class="value" >
+                {{pret.nombre_echeances_impayes}}
               </span>
             </div>
             <div class="detail-item">
               <span class="label">Date de Constatation</span>
-              <span class="value">{{pret.dateConstatationEcheancesImpayes}}</span>
+              <span class="value">{{pret.date_constatation_echeances_impayes}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Capital en Retard</span>
-              <span class="value" [class.warning]="pret.montantCapitalRetard > 0">
-                {{pret.montantCapitalRetard | currency:pret.libelleDev}}
+              <span class="value">
+                {{pret.montant_capital_retard !== null && pret.monnaie ? (pret.montant_capital_retard | currency:pret.monnaie) : ''}}
               </span>
             </div>
             <div class="detail-item">
               <span class="label">Intérêts de Retard</span>
-              <span class="value" [class.warning]="pret.montantInteretsRetard > 0">
-                {{pret.montantInteretsRetard | currency:pret.libelleDev}}
+              <span class="value" >
+                {{pret.montant_interets_retard !== null && pret.monnaie ? (pret.montant_interets_retard | currency:pret.monnaie) : ''}}
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Dates -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-calendar-alt"></i>
@@ -229,24 +223,23 @@ import { Intervenant } from '../../../core/models/credits';
           <div class="details-content">
             <div class="detail-item">
               <span class="label">Date d'Octroi</span>
-              <span class="value">{{pret.dateOctroi}}</span>
+              <span class="value">{{pret.date_octroi}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Date d'Expiration</span>
-              <span class="value">{{pret.dateExpiration}}</span>
+              <span class="value">{{pret.date_expiration}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Date de Déclaration</span>
-              <span class="value">{{pret.dateDeclaration}}</span>
+              <span class="value">{{pret.date_declaration}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Date de Rejet</span>
-              <span class="value">{{pret.dateRejet}}</span>
+              <span class="value">{{pret.date_rejet}}</span>
             </div>
           </div>
         </div>
 
-        <!-- Garanties -->
         <div class="details-section card">
           <h2>
             <i class="fas fa-shield-alt"></i>
@@ -256,23 +249,23 @@ import { Intervenant } from '../../../core/models/credits';
             <div class="garantie-list">
               <div *ngFor="let garantie of pret.garanties" class="garantie-item card">
                 <div class="garantie-header">
-                  <h3>{{garantie.type}}</h3>
+                  <h3>{{garantie.libelle_type_garantie}} ({{garantie.type_garantie}})</h3>
                 </div>
                 <div class="garantie-details">
                   <div class="detail-item">
                     <span class="label">Intervenant</span>
-                    <span class="value">{{garantie.intervenant}}</span>
+                    <span class="value">{{garantie.cle_intervenant}}</span>
                   </div>
                   <div class="detail-item">
                     <span class="label">Montant</span>
-                    <span class="value">{{garantie.montant | currency:pret.libelleDev}}</span>
+                    <span class="value">{{garantie.montant_garantie !== null && pret.monnaie ? (garantie.montant_garantie | currency:pret.monnaie) : ''}}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- Source -->
+=
         <div class="details-section card">
           <h2>
             <i class="fas fa-file-import"></i>
@@ -281,22 +274,11 @@ import { Intervenant } from '../../../core/models/credits';
           <div class="details-content">
             <div class="detail-item">
               <span class="label">Type de Création</span>
-              <span class="value source-badge" [class]="pret.source.type">
-                {{pret.source.type === 'excel' ? 'Import Excel' : 'Création Manuel'}}
+              <span class="value source-badge" >
+                {{pret.id_excel}}
               </span>
             </div>
-            <div class="detail-item" *ngIf="pret.source.type === 'excel'">
-              <span class="label">Fichier Source</span>
-              <span class="value">{{pret.source.fileName}}</span>
-            </div>
-            <div class="detail-item" *ngIf="pret.source.type === 'excel'">
-              <span class="label">Date d'Import</span>
-              <span class="value">{{pret.source.importDate}}</span>
-            </div>
-            <div class="detail-item" *ngIf="pret.source.type === 'manual'">
-              <span class="label">Crée par</span>
-              <span class="value">{{pret.source.createdBy}}</span>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -518,53 +500,24 @@ import { Intervenant } from '../../../core/models/credits';
   `]
 })
 export class PretDetailsComponent {
-  @Input() pret!: Credit;
+  @Input() pret!: CreditDto;
   @Output() close = new EventEmitter<void>();
 
   constructor(private router: Router) {}
 
-  getTypeCreditLabel(type: string): string {
-    const types = {
-      '1': 'Prêt Immobilier',
-      '2': 'Prêt à la Consommation',
-      '3': 'Prêt Professionnel',
-      '4': 'Prêt Étudiant'
-    };
-    return types[type as keyof typeof types] || 'Inconnu';
-  }
-
-  getSituationLabel(situation: number): string {
-    const situations = {
-      1: 'En Cours',
-      2: 'Terminé',
-      3: 'En Retard',
-      4: 'Rejeté'
-    };
-    return situations[situation as keyof typeof situations] || 'Inconnu';
-  }
-
-  getClasseRetardLabel(classe: number): string {
-    const classes = {
-      0: 'Aucun Retard',
-      1: 'Retard < 30 jours',
-      2: 'Retard 30-90 jours',
-      3: 'Retard > 90 jours'
-    };
-    return classes[classe as keyof typeof classes] || 'Inconnu';
-  }
+  
 
   onClose() {
     this.close.emit();
   }
 
   onEdit() {
-    console.log('Editing loan:', this.pret);
-    this.router.navigate(['/credits/modifier', this.pret.numContrat], {
+    this.router.navigate(['/credits/modifier', this.pret.num_contrat_credit], {
       state: { pret: this.pret }
     }).then(() => {
-      console.log('Navigation successful');
+      console.log('');
     }).catch(error => {
-      console.error('Navigation failed:', error);
+      console.error( error);
     });
   }
 } 

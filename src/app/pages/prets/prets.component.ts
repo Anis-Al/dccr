@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PretDetailsComponent } from './pret-details/pret-details.component';
-import { Credit } from '../../core/models/credits';
-import { Garantie } from '../../core/models/credits';
-import { Intervenant } from '../../core/models/credits';
-import { GenererDonneesFictivesService } from '../../core/services/generer-donnees-fictives.service';
+import { CreditDto }   from '../../core/models/credits';
+import { CreditsService } from '../../core/services/credits/credits.service';
+import { catchError, Observable, of, Subscription, tap } from 'rxjs';
+
 
 @Component({
   selector: 'app-prets',
@@ -34,9 +34,7 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
             <button class="btn" [class.active]="currentFilter === 'late'" (click)="filterLoans('late')">
               En Retard
             </button>
-            <!-- <button class="btn" [class.active]="currentFilter === 'completed'" (click)="filterLoans('completed')">
-              Terminés
-            </button> -->
+            
           </div>
         </div>
 
@@ -44,32 +42,27 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
           <table>
             <thead>
               <tr>
-                <th class="sticky-column">N° Contrat</th>
+                <th class="collante">N° Contrat</th>
                 <th>Date Déclaration</th>
-                <th>Emprunteur Principal</th>
                 <th>Situation</th>
                 <th>Type</th>
                 <th>Activité</th>
-                <th>Fichier source</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let pret of paginatedPrets" 
-                  (click)="onSelectPret(pret)"
-                  [class.selected]="creditSelectionne?.numContrat === pret.numContrat && creditSelectionne !== null">
-                <td class="sticky-column">{{pret.numContrat}}</td>
-                <td>{{pret.dateDeclaration | date:'dd/MM/yyyy'}}</td>
-                <td>{{getEmprunteurPrincipal(pret)}}</td>
-                <td>{{pret.libelleSituation}}</td>
-                <td>{{pret.libelleTypeCredit}}</td>
-                <td>{{pret.libelleActivite}}</td>
-                <td>{{pret.source.fileName}}</td>
-                <!-- <td>
-                  <span class="status-badge" [class]="getStatusClass(pret)">
-                    {{getStatusLabel(pret)}}
-                  </span>
-                </td> -->
-              </tr>
+              <div >
+                <tr *ngFor="let credit of CreditsPagines"
+                    (click)="selectionnerCredit(credit)"
+                    [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit"
+                >                  
+                  <td class="collante">{{credit.num_contrat_credit}}</td>
+                  <td>{{credit.date_declaration}}</td>
+                  <td>{{credit.libelle_situation}}</td>
+                  <td>{{credit.libelle_type_credit}}</td>
+                  <td>{{credit.libelle_activite}}</td>
+
+                </tr>
+            </div>
             </tbody>
           </table>
         </div>
@@ -297,7 +290,7 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
           border-bottom: 2px solid var(--border-color);
         }
 
-        .sticky-column {
+        .collante {
           position: sticky;
           left: 0;
           z-index: 1;
@@ -306,7 +299,7 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
           box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
         }
 
-        thead th.sticky-column {
+        thead th.collante {
           z-index: 2;
         }
 
@@ -435,31 +428,36 @@ import { GenererDonneesFictivesService } from '../../core/services/generer-donne
     }
   `]
 })
-export class PretsComponent {
-  searchTerm: string = '';
-  currentFilter: string = 'all';
-  creditSelectionne: Credit | null = null;
-  
-  pageActuelle: number = 1;
-  lignesParPage: number = 5;
-  totalPages: number = 2;
-  paginatedPrets: Credit[] = [];
-  filteredPrets: Credit[] = [];
+export class PretsComponent implements OnInit {
+  credits$: Observable<CreditDto[]> | undefined;
+  private TousLesCredits: CreditDto[] = []; 
+  private loadCreditsSubscription: Subscription | undefined;
+  isLoading: boolean = false; 
 
-  credits: Credit[] = [];
+  searchTerm: string = '';
+  currentFilter: string = 'all'; 
+  creditSelectionne: CreditDto | null = null;
+
+  pageActuelle: number = 1;
+  lignesParPage: number = 10;
+  totalPages: number = 1;
+  CreditsPagines: CreditDto[] = [];
+  filteredPrets: CreditDto[] = []; 
+
+  errorMessage: string | null = null;
+
+
+  ngOnInit() {
+    this.loadCredits();
+  }
 
   constructor(
     private router: Router,
-    private mockService: GenererDonneesFictivesService
+    private creditService: CreditsService
   ) {
-    this.loadMockData();
   }
 
-  loadMockData() {
-    this.credits = this.mockService.getMockCredits(25);
-    this.updatePagination();
-
-  }
+  
 
   onSearch() {
     this.pageActuelle = 1;
@@ -477,47 +475,103 @@ export class PretsComponent {
     this.updatePagination();
   }
 
-  updatePagination() {
-    this.filteredPrets = this.credits.filter(credit => {
-      const matchesSearch = credit.numContrat.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                          this.getEmprunteurPrincipal(credit).toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      const matchesFilter = this.currentFilter === 'all' ||
-                          (this.currentFilter === 'active' && credit.situation === 1) ||
-                          (this.currentFilter === 'late' && credit.situation === 3) ||
-                          (this.currentFilter === 'completed' && credit.situation === 2);
+  // updatePagination(): void {
+  //   if (!this.TousLesCredits) {
+  //     this.filteredPrets = [];
+  //     this.CreditsPagines = [];
+  //     this.totalPages = 1;
+  //     return;
+  //   }
+  //   let searchedCredits = this.TousLesCredits.filter(credit =>
+  //     credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false
+  //   );
+  //   this.totalPages = Math.ceil(this.filteredPrets.length / this.lignesParPage);
+  //   if (this.totalPages < 1) { this.totalPages = 1; } 
 
-      return matchesSearch && matchesFilter;
-    });
+  //   if(this.pageActuelle > this.totalPages) {
+  //       this.pageActuelle = this.totalPages;
+  //   }
+  //    if(this.pageActuelle < 1) {
+  //       this.pageActuelle = 1;
+  //   }
+  //   const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
+  //   this.CreditsPagines = this.filteredPrets.slice(startIndex, startIndex + this.lignesParPage);
+  // }
+
+  updatePagination(): void {
+    console.log('Updating pagination. Filter:', this.currentFilter, 'Search:', this.searchTerm, 'Total Items:', this.TousLesCredits.length); // Debug line
+
+    this.filteredPrets = this.TousLesCredits.filter(credit =>
+      credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false
+    );
+     console.log('Filtered count:', this.filteredPrets.length);
 
     this.totalPages = Math.ceil(this.filteredPrets.length / this.lignesParPage);
+    this.totalPages = Math.max(1, this.totalPages); 
+
+    this.pageActuelle = Math.max(1, Math.min(this.pageActuelle, this.totalPages));
+
     const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
-    this.paginatedPrets = this.filteredPrets.slice(startIndex, startIndex + this.lignesParPage);
-    console.log(this.paginatedPrets);
+    const endIndex = startIndex + this.lignesParPage;
+    this.CreditsPagines = this.filteredPrets.slice(startIndex, endIndex);
+
+     console.log(`Page ${this.pageActuelle}/${this.totalPages}. Displaying items ${startIndex + 1} to ${Math.min(endIndex, this.filteredPrets.length)} (${this.CreditsPagines.length} items).`); 
   }
 
-  onNewLoan() {
+  nouveauCredit() {
     this.router.navigate(['/prets/nouveau']);
   }
 
-  onSelectPret(credit: any) {
-    this.creditSelectionne = this.creditSelectionne?.numContrat === credit.numContrat ? null : credit;
+  selectionnerCredit(credit: CreditDto): void {
+    if (this.creditSelectionne?.num_contrat_credit === credit.num_contrat_credit) {
+        this.fermerDetails(); 
+    } else {
+        this.creditSelectionne = credit;
+    }
+}
+
+  fermerDetails(): void {
+      this.creditSelectionne = null;
+  } 
+
+  loadCredits(): void {
+    this.isLoading = true;      
+    this.errorMessage = null; 
+    this.TousLesCredits = [];   
+    this.CreditsPagines = []; 
+    this.totalPages = 1;    
+
+    this.loadCreditsSubscription?.unsubscribe();
+
+    this.loadCreditsSubscription = this.creditService.getTousLesCredits()
+      .subscribe({ 
+        next: (resultat: CreditDto[]) => {
+          console.log('Data received in subscribe:', resultat);
+          if (Array.isArray(resultat)) {
+             this.TousLesCredits =resultat; 
+             this.updatePagination();     
+          } else {
+            console.error(resultat);
+            this.TousLesCredits = [];
+            this.updatePagination();
+          }
+          this.isLoading = false; 
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = err?.message;
+          this.TousLesCredits = [];    
+          this.CreditsPagines = [];
+          this.totalPages = 1;
+          this.isLoading = false; 
+        }
+      });
   }
 
-  getEmprunteurPrincipal(credit: Credit): string {
-    const emprunteur = credit.intervenants.find(i => i.libelleNiveauResponsabilite === 'Emprunteur');
-    return emprunteur ? `${emprunteur.cle}` : 'N/A';
-  }
 
-  // getStatusClass(credit: Credit): string {
-  //   if (credit?.classeRetard > 0) return 'status-late';
-  //   if (credit.dureeRestante === 0) return 'status-completed';
-  //   return 'status-active';
-  // }
 
-  // getStatusLabel(credit: Credit): string {
-  //   if (credit.classeRetard > 0) return 'En Retard';
-  //   if (credit.dureeRestante === 0) return 'Terminé';
-  //   return 'En Cours';
-  // }
+
+ 
+
+  
 }

@@ -2,368 +2,404 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Credit } from '../../../core/models/credits';
+import { CreditDto, GarantieDto, IntervenantDto } from '../../../core/models/credits';
+import { CreditsService } from '../../../core/services/credits/credits.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-pret-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="pret-form">
-      <div class="header">
-        <h1>
-          <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus'"></i>
-          {{isEditMode ? 'Modifier' : 'Nouveau'}} Crédit
-          <span class="contract-number" *ngIf="isEditMode">{{pret.numContrat}}?</span>
-        </h1>
-        <div class="actions">
-          <button class="btn btn-secondary" (click)="onCancel()">
-            <i class="fas fa-times"></i>
-            Annuler
-          </button>
-          <button class="btn btn-primary" (click)="onSave()">
-            <i class="fas fa-save"></i>
-            Enregistrer
-          </button>
-        </div>
-      </div>
+  <!-- src/app/components/pret-form/pret-form.component.html -->
 
-      <div class="form-container">
+<div class="pret-form">
+    <div class="header">
+      <h1>
+        <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus'"></i>
+        {{isEditMode ? 'Modifier' : 'Nouveau'}} Crédit
+         <!-- Display num_contrat_credit when editing -->
+        <span class="contract-number" *ngIf="isEditMode">{{ pret.num_contrat_credit || 'Chargement...' }}</span>
+      </h1>
+      <div class="actions">
+         <!-- Cancel Button -->
+        <button class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+          <i class="fas fa-times"></i> Annuler
+        </button>
+         <!-- Save Button -->
+        <button class="btn btn-primary" (click)="onSave()" [disabled]="isLoading">
+          <span *ngIf="!isLoading"><i class="fas fa-save"></i> Enregistrer</span>
+          <span *ngIf="isLoading">Enregistrement...</span> <!-- Loading state -->
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+     <div *ngIf="isLoading && isEditMode" class="loading-indicator">Chargement des détails du crédit...</div>
+     <!-- Error Display -->
+     <div *ngIf="errorMessage" class="alert alert-danger">Erreur: {{errorMessage}}</div>
+
+
+    <div class="form-container" *ngIf="!isLoading"> <!-- Hide form while loading details -->
+
         <!-- 1. Informations Générales -->
         <div class="form-section">
-          <h2>
-            <i class="fas fa-info-circle"></i>
-            Informations Générales
-          </h2>
+          <h2><i class="fas fa-info-circle"></i> Informations Générales</h2>
           <div class="form-grid">
+             <!-- Bind to snake_case properties -->
             <div class="form-group">
-              <label>N° Contrat</label>
-              <input type="text" [(ngModel)]="pret.numContrat" [disabled]="isEditMode">
+              <label for="numContrat">N° Contrat</label>
+              <input id="numContrat" type="text" [(ngModel)]="pret.num_contrat_credit" [disabled]="isEditMode" name="numContrat">
             </div>
-            <div class="form-group">
-              <label>Type de Crédit</label>
-              <select [(ngModel)]="pret.typeCredit">
-                <option value="1">Credit automobile</option>
-             
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Plafond Accordé</label>
-              <div class="radio-group">
-                <label>
-                  <input type="radio" name="plafondAccorde" [(ngModel)]="pret.plafondAccorde" [value]="true">
-                  Oui
-                </label>
-                <label>
-                  <input type="radio" name="plafondAccorde" [(ngModel)]="pret.plafondAccorde" [value]="false">
-                  Non
-                </label>
+             <!-- Use lookups for Select -->
+             <div class="form-group">
+                <label for="typeCredit">Type de Crédit</label>
+                <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option *ngFor="let type of lookupTypesCredit" [value]="type.code">
+                     {{type.libelle}}
+                   </option>
+                 </select>
+             </div>
+             <div class="form-group">
+                <label>Plafond Accordé</label>
+                <div class="radio-group">
+                  <!-- Note: Value bindings are boolean -->
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="true"> Oui</label>
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="false"> Non</label>
+                 </div>
+             </div>
+             <!-- Bind id_plafond -->
+             <div class="form-group" *ngIf="pret.est_plafond_accorde">
+                <label for="numPlafond">N° Plafond</label>
+                <input id="numPlafond" type="text" [(ngModel)]="pret.id_plafond" name="numPlafond">
               </div>
-            </div>
-            <div class="form-group" *ngIf="pret.plafondAccorde">
-              <label>N° Plafond</label>
-              <input type="text" [(ngModel)]="pret.numeroPlafond">
-            </div>
-            <div class="form-group">
-              <label>Activité</label>
-              <select [(ngModel)]="pret.libelleActivite">
-                <option [ngValue]="1">Agriculture, Chasse, Services Annexe</option>
-                <option [ngValue]="2">Pêche, Aquaculture</option>
-                <option [ngValue]="3">Industrie du Papier et du Carton</option>
-                <option [ngValue]="4">Industrie Textile</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Situation</label>
-              <select [(ngModel)]="pret.situation">
-                <option [ngValue]="1">Crédit régulier</option>
-                <option [ngValue]="2">Crédit rejeté</option>
-                <option [ngValue]="3">Crédit impayé</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Motif</label>
-              <input type="text" [(ngModel)]="pret.motif">
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Intervenants -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-users"></i>
-            Débiteurs
-            <button class="btn btn-danger" (click)="addIntervenant()">
-              <i class="fas fa-plus"></i>
-              Ajouter Débiteur
-            </button>
-          </h2>
-          <div class="form-grid">
-            <div class="form-group" *ngFor="let intervenant of pret.intervenants; let i = index">
-              <h3>
-                Débiteur {{i + 1}}
-                <button class="btn btn-danger" (click)="removeIntervenant(i)" *ngIf="pret.intervenants.length > 1">
-                  <i class="fas fa-trash"></i>
-                  Supprimer
-                </button>
-              </h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Clé</label>
-                  <input type="text" [(ngModel)]="intervenant.cle">
-                </div>
-                <div class="form-group">
-                  <label>Type de Clé</label>
-                  <select [(ngModel)]="intervenant.typeCle">
-                    <option value="Personne Physique">Personne Physique</option>
-                    <option value="Personne Morale">Personne Morale</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Niveau de Responsabilité</label>
-                  <select [(ngModel)]="intervenant.niveauResponsabilite">
-                    <option value="Emprunteur Principal">Emprunteur Principal</option>
-                    <option value="Co-emprunteur">Co-emprunteur</option>
-                    <option value="Garant">Garant</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>NIF</label>
-                  <input type="text" [(ngModel)]="intervenant.nif">
-                </div>
-                <div class="form-group">
-                  <label>RIB</label>
-                  <input type="text" [(ngModel)]="intervenant.rib">
-                </div>
-                <div class="form-group">
-                  <label>CLI</label>
-                  <input type="text" [(ngModel)]="intervenant.cli">
-                </div>
-                
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Localisation -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-map-marker-alt"></i>
-            Localisation
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Code Agence</label>
-              <input type="text" [(ngModel)]="pret.codeAgence">
-            </div>
-            <div class="form-group">
-              <label>Code Wilaya</label>
-              <input type="text" [(ngModel)]="pret.codeWilaya">
-            </div>
-            <div class="form-group">
-              <label>Code Pays</label>
-              <input type="text" [(ngModel)]="pret.codePays">
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Conditions Financières -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-euro-sign"></i>
-            Conditions Financières
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Crédits Accordés</label>
-              <input type="number" [(ngModel)]="pret.creditsAccorde">
-            </div>
-            <div class="form-group">
-              <label>Devise</label>
-              <select [(ngModel)]="pret.dev">
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="DZD">DZD</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Taux d'Intérêts</label>
-              <input type="number" [(ngModel)]="pret.tauxInterets" step="0.01">
-            </div>
-            <div class="form-group">
-              <label>Coût des Crédits</label>
-              <input type="number" [(ngModel)]="pret.coutCredits">
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Remboursement -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-calendar-check"></i>
-            Remboursement
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Mensualité</label>
-              <input type="number" [(ngModel)]="pret.mensualite">
-            </div>
-            <div class="form-group">
-              <label>Durée Initiale (mois)</label>
-              <input type="number" [(ngModel)]="pret.dureeInit">
-            </div>
-            <div class="form-group">
-              <label>Durée Restante (mois)</label>
-              <input type="number" [(ngModel)]="pret.dureeRestante">
-            </div>
-          </div>
-        </div>
-
-        <!-- 6. Retard -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-exclamation-triangle"></i>
-            Retard
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Classe de Retard</label>
-              <select [(ngModel)]="pret.classeRetard">
-                <option [ngValue]="0">Aucun Retard</option>
-                <option [ngValue]="1">Retard < 30 jours</option>
-                <option [ngValue]="2">Retard 30-90 jours</option>
-                <option [ngValue]="3">Retard > 90 jours</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Nombre d'Échéances Impayées</label>
-              <input type="number" [(ngModel)]="pret.nombreEcheancesImpayes">
-            </div>
-            <div class="form-group">
-              <label>Date de Constatation</label>
-              <input type="date" [(ngModel)]="pret.dateConstatationEcheancesImpayes">
-            </div>
-            <div class="form-group">
-              <label>Montant Capital en Retard</label>
-              <input type="number" [(ngModel)]="pret.montantCapitalRetard">
-            </div>
-            <div class="form-group">
-              <label>Montant Intérêts en Retard</label>
-              <input type="number" [(ngModel)]="pret.montantInteretsRetard">
-            </div>
-            <div class="form-group">
-              <label>Montant Intérêts Courus</label>
-              <input type="number" [(ngModel)]="pret.montantInteretsCourus">
-            </div>
-          </div>
-        </div>
-
-        <!-- 7. Dates -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-calendar-alt"></i>
-            Dates
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Date d'Octroi</label>
-              <input type="date" [(ngModel)]="pret.dateOctroi">
-            </div>
-            <div class="form-group">
-              <label>Date d'Expiration</label>
-              <input type="date" [(ngModel)]="pret.dateExpiration">
-            </div>
-            <div class="form-group">
-              <label>Date de Déclaration</label>
-              <input type="date" [(ngModel)]="pret.dateDeclaration">
-            </div>
-            <div class="form-group">
-              <label>Date de Rejet</label>
-              <input type="date" [(ngModel)]="pret.dateRejet">
-            </div>
-          </div>
-        </div>
-
-        <!-- 8. Garanties -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-shield-alt"></i>
-            Garanties
-            <button class="btn btn-danger" (click)="addGarantie()">
-              <i class="fas fa-plus"></i>
-              Ajouter Garantie
-            </button>
-          </h2>
-          <div class="form-grid">
-            <div class="form-group" *ngFor="let garantie of pret.garanties; let i = index">
-              <h3>
-                Garantie {{i + 1}}
-                <button class="btn btn-danger" (click)="removeGarantie(i)" *ngIf="pret.garanties.length > 1">
-                  <i class="fas fa-trash"></i>
-                  Supprimer
-                </button>
-              </h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Intervenant</label>
-                  <select [(ngModel)]="garantie.intervenant">
-                    <option *ngFor="let intervenant of pret.intervenants" [value]="intervenant.cli">
-                      {{intervenant.cli}} - {{intervenant.niveauResponsabilite}}
+              <!-- More bindings... -->
+               <div class="form-group">
+                 <label for="activite">Activité</label>
+                 <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option *ngFor="let act of lookupActivites" [value]="act.code">
+                      {{act.libelle}}
                     </option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Type</label>
-                  <select [(ngModel)]="garantie.type">
-                    <option value="Hypothèque">Hypothèque</option>
-                    <option value="Caution Personnelle">Caution Personnelle</option>
-                    <option value="Caution Institutionnelle">Caution Institutionnelle</option>
-                    <option value="Nantissement">Nantissement</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Montant</label>
-                  <input type="number" [(ngModel)]="garantie.montant">
-                </div>
-              </div>
+                   <label for="situation">Situation</label>
+                   <select id="situation" [(ngModel)]="pret.situation" name="situation">
+                     <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                     <option *ngFor="let sit of lookupSituations" [value]="sit.code">
+                         {{sit.libelle}}
+                      </option>
+                   </select>
+                 </div>
+                 <div class="form-group">
+                   <label for="motif">Motif</label>
+                   <input id="motif" type="text" [(ngModel)]="pret.motif" name="motif">
+                 </div>
+
+                 <div class="form-group"> <!-- Date Declaration -->
+                   <label for="dateDeclaration">Date de Déclaration</label>
+                   <input id="dateDeclaration" type="date" [(ngModel)]="pret.date_declaration" name="dateDeclaration">
+                 </div>
+                 <div class="form-group"> <!-- ID Excel -->
+                   <label for="idExcel">ID Import Excel</label>
+                   <!-- Might be display-only or set by system, often disabled -->
+                   <input id="idExcel" type="number" [(ngModel)]="pret.id_excel" name="idExcel" disabled>
+                 </div>
+             </div>
+        </div>
+
+
+       <!-- 2. Débiteurs (Intervenants) -->
+       <div class="form-section">
+         <h2>
+           <i class="fas fa-users"></i> Débiteurs
+            <!-- Use button type="button" to prevent accidental form submission -->
+           <button type="button" class="btn btn-danger btn-add" (click)="addIntervenant()">
+             <i class="fas fa-plus"></i> Ajouter Débiteur
+           </button>
+         </h2>
+          <!-- Removed extra div around loop -->
+         <div class="intervenant-item" *ngFor="let intervenant of pret.intervenants; let i = index; trackBy: trackByIndex"> <!-- Added trackBy -->
+           <h3>
+             Débiteur {{i + 1}}
+             <button type="button" class="btn btn-danger btn-delete" (click)="removeIntervenant(i)" *ngIf="pret.intervenants.length > 0"> <!-- Allow removing the last one -->
+               <i class="fas fa-trash"></i> Supprimer
+             </button>
+           </h3>
+           <div class="form-grid">
+             <div class="form-group">
+               <label for="intervenantCle_{{i}}">Clé</label>
+                <!-- Unique names using index -->
+               <input id="intervenantCle_{{i}}" type="text" [(ngModel)]="intervenant.cle" name="intervenantCle_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
+               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
+                  <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <!-- Use lookupTypesCle -->
+                  <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
+                </select>
+             </div>
+             <div class="form-group">
+               <label for="intervenantNiveau_{{i}}">Niveau de Responsabilité</label>
+               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}">
+                 <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                  <!-- Use lookupNiveauxResponsabilite -->
+                  <option *ngFor="let niv of lookupNiveauxResponsabilite" [value]="niv.code">{{niv.libelle}}</option>
+                </select>
+             </div>
+             <div class="form-group">
+               <label for="intervenantNif_{{i}}">NIF</label>
+               <input id="intervenantNif_{{i}}" type="text" [(ngModel)]="intervenant.nif" name="intervenantNif_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantRib_{{i}}">RIB</label>
+               <input id="intervenantRib_{{i}}" type="text" [(ngModel)]="intervenant.rib" name="intervenantRib_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantCli_{{i}}">CLI</label>
+               <input id="intervenantCli_{{i}}" type="text" [(ngModel)]="intervenant.cli" name="intervenantCli_{{i}}">
+             </div>
+           </div>
+           <!-- Add separator for clarity -->
+           <hr *ngIf="i < pret.intervenants.length - 1">
+         </div>
+         <!-- Message if no intervenants -->
+         <div *ngIf="pret.intervenants.length === 0">
+            Aucun débiteur ajouté.
+         </div>
+       </div>
+
+
+        <!-- 3. Localisation -->
+        <div class="form-section">
+          <h2><i class="fas fa-map-marker-alt"></i> Localisation</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="codeAgence">Code Agence</label>
+              <!-- Bind code_agence -->
+              <input id="codeAgence" type="text" [(ngModel)]="pret.code_agence" name="codeAgence">
             </div>
+             <!-- Add readonly display for Libelle (assuming fetched elsewhere or based on code) -->
+             <div class="form-group readonly-display" *ngIf="pret.libelle_agence">
+                <label>Agence</label>
+                <span>{{pret.libelle_agence}}</span>
+              </div>
+
+             <!-- Repeat for Wilaya -->
+            <div class="form-group">
+              <label for="codeWilaya">Code Wilaya</label>
+              <input id="codeWilaya" type="text" [(ngModel)]="pret.code_wilaya" name="codeWilaya">
+            </div>
+             <div class="form-group readonly-display" *ngIf="pret.libelle_wilaya">
+                <label>Wilaya</label>
+                <span>{{pret.libelle_wilaya}}</span>
+              </div>
+
+             <!-- Repeat for Pays -->
+            <div class="form-group">
+              <label for="codePays">Code Pays</label>
+              <input id="codePays" type="text" [(ngModel)]="pret.code_pays" name="codePays">
+            </div>
+             <div class="form-group readonly-display" *ngIf="pret.libelle_pays">
+                <label>Pays</label>
+                <span>{{pret.libelle_pays}}</span>
+              </div>
           </div>
         </div>
 
-        <!-- 9. Source -->
-        <div class="form-section">
-          <h2>
-            <i class="fas fa-database"></i>
-            Source
-          </h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Type</label>
-              <select [(ngModel)]="pret.source.type">
-                <option value="excel">Import Excel</option>
-                <option value="manual">Saisie Manuel</option>
-              </select>
-            </div>
-            <div class="form-group" *ngIf="pret.source.type === 'excel'">
-              <label>ID Fichier</label>
-              <input type="text" [(ngModel)]="pret.source.fileId">
-            </div>
-            <div class="form-group" *ngIf="pret.source.type === 'excel'">
-              <label>Nom Fichier</label>
-              <input type="text" [(ngModel)]="pret.source.fileName">
-            </div>
-            <div class="form-group" *ngIf="pret.source.type === 'excel'">
-              <label>Date d'Import</label>
-              <input type="date" [(ngModel)]="pret.source.importDate">
-            </div>
-            <div class="form-group">
-              <label>Créé par</label>
-              <input type="text" [(ngModel)]="pret.source.createdBy">
+
+         <!-- 4. Conditions Financières -->
+         <div class="form-section">
+            <h2><i class="fas fa-euro-sign"></i> Conditions Financières</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                 <label for="creditsAccorde">Crédit Accordé</label>
+                  <!-- Bind credit_accorde -->
+                  <input id="creditsAccorde" type="number" [(ngModel)]="pret.credit_accorde" name="creditsAccorde" step="any">
+              </div>
+              <div class="form-group">
+                 <label for="devise">Devise</label>
+                  <!-- Bind monnaie -->
+                 <select id="devise" [(ngModel)]="pret.monnaie" name="devise">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                    <!-- Use lookupDevises -->
+                    <option *ngFor="let dev of lookupDevises" [value]="dev.code">{{dev.libelle}}</option>
+                  </select>
+               </div>
+               <div class="form-group">
+                  <label for="tauxInterets">Taux d'Intérêts (%)</label>
+                   <!-- Bind taux_interets -->
+                   <input id="tauxInterets" type="number" [(ngModel)]="pret.taux_interets" name="tauxInterets" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="coutCredits">Coût Total Crédit</label>
+                    <!-- Bind cout_total_credit -->
+                    <input id="coutCredits" type="number" [(ngModel)]="pret.cout_total_credit" name="coutCredits" step="any">
+                 </div>
+                 <div class="form-group">
+                    <label for="soldeRestant">Solde Restant Dû</label>
+                    <!-- Bind solde_restant -->
+                    <input id="soldeRestant" type="number" [(ngModel)]="pret.solde_restant" name="soldeRestant" step="any">
+                 </div>
+              </div>
+          </div>
+
+
+       <!-- 5. Remboursement -->
+       <div class="form-section">
+         <h2><i class="fas fa-calendar-check"></i> Remboursement</h2>
+         <div class="form-grid">
+           <div class="form-group">
+             <label for="mensualite">Mensualité</label>
+              <!-- Bind mensualite -->
+              <input id="mensualite" type="number" [(ngModel)]="pret.mensualite" name="mensualite" step="any">
+           </div>
+           <div class="form-group">
+             <label for="dureeInit">Durée Initiale</label>
+             <!-- Bind duree_initiale (assuming code input) -->
+             <input id="dureeInit" type="text" [(ngModel)]="pret.duree_initiale" name="dureeInit">
+           </div>
+            <div class="form-group readonly-display" *ngIf="pret.libelle_duree_initiale">
+                <label>Format Durée Initiale</label>
+                <span>{{pret.libelle_duree_initiale}}</span>
+             </div>
+
+           <div class="form-group">
+             <label for="dureeRestante">Durée Restante</label>
+              <!-- Bind duree_restante (assuming code input) -->
+              <input id="dureeRestante" type="text" [(ngModel)]="pret.duree_restante" name="dureeRestante">
+           </div>
+            <div class="form-group readonly-display" *ngIf="pret.libelle_duree_restante">
+               <label>Format Durée Restante</label>
+               <span>{{pret.libelle_duree_restante}}</span>
             </div>
           </div>
+       </div>
+
+
+        <!-- 6. Retard -->
+        <div class="form-section">
+          <h2><i class="fas fa-exclamation-triangle"></i> Retard</h2>
+          <div class="form-grid">
+             <div class="form-group">
+                <label for="classeRetard">Classe de Retard</label>
+                <!-- Bind classe_retard -->
+               <select id="classeRetard" [(ngModel)]="pret.classe_retard" name="classeRetard">
+                  <option [ngValue]="null">-- Sélectionner --</option> <!-- Allow empty/null -->
+                  <!-- Use lookupClassesRetard -->
+                  <option *ngFor="let cl of lookupClassesRetard" [value]="cl.code">{{cl.libelle}}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                 <label for="nbEcheances">Nombre d'Échéances Impayées</label>
+                  <!-- Bind nombre_echeances_impayes -->
+                 <input id="nbEcheances" type="number" [(ngModel)]="pret.nombre_echeances_impayes" name="nbEcheances" step="1" min="0">
+              </div>
+              <div class="form-group">
+                 <label for="dateConstat">Date de Constatation</label>
+                  <!-- Bind date_constatation_echeances_impayes -->
+                 <input id="dateConstat" type="date" [(ngModel)]="pret.date_constatation_echeances_impayes" name="dateConstat">
+              </div>
+              <div class="form-group">
+                  <label for="montantCapRetard">Montant Capital en Retard</label>
+                  <!-- Bind montant_capital_retard -->
+                  <input id="montantCapRetard" type="number" [(ngModel)]="pret.montant_capital_retard" name="montantCapRetard" step="any">
+              </div>
+              <div class="form-group">
+                  <label for="montantIntRetard">Montant Intérêts en Retard</label>
+                  <!-- Bind montant_interets_retard -->
+                 <input id="montantIntRetard" type="number" [(ngModel)]="pret.montant_interets_retard" name="montantIntRetard" step="any">
+              </div>
+              <div class="form-group">
+                  <label for="montantIntCourus">Montant Intérêts Courus</label>
+                  <!-- Bind montant_interets_courus -->
+                  <input id="montantIntCourus" type="number" [(ngModel)]="pret.montant_interets_courus" name="montantIntCourus" step="any">
+               </div>
+           </div>
         </div>
-      </div>
-    </div>
+
+
+       <!-- 7. Dates -->
+       <div class="form-section">
+          <h2><i class="fas fa-calendar-alt"></i> Dates</h2>
+          <div class="form-grid">
+             <div class="form-group">
+               <label for="dateOctroi">Date d'Octroi</label>
+               <!-- Bind date_octroi -->
+               <input id="dateOctroi" type="date" [(ngModel)]="pret.date_octroi" name="dateOctroi">
+             </div>
+             <div class="form-group">
+               <label for="dateExpiration">Date d'Expiration</label>
+                <!-- Bind date_expiration -->
+               <input id="dateExpiration" type="date" [(ngModel)]="pret.date_expiration" name="dateExpiration">
+             </div>
+             <div class="form-group">
+                 <label for="dateExecution">Date Exécution</label>
+                 <!-- Bind date_execution -->
+                 <input id="dateExecution" type="date" [(ngModel)]="pret.date_execution" name="dateExecution">
+             </div>
+             <div class="form-group">
+                 <label for="dateRejet">Date de Rejet</label>
+                 <!-- Bind date_rejet -->
+                 <input id="dateRejet" type="date" [(ngModel)]="pret.date_rejet" name="dateRejet">
+             </div>
+           </div>
+       </div>
+
+
+       <!-- 8. Garanties -->
+        <div class="form-section">
+          <h2>
+            <i class="fas fa-shield-alt"></i> Garanties
+             <button type="button" class="btn btn-danger btn-add" (click)="addGarantie()">
+               <i class="fas fa-plus"></i> Ajouter Garantie
+             </button>
+          </h2>
+          <div class="intervenant-item" *ngFor="let garantie of pret.garanties; let i = index; trackBy: trackByIndex">
+             <h3>
+               Garantie {{i + 1}}
+               <button type="button" class="btn btn-danger btn-delete" (click)="removeGarantie(i)" *ngIf="pret.garanties.length > 0">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+             </h3>
+             <div class="form-grid">
+               <div class="form-group">
+                 <label for="garantieIntervenant_{{i}}">Clé Intervenant (Garant)</label>
+                  <!-- Select from available intervenants -->
+                  <select id="garantieIntervenant_{{i}}" [(ngModel)]="garantie.cle_intervenant" name="garantieIntervenant_{{i}}">
+                    <option [ngValue]="null">-- Sélectionner Intervenant --</option>
+                     <option *ngFor="let intervenant of pret.intervenants" [value]="intervenant.cle">
+                        {{intervenant.cle}} - {{intervenant.libelle_niveau_responsabilite || intervenant.niveau_responsabilite}}
+                      </option>
+                    </select>
+               </div>
+               <div class="form-group">
+                 <label for="garantieType_{{i}}">Type</label>
+                  <!-- Bind type_garantie -->
+                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                    <!-- Use lookupTypesGarantie -->
+                   <option *ngFor="let type of lookupTypesGarantie" [value]="type.code">{{type.libelle}}</option>
+                 </select>
+               </div>
+               <div class="form-group">
+                 <label for="garantieMontant_{{i}}">Montant</label>
+                 <input id="garantieMontant_{{i}}" type="number" [(ngModel)]="garantie.montant_garantie" name="garantieMontant_{{i}}" step="any">
+               </div>
+             </div>
+              <hr *ngIf="i < pret.garanties.length - 1">
+          </div>
+            <div *ngIf="pret.garanties.length === 0">
+              Aucune garantie ajoutée.
+           </div>
+        </div>
+
+
+    </div> 
+  </div>
   `,
   styles: [`
     .pret-form {
@@ -528,105 +564,196 @@ import { Credit } from '../../../core/models/credits';
   `]
 })
 export class PretFormComponent implements OnInit {
-  pret: Credit = {
-    numContrat: '',
-    typeCredit: 1,
-    libelleTypeCredit: '',
-    plafondAccorde: false,
-    numeroPlafond: '',
-    codeActivite: 0,
-    libelleActivite: '',
-    situation: 1,
-    libelleSituation: '',
-    motif: '',
-    intervenants: [],
-    codeAgence: 0,
-    libelleAgence: '',
-    codeWilaya: 0,
-    libelleWilaya: '',
-    codePays: 0,
-    libellePays: '',
-    creditsAccorde: 0,
-    dev: 1,
-    libelleDev: '',
-    tauxInterets: 0,
-    coutCredits: 0,
-    mensualite: 0,
-    dureeInit: 0,
-    libelleDureeInitiale: '',
-    dureeRestante: 0,
-    libelleDureeRestante: '',
-    classeRetard: 0,
-    libelleClasseRetard: '',
-    nombreEcheancesImpayes: 0,
-    dateConstatationEcheancesImpayes: '',
-    montantCapitalRetard: 0,
-    montantInteretsRetard: 0,
-    montantInteretsCourus: 0,
-    dateOctroi: '',
-    dateExpiration: '',
-    dateDeclaration: '',
-    dateRejet: '',
-    garanties: [],
-    source: {
-      type: 'manual',
-      createdBy: ''
-    }
-  };
 
+  pret: CreditDto = this.createEmptyCredit();
   isEditMode = false;
+  isLoading = false;
+  errorMessage = '';
+
+  lookupTypesCredit = [ { code: 'AUT', libelle: 'Credit automobile' }, { code: 'IMM', libelle: 'Credit Immobilier' } ];
+  lookupActivites = [ { code: 'AGR', libelle: 'Agriculture' }, { code: 'PCH', libelle: 'Pêche' } ];
+  lookupSituations = [ { code: '1', libelle: 'Régulier' }, { code: '2', libelle: 'Rejeté' }, { code: '3', libelle: 'Impayé' } ];
+  lookupTypesCle = [ { code:'NIF', libelle: 'NIF' }, { code:'RC', libelle: 'RC' }, { code: 'CLI', libelle:'N° Client'} ];
+  lookupNiveauxResponsabilite = [ { code:'PPAL', libelle: 'Principal'}, { code:'COEM', libelle: 'Co-emprunteur'}, { code:'GARA', libelle: 'Garant'} ];
+  lookupDevises = [ {code:'DZD', libelle:'DZD'}, {code:'EUR', libelle:'EUR'}, {code:'USD', libelle:'USD'} ];
+  lookupClassesRetard = [ { code: '0', libelle: 'Aucun' }, { code: '1', libelle: '< 30j' } ];
+  lookupTypesGarantie = [ {code:'HYPO', libelle: 'Hypothèque'}, {code:'CAUTP', libelle: 'Caution Personnelle'} ];
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private creditService: CreditsService
   ) {}
 
-  ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
+  ngOnInit(): void {
+    const numContrat = this.route.snapshot.paramMap.get('numContrat');
+    const dateDeclStr = this.route.snapshot.paramMap.get('dateDecl');
+
+    if (numContrat && dateDeclStr) {
       this.isEditMode = true;
-      // Load pret data from service
+      this.loadCreditData(numContrat, dateDeclStr);
+    } else {
+      this.isEditMode = false;
     }
   }
 
-  onSave() {
-    // Save pret data
-    this.router.navigate(['/credits']);
-  }
-
-  onCancel() {
-    this.router.navigate(['/credits']);
-  }
-
-  addIntervenant() {
-    const newIntervenant = {
-      cle: '',
-      typeCle: 'i1',
-      niveauResponsabilite: 1,
-      libelleNiveauResponsabilite: 'Emprunteur Principal',
-      nif: '',
-      rib: '',
-      cli: '',
-      soldeRestant: 0
+  createEmptyCredit(): CreditDto {
+    return {
+        num_contrat_credit: null,
+        date_declaration: this.getTodayDateString(),
+        type_credit: null,
+        libelle_type_credit: null,
+        est_plafond_accorde: false,
+        id_plafond: null,
+        code_activite: null,
+        libelle_activite: null,
+        situation: null,
+        libelle_situation: null,
+        motif: null,
+        code_agence: null,
+        libelle_agence: null,
+        code_wilaya: null,
+        libelle_wilaya: null,
+        code_pays: null,
+        libelle_pays: null,
+        credit_accorde: null,
+        monnaie: null,
+        libelle_monnaie: null,
+        taux_interets: null,
+        cout_total_credit: null,
+        solde_restant: null,
+        mensualite: null,
+        duree_initiale: null,
+        libelle_duree_initiale: null,
+        duree_restante: null,
+        libelle_duree_restante: null,
+        classe_retard: null,
+        libelle_classe_retard: null,
+        nombre_echeances_impayes: null,
+        date_constatation_echeances_impayes: null,
+        montant_capital_retard: null,
+        montant_interets_retard: null,
+        montant_interets_courus: null,
+        date_octroi: this.getTodayDateString(),
+        date_expiration: null,
+        date_execution: '',
+        date_rejet: null,
+        id_excel: null,
+        intervenants: [],
+        garanties: []
     };
+  }
+
+  loadCreditData(numContrat: string, dateDecl: string): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    console.warn('Placeholder: Implement loadCreditData in service.');
+    // Simulate loading existing data
+    this.pret = this.createEmptyCredit();
+    this.pret.num_contrat_credit = numContrat;
+    this.pret.date_declaration = dateDecl;
+    this.pret.type_credit = 'AUT';
+    this.pret.libelle_type_credit = 'Credit automobile';
+    this.pret.motif = 'Données de test chargées';
+    this.pret.est_plafond_accorde = true;
+    this.pret.id_plafond = 'PLAF123';
+    this.pret.intervenants.push({
+        cle: 'CLI-001', type_cle: 'CLI', niveau_responsabilite: 'PPAL',
+        libelle_niveau_responsabilite: 'Principal', nif:'1234', rib:'5678', cli:'001'
+       });
+    this.isLoading = false;
+    // Replace with actual service call:
+    // this.creditService.getCreditByKeys(numContrat, dateDecl).subscribe({ ... });
+  }
+
+
+  onSave(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    const dataToSave: CreditDto = { ...this.pret };
+    let saveObservable: Observable<any>;
+
+    if (this.isEditMode) {
+      console.warn('Placeholder: Implement updateCredit in service.');
+      saveObservable = new Observable(subscriber => {
+        const timeoutId = setTimeout(() => {
+          subscriber.next({ success: true });
+          subscriber.complete();
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+      });
+      // saveObservable = this.creditService.updateCredit(dataToSave);
+    } else {
+      console.warn('Placeholder: Implement createCredit in service.');
+      saveObservable = new Observable(observer => {
+        const timeoutId = setTimeout(() => {
+          observer.next({ id: 'NEW_CONTRAT_123' });
+          observer.complete();
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+      });
+      // saveObservable = this.creditService.createCredit(dataToSave);
+    }
+
+    saveObservable.subscribe({
+        next: (response) => {
+            console.log('Save successful:', response);
+            this.isLoading = false;
+            this.router.navigate(['/prets']);
+        },
+        error: (err) => {
+            console.error('Error saving credit:', err);
+            this.errorMessage = `Échec de l'enregistrement: ${err?.error?.message || err?.message || 'Erreur inconnue'}`;
+            this.isLoading = false;
+        }
+    });
+  }
+
+  onCancel(): void {
+    this.router.navigate(['/prets']);
+  }
+
+  addIntervenant(): void {
+    const newIntervenant: IntervenantDto = {
+      cle: null, type_cle: null, niveau_responsabilite: null,
+      libelle_niveau_responsabilite: null, nif: null, rib: null, cli: null
+    };
+    this.pret.intervenants = this.pret.intervenants || [];
     this.pret.intervenants.push(newIntervenant);
   }
 
-  removeIntervenant(index: number) {
-    this.pret.intervenants.splice(index, 1);
+  removeIntervenant(index: number): void {
+    if (index >= 0 && index < this.pret.intervenants?.length) {
+      this.pret.intervenants.splice(index, 1);
+    }
   }
 
-  addGarantie() {
-    const newGarantie = {
-      intervenant: '',
-      type: 1,
-      libelleType: 'Hypothèque',
-      montant: 0
+  addGarantie(): void {
+    const newGarantie: GarantieDto = {
+      cle_intervenant: null, type_garantie: null,
+      libelle_type_garantie: null, montant_garantie: null
     };
+    this.pret.garanties = this.pret.garanties || [];
     this.pret.garanties.push(newGarantie);
   }
 
-  removeGarantie(index: number) {
-    this.pret.garanties.splice(index, 1);
+  removeGarantie(index: number): void {
+    if (index >= 0 && index < this.pret.garanties?.length) {
+      this.pret.garanties.splice(index, 1);
+    }
   }
-} 
+
+  getTodayDateString(): string {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = (today.getMonth() + 1).toString().padStart(2, '0');
+      const day = today.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  }
+
+  trackByIndex(index: number, item: any): number {
+      return index;
+  }
+}

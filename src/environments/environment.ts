@@ -8,6 +8,9 @@ export const environment = {
       exportationErreurs: '/Excel/exporter-erreurs-excel', 
 
     },
+    credits: {
+      tousLesCreditsEnCours: '/credits/get-tous-credits',
+    },
     users: {
       getAll: '/api/Users',
       getById: '/api/Users/{userId}',

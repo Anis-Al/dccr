@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Credit } from '../../../../../core/models/credits';
+import { CreditDto } from '../../../../../core/models/credits';
 import { Router } from '@angular/router';
-import { GenererDonneesFictivesService } from '../../../../../core/services/generer-donnees-fictives.service';
 import { ViewStateService } from '../../../../../core/services/view-state.service';
 import { ActivatedRoute } from '@angular/router';
 import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-response.dto';
@@ -573,28 +572,23 @@ export class ResultatComponent implements OnInit {
   fileName: string = '';
   showErrorCase = true;
   apercuDonnees: any[] = [];
-  idExcel:number=0;
+  idExcel=this.result?.idExcel;
+  
   constructor(
     private route: ActivatedRoute,
     private viewState: ViewStateService,
     private router: Router,
-    private mockDataService: GenererDonneesFictivesService,
     private aps:ApiService
   ) 
   {
-    this.mockCredits = this.mockDataService.getMockCredits(5);
   }
 
-  mockCredits: Credit[];
 
   get erreurs() {
     return this.result?.erreurs || [];
   }
 
-  invalidRows: { rowIndex: number, errors: string[] }[] = [
-    { rowIndex: 2, errors: ['Champ "typeCredit" manquant', 'Code activité invalide'] },
-    { rowIndex: 4, errors: ['Date d\'expiration antérieure à la date d\'octroi'] }
-  ];
+  
 
   currentValidPage = 1;
   currentInvalidPage = 1;
@@ -609,8 +603,6 @@ export class ResultatComponent implements OnInit {
       if (params['result']) {
         this.result = JSON.parse(params['result']);
         this.apercuDonnees = this.result?.apercuDonnees || [];
-        this.idExcel = this.result?.idExcel; 
-
       }
       if (params['fileName']) {
         this.fileName = params['fileName'];
@@ -657,26 +649,13 @@ export class ResultatComponent implements OnInit {
   }
 
   telechargerFichierErreurs(): void {
-    console.log("telechargerFichierErreurs called");
     if (!this.idExcel) {
-      console.warn("idExcel is falsy!", this.idExcel);
       return;
     }
-    console.log("About to call this.aps.telechargerFichierErreursExcel with idExcel:", this.idExcel);
     this.aps.telechargerFichierErreursExcel(this.idExcel).subscribe({
       next: (response: HttpResponse<Blob>) => {
         const blob = response.body;
-        console.log('Blob:', blob);
-        // Log all headers for debugging
-        if (response.headers) {
-          const headersObj: any = {};
-          response.headers.keys().forEach(key => {
-            headersObj[key] = response.headers.get(key);
-          });
-          console.log('Response Headers:', headersObj);
-        } else {
-          console.warn('No headers found in response!');
-        }
+        console.log(blob);
 
         if (!blob || blob.size === 0) {
           console.warn(`No error data found or empty file received for File ID: ${this.idExcel}.`);
@@ -689,7 +668,6 @@ export class ResultatComponent implements OnInit {
         console.log(`Download triggered for: ${filename}`);
       },
       error: (err) => {
-        console.error("Error downloading file:", err);
         alert(err.status); 
       }
     });
