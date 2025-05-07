@@ -483,12 +483,10 @@ export class PretsComponent implements OnInit {
     this.currentFilter = filter;
     this.pageActuelle = 1;
     
-    // Reset search term when changing filter
     if (filter !== 'all') {
       this.searchTerm = '';
     }
 
-    // Apply date filters based on the selection
     const currentDate = new Date();
     const filteredCredits = this.TousLesCredits.filter(credit => {
       if (filter === 'all') return true;
