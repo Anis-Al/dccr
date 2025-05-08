@@ -1,9 +1,9 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ApiService } from '../../../../core/services/api.service';
-import { ReponseIntegrationDto } from '../../../../core/dtos/integration-response.dto';
-import { DemandeIntegrationDto } from '../../../../core/dtos/demande-integration.dto';
+import { ApiService } from '../../../../core/services/excel/api.service';
+import { ReponseIntegrationDto } from '../../../../core/dtos/Excel/integration-response.dto';
+import { DemandeIntegrationDto } from '../../../../core/dtos/Excel/demande-integration.dto';
 import { finalize } from 'rxjs/operators';
 
 @Component({

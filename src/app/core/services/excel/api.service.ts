@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
-import { ReponseIntegrationDto } from '../dtos/integration-response.dto';
-import { DemandeIntegrationDto } from '../dtos/demande-integration.dto';
+import { ReponseIntegrationDto } from '../../dtos/Excel/integration-response.dto';
+import { DemandeIntegrationDto } from '../../dtos/Excel/demande-integration.dto';
 
 @Injectable({
   providedIn: 'root'

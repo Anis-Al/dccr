@@ -1,13 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ExcelCrudService } from '../../core/services/excel/excel-crud.service';
+import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto';
 
-interface ExcelFile {
-  id: string;
-  nom: string;
-  chemin: string;
-  dateIntegration: Date;
-  integrateur: string;
-}
+
 
 @Component({
   selector: 'app-fichiers-excel',
@@ -52,10 +48,10 @@ interface ExcelFile {
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let fichier of paginatedFiles">
-                <td>{{ fichier.nom }}</td>
-                <td>{{ fichier.chemin }}</td>
-                <td>{{ fichier.dateIntegration | date:'dd/MM/yyyy HH:mm' }}</td>
+              <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier">
+                <td>{{ fichier.nom_fichier_excel }}</td>  
+                <td>{{ fichier.chemin_fichier_excel }}</td>
+                <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ fichier.integrateur }}</td>
                 
                 <td>
@@ -174,54 +170,41 @@ interface ExcelFile {
     }
   `]
 })
-export class FichiersExcelComponent {
+export class FichiersExcelComponent implements OnInit {
+  fichiers: ExcelMetadonneesDto[] = [];
+
+  constructor(private excelCrudService: ExcelCrudService) {
+    this.updatePagination();
+  }
+
+  ngOnInit() {
+    this.getTousLesMetadonneesduExcel();
+  }
+
   pageActuelle = 1;
   lignesParPage = 3;
-  paginatedFiles: ExcelFile[] = [];
+  FichiersExcelPagines: ExcelMetadonneesDto[] = [];
   totalPages = 2;
 
-  fichiers: ExcelFile[] = [
-    {
-      id: '1',
-      nom: 'clients_mars_2024.xlsx',
-      chemin: 'Downloads/clients_mars_2024.xlsx',     
-      dateIntegration: new Date('2024-03-20T14:30:00'),
-      integrateur: 'Alim Anis',
-     
-    },
-    {
-      id: '2',
-      nom: 'clients_fevrier_2024.xlsx',
-      chemin: 'Downloads/clients_fevrier_2024.xlsx',
-      dateIntegration: new Date('2024-02-15T09:00:00'),     
-      integrateur: 'Alim Anis',
-    },
-    {
-      id: '3',
-      nom: 'clients_fevrier_2024.xlsx',
-      chemin: 'Downloads/clients_fevrier_2024.xlsx',
-      dateIntegration: new Date('2024-02-15T09:00:00'),     
-      integrateur: 'Alim Anis',
-    },
-    {
-      id: '4',
-      nom: 'clients_fevrier_2024.xlsx',
-      chemin: 'Downloads/clients_fevrier_2024.xlsx',
-      dateIntegration: new Date('2024-02-15T09:00:00'),     
-      integrateur: 'Alim Anis',
-    }
-    
-  ];
-  
 
-  constructor() {
-    this.updatePagination();
+  getTousLesMetadonneesduExcel() {
+    this.excelCrudService.getTousLesMetadonneesDuExcel()
+      .subscribe({
+        next: (metadonnees) => {
+          this.fichiers = metadonnees;
+          console.log(metadonnees);
+          this.updatePagination();
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
   }
 
   updatePagination() {
     const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
     const endIndex = startIndex + this.lignesParPage;
-    this.paginatedFiles = this.fichiers.slice(startIndex, endIndex);
+    this.FichiersExcelPagines = this.fichiers.slice(startIndex, endIndex);
     this.totalPages = Math.ceil(this.fichiers.length / this.lignesParPage);
   }
 
@@ -231,5 +214,9 @@ export class FichiersExcelComponent {
       this.updatePagination();
     }
   }
+
+  trackByFichier(index: number, fichier: ExcelMetadonneesDto): number {
+    return fichier.id_fichier_excel; 
+  }
   
-} 
+}

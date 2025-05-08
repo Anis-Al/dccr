@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CreditDto } from '../../models/credits';
+import { CreditDto } from '../../dtos/Credits/credits';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
@@ -20,10 +20,7 @@ export class CreditsService {
         catchError((error: HttpErrorResponse): Observable<never> => {
           return throwError(() => new Error(error.message));
         })
-      );
-      
-      
-        
-      
+      ); 
   }
+  
 }

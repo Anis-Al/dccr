@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PretDetailsComponent } from './pret-details/pret-details.component';
-import { CreditDto }   from '../../core/models/credits';
+import { CreditDto }  from '../../core/dtos/Credits/credits';
 import { CreditsService } from '../../core/services/credits/credits.service';
 import { catchError, Observable, of, Subscription, tap } from 'rxjs';
 
@@ -491,12 +491,10 @@ export class PretsComponent implements OnInit {
     const filteredCredits = this.TousLesCredits.filter(credit => {
       if (filter === 'all') return true;
       
-      // Skip if there's no date declaration
       if (!credit.date_declaration) return false;
       
       const creditDate = new Date(credit.date_declaration);
       
-      // Skip if the date is invalid
       if (isNaN(creditDate.getTime())) return false;
       
       switch (filter) {

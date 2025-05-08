@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { CreditDto, GarantieDto, IntervenantDto } from '../../../core/models/credits';
+import { CreditDto, GarantieDto, IntervenantDto } from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { Observable } from 'rxjs';
 

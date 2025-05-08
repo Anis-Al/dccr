@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CreditDto } from '../../../core/models/credits';
+import { CreditDto } from '../../../core/dtos/Credits/credits';
 
 
 
@@ -265,7 +265,7 @@ import { CreditDto } from '../../../core/models/credits';
             </div>
           </div>
         </div>
-=
+
         <div class="details-section card">
           <h2>
             <i class="fas fa-file-import"></i>

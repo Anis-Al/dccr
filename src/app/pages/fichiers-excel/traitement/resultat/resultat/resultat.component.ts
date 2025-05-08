@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CreditDto } from '../../../../../core/models/credits';
+import { CreditDto } from '../../../../../core/dtos/Credits/credits';
 import { Router } from '@angular/router';
-import { ViewStateService } from '../../../../../core/services/view-state.service';
 import { ActivatedRoute } from '@angular/router';
-import { ReponseIntegrationDto } from '../../../../../core/dtos/integration-response.dto';
-import { ApiService } from '../../../../../core/services/api.service';
+import { ReponseIntegrationDto } from '../../../../../core/dtos/Excel/integration-response.dto';
+import { ApiService } from '../../../../../core/services/excel/api.service';
 import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-resultat',
   standalone:true,
   imports: [CommonModule],
+  providers: [ApiService],
   template: `
    <div class="validation-result-container">
      <div class="header-actions">
@@ -576,20 +576,16 @@ export class ResultatComponent implements OnInit {
   
   constructor(
     private route: ActivatedRoute,
-    private viewState: ViewStateService,
     private router: Router,
     private aps:ApiService
   ) 
   {
+    
   }
-
 
   get erreurs() {
     return this.result?.erreurs || [];
   }
-
-  
-
   currentValidPage = 1;
   currentInvalidPage = 1;
   itemsPerPage = 10;
@@ -602,7 +598,7 @@ export class ResultatComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['result']) {
         this.result = JSON.parse(params['result']);
-        this.idExcel = this.result?.idExcel; 
+        this.idExcel = this.result.idExcel; 
         this.apercuDonnees = this.result?.apercuDonnees || [];
       }
       if (params['fileName']) {
