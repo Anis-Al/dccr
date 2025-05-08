@@ -29,4 +29,10 @@ export class ApiService {
     });
   }
 
+  confirmerIntegration(id_excel: number): Observable<any> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.integrationPart2}`;
+    const params = new HttpParams().set('idExcel', id_excel.toString());
+    return this.http.post<any>(url, {}, { params });
+  }
+
 }

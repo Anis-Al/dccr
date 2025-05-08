@@ -11,47 +11,38 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-  <!-- src/app/components/pret-form/pret-form.component.html -->
 
 <div class="pret-form">
     <div class="header">
       <h1>
         <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus'"></i>
         {{isEditMode ? 'Modifier' : 'Nouveau'}} Crédit
-         <!-- Display num_contrat_credit when editing -->
         <span class="contract-number" *ngIf="isEditMode">{{ pret.num_contrat_credit || 'Chargement...' }}</span>
       </h1>
       <div class="actions">
-         <!-- Cancel Button -->
         <button class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
           <i class="fas fa-times"></i> Annuler
         </button>
-         <!-- Save Button -->
         <button class="btn btn-primary" (click)="onSave()" [disabled]="isLoading">
           <span *ngIf="!isLoading"><i class="fas fa-save"></i> Enregistrer</span>
-          <span *ngIf="isLoading">Enregistrement...</span> <!-- Loading state -->
+          <span *ngIf="isLoading">Enregistrement...</span>
         </button>
       </div>
     </div>
 
-    <!-- Loading Indicator -->
      <div *ngIf="isLoading && isEditMode" class="loading-indicator">Chargement des détails du crédit...</div>
-     <!-- Error Display -->
      <div *ngIf="errorMessage" class="alert alert-danger">Erreur: {{errorMessage}}</div>
 
 
-    <div class="form-container" *ngIf="!isLoading"> <!-- Hide form while loading details -->
+    <div class="form-container" *ngIf="!isLoading"> 
 
-        <!-- 1. Informations Générales -->
         <div class="form-section">
           <h2><i class="fas fa-info-circle"></i> Informations Générales</h2>
           <div class="form-grid">
-             <!-- Bind to snake_case properties -->
             <div class="form-group">
               <label for="numContrat">N° Contrat</label>
               <input id="numContrat" type="text" [(ngModel)]="pret.num_contrat_credit" [disabled]="isEditMode" name="numContrat">
             </div>
-             <!-- Use lookups for Select -->
              <div class="form-group">
                 <label for="typeCredit">Type de Crédit</label>
                 <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit">
@@ -64,17 +55,14 @@ import { Observable } from 'rxjs';
              <div class="form-group">
                 <label>Plafond Accordé</label>
                 <div class="radio-group">
-                  <!-- Note: Value bindings are boolean -->
                    <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="true"> Oui</label>
                    <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="false"> Non</label>
                  </div>
              </div>
-             <!-- Bind id_plafond -->
              <div class="form-group" *ngIf="pret.est_plafond_accorde">
                 <label for="numPlafond">N° Plafond</label>
                 <input id="numPlafond" type="text" [(ngModel)]="pret.id_plafond" name="numPlafond">
               </div>
-              <!-- More bindings... -->
                <div class="form-group">
                  <label for="activite">Activité</label>
                  <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite">
@@ -98,29 +86,25 @@ import { Observable } from 'rxjs';
                    <input id="motif" type="text" [(ngModel)]="pret.motif" name="motif">
                  </div>
 
-                 <div class="form-group"> <!-- Date Declaration -->
+                 <div class="form-group"> 
                    <label for="dateDeclaration">Date de Déclaration</label>
                    <input id="dateDeclaration" type="date" [(ngModel)]="pret.date_declaration" name="dateDeclaration">
                  </div>
-                 <div class="form-group"> <!-- ID Excel -->
+                 <div class="form-group"> 
                    <label for="idExcel">ID Import Excel</label>
-                   <!-- Might be display-only or set by system, often disabled -->
                    <input id="idExcel" type="number" [(ngModel)]="pret.id_excel" name="idExcel" disabled>
                  </div>
              </div>
         </div>
 
 
-       <!-- 2. Débiteurs (Intervenants) -->
        <div class="form-section">
          <h2>
            <i class="fas fa-users"></i> Débiteurs
-            <!-- Use button type="button" to prevent accidental form submission -->
            <button type="button" class="btn btn-danger btn-add" (click)="addIntervenant()">
              <i class="fas fa-plus"></i> Ajouter Débiteur
            </button>
          </h2>
-          <!-- Removed extra div around loop -->
          <div class="intervenant-item" *ngFor="let intervenant of pret.intervenants; let i = index; trackBy: trackByIndex"> <!-- Added trackBy -->
            <h3>
              Débiteur {{i + 1}}
@@ -131,14 +115,12 @@ import { Observable } from 'rxjs';
            <div class="form-grid">
              <div class="form-group">
                <label for="intervenantCle_{{i}}">Clé</label>
-                <!-- Unique names using index -->
                <input id="intervenantCle_{{i}}" type="text" [(ngModel)]="intervenant.cle" name="intervenantCle_{{i}}">
              </div>
              <div class="form-group">
                <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
                <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
-                   <!-- Use lookupTypesCle -->
                   <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
                 </select>
              </div>
@@ -146,7 +128,6 @@ import { Observable } from 'rxjs';
                <label for="intervenantNiveau_{{i}}">Niveau de Responsabilité</label>
                <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}">
                  <option [ngValue]="null" disabled>-- Sélectionner --</option>
-                  <!-- Use lookupNiveauxResponsabilite -->
                   <option *ngFor="let niv of lookupNiveauxResponsabilite" [value]="niv.code">{{niv.libelle}}</option>
                 </select>
              </div>

@@ -572,7 +572,7 @@ export class ResultatComponent implements OnInit {
   fileName: string = '';
   showErrorCase = true;
   apercuDonnees: any[] = [];
-  idExcel=this.result?.idExcel;
+  idExcel: number | undefined;
   
   constructor(
     private route: ActivatedRoute,
@@ -602,6 +602,7 @@ export class ResultatComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['result']) {
         this.result = JSON.parse(params['result']);
+        this.idExcel = this.result?.idExcel; 
         this.apercuDonnees = this.result?.apercuDonnees || [];
       }
       if (params['fileName']) {
@@ -634,8 +635,25 @@ export class ResultatComponent implements OnInit {
   }
 
   confirmInsertion() {
-    // Your existing insertion logic
-    this.showSuccessPopup('Les crédits ont été insérés avec succès!');
+    console.log('Result before API call:', this.result); // Debugging log
+    console.log('idExcel before API call:', this.idExcel); // Debugging log
+
+    if (!this.result || !this.idExcel) {
+      console.error('Result or idExcel is undefined. Cannot confirm integration.');
+      alert('Une erreur est survenue : Les données nécessaires sont manquantes.');
+      return;
+    }
+
+    this.aps.confirmerIntegration(this.idExcel).subscribe({
+      next: (response) => {
+        this.showSuccessPopup('Les crédits ont été insérés avec succès!');
+        this.router.navigate(['/credits']);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la confirmation de l\'intégration:', err);
+        alert('Une erreur est survenue lors de la confirmation de l\'intégration.');
+      }
+    });
   }
 
   showSuccessPopup(message: string) {

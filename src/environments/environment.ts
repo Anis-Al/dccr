@@ -4,7 +4,7 @@ export const environment = {
   endpoints: {
     excel: {
       integrationPart1: '/Excel/importer',
-      integrationPart2:'api/Excel/confirmer-integration',
+      integrationPart2:'/Excel/confirmer-integration',
       exportationErreurs: '/Excel/exporter-erreurs-excel', 
 
     },
