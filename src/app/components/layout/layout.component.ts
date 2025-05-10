@@ -109,7 +109,7 @@ interface NavItem {
       transition: width 0.3s ease;
 
       .layout.sidebar-collapsed & {
-        width: 64px;
+        width: 66px;
       }
     }
 

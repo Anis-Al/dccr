@@ -28,19 +28,15 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
           </div>
-          <div class="filter-buttons">
-            <button class="btn" [class.active]="currentFilter === 'all'" (click)="filtrerCredit('all')">
-              Tous
-            </button>
-            <button class="btn" [class.active]="currentFilter === 'lastMonth'" (click)="filtrerCredit('lastMonth')">
-              Dernier mois
-            </button>
-            <button class="btn" [class.active]="currentFilter === 'lastQuarter'" (click)="filtrerCredit('lastQuarter')">
-              Dernier trimestre
-            </button>
-            <button class="btn" [class.active]="currentFilter === 'lastYear'" (click)="filtrerCredit('lastYear')">
-              Dernière année
-            </button>
+          <div class="date-filters">
+            <div class="date-input">
+              <label>Du:</label>
+              <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+            </div>
+            <div class="date-input">
+              <label>Au:</label>
+              <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+            </div>
           </div>
         </div>
 
@@ -384,27 +380,33 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
         }
       }
 
-      .filter-buttons {
+      .date-filters {
         display: flex;
-        gap: 0.5rem;
+        gap: 1rem;
+        align-items: center;
 
-        .btn {
-          padding: 0.5rem 1rem;
-          border: 1px solid var(--border-color);
-          background: none;
-          border-radius: 4px;
-          font-size: 0.875rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
+        .date-input {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
 
-          &:hover {
-            background-color: var(--hover-color);
+          label {
+            color: var(--text-color);
+            font-size: 0.875rem;
           }
 
-          &.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+          input[type="date"] {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            background-color: white;
+
+            &:focus {
+              outline: none;
+              border-color: var(--primary-color);
+            }
           }
         }
       }
@@ -450,7 +452,8 @@ export class PretsComponent implements OnInit {
   isLoading: boolean = false; 
 
   searchTerm: string = '';
-  currentFilter: string = 'all'; 
+  dateDebut: string = '';
+  dateFin: string = '';
   creditSelectionne: CreditDto | null = null;
 
   pageActuelle: number = 1;
@@ -479,34 +482,27 @@ export class PretsComponent implements OnInit {
     this.updatePagination();
   }
 
-  filtrerCredit(filter: string) {
-    this.currentFilter = filter;
+  filtrerParDate() {
     this.pageActuelle = 1;
     
-    if (filter !== 'all') {
-      this.searchTerm = '';
-    }
-
-    const currentDate = new Date();
     const filteredCredits = this.TousLesCredits.filter(credit => {
-      if (filter === 'all') return true;
-      
       if (!credit.date_declaration) return false;
       
       const creditDate = new Date(credit.date_declaration);
-      
       if (isNaN(creditDate.getTime())) return false;
       
-      switch (filter) {
-        case 'lastMonth':
-          return creditDate >= new Date(currentDate.setMonth(currentDate.getMonth() - 1));
-        case 'lastQuarter':
-          return creditDate >= new Date(currentDate.setMonth(currentDate.getMonth() - 3));
-        case 'lastYear':
-          return creditDate >= new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
-        default:
-          return true;
+      const dateDebutValid = this.dateDebut ? new Date(this.dateDebut) : null;
+      const dateFinValid = this.dateFin ? new Date(this.dateFin) : null;
+      
+      if (dateDebutValid && dateFinValid) {
+        return creditDate >= dateDebutValid && creditDate <= dateFinValid;
+      } else if (dateDebutValid) {
+        return creditDate >= dateDebutValid;
+      } else if (dateFinValid) {
+        return creditDate <= dateFinValid;
       }
+      
+      return true;
     });
 
     this.filteredPrets = filteredCredits;
@@ -542,7 +538,7 @@ export class PretsComponent implements OnInit {
   // }
 
   updatePagination(): void {
-    console.log('Updating pagination. Filter:', this.currentFilter, 'Search:', this.searchTerm, 'Total Items:', this.TousLesCredits.length); // Debug line
+    console.log('Updating pagination. Search:', this.searchTerm, 'Total Items:', this.TousLesCredits.length); // Debug line
 
     this.filteredPrets = this.TousLesCredits.filter(credit =>
       credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false

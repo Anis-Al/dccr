@@ -12,7 +12,12 @@ import { finalize } from 'rxjs/operators';
   imports: [CommonModule],
   template: `
     <div class="upload-container">
-      <h1>Intégration </h1>
+      <div class="header-content">
+        <h1>Intégration</h1>
+        <button class="btn-icon" title="Telecharger un modele .xslx">
+          <i class="fas fa-download"></i>
+        </button>
+      </div>
 
       <div class="upload-zone card" 
            (dragover)="$event.preventDefault()" 
@@ -42,6 +47,26 @@ import { finalize } from 'rxjs/operators';
       display: flex;
       flex-direction: column;
       padding: 20px;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: #1d6f42;
+      transition: opacity 0.3s;
+    }
+
+    .btn-icon:hover {
+      opacity: 0.8;
     }
     
     .upload-zone {

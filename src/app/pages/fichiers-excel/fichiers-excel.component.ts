@@ -40,7 +40,6 @@ import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto
             <thead>
               <tr>
                 <th>Nom du fichier</th>
-                <th>Chemin</th>
                 <th>Date d'intégration</th>
                 <th>Intégrateur</th>
                 <th>Actions</th>
@@ -50,7 +49,6 @@ import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto
             <tbody>
               <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier">
                 <td>{{ fichier.nom_fichier_excel }}</td>  
-                <td>{{ fichier.chemin_fichier_excel }}</td>
                 <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ fichier.integrateur }}</td>
                 

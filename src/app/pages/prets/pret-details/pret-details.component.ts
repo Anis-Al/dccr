@@ -12,19 +12,23 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
   template: `
     <div class="pret-details">
       <div class="header">
-        <h1>
-          <i class="fas fa-file-invoice-dollar"></i>
-          Détails du Crédit
-          <span class="contract-number">{{pret.num_contrat_credit}}</span>
-        </h1>
-        <div class="actions">
-          <button class="btn btn-secondary" (click)="onClose()">
+        <div class="header-main">
+          <h1>
+            <i class="fas fa-file-invoice-dollar"></i>
+            Détails du Crédit
+          </h1>
+          <button class="btn btn-icon" (click)="onClose()" title="Fermer">
             <i class="fas fa-times"></i>
-            Fermer
           </button>
+        </div>
+        <div class="action-group">
           <button class="btn btn-primary" (click)="onEdit()">
             <i class="fas fa-edit"></i>
             Modifier
+          </button>
+          <button class="btn btn-danger" (click)="onDelete()">
+            <i class="fas fa-trash-alt"></i>
+            Supprimer
           </button>
         </div>
       </div>
@@ -293,12 +297,16 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
     }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       margin-bottom: 2.5rem;
       padding-bottom: 1.5rem;
       border-bottom: 1px solid #e9ecef;
+    }
+
+    .header-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
     }
 
     .header h1 {
@@ -319,9 +327,10 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
       font-size: 1rem;
     }
 
-    .actions {
+    .action-group {
       display: flex;
       gap: 1rem;
+      justify-content: flex-start;
     }
 
     .btn {
@@ -337,12 +346,13 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
     }
 
     .btn-primary {
-      background-color: #e74c3c;
+      background-color: #2196F3;
       color: white;
     }
 
     .btn-primary:hover {
-      background-color: #c0392b;
+      background-color: #1976D2;
+      color: white;
     }
 
     .btn-secondary {
@@ -353,6 +363,15 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
 
     .btn-secondary:hover {
       background-color: #e9ecef;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
     }
 
     .details-grid {
@@ -502,10 +521,9 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
 export class PretDetailsComponent {
   @Input() pret!: CreditDto;
   @Output() close = new EventEmitter<void>();
+  @Output() delete = new EventEmitter<void>();
 
   constructor(private router: Router) {}
-
-  
 
   onClose() {
     this.close.emit();
@@ -517,7 +535,13 @@ export class PretDetailsComponent {
     }).then(() => {
       console.log('');
     }).catch(error => {
-      console.error( error);
+      console.error(error);
     });
   }
-} 
+
+  onDelete() {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce crédit ?')) {
+      this.delete.emit();
+    }
+  }
+}
