@@ -1,23 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PretDetailsComponent } from './pret-details/pret-details.component';
 import { CreditDto }  from '../../core/dtos/Credits/credits';
 import { CreditsService } from '../../core/services/credits/credits.service';
 import { catchError, Observable, of, Subscription, tap } from 'rxjs';
+import { ExcelSelectionService } from '../../core/services/excel/excel-selection.service';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 
 @Component({
   selector: 'app-prets',
   standalone: true,
-  imports: [CommonModule, FormsModule, PretDetailsComponent],
+  imports: [CommonModule, FormsModule, PretDetailsComponent, PaginationComponent],
   template: `
     <div class="prets-container" [class.details-open]="creditSelectionne">
       <div class="prets-list">
         <div class="header">
           <h1>Crédits En Cours</h1>
-          <button class="btn header-btn" (click)="nouveauCredit()">
+          <button class="btn header-btn" (click)="nouveauCredit()" *ngIf="selectedExcelFile">
             <span>Nouveau</span>
             <i class="fas fa-plus"></i>
           </button>
@@ -55,26 +57,27 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
                 <tr *ngFor="let credit of CreditsPagines"
                     (click)="selectionnerCredit(credit)"
                     [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit"
+                    [class.highlight-excel]="selectedExcelFile && credit.id_excel === selectedExcelFile.id_fichier_excel"
                 >                  
                   <td class="collante">{{credit.num_contrat_credit}}</td>
                   <td>{{credit.date_declaration}}</td>
                   <td>{{credit.libelle_situation}}</td>
                   <td>{{credit.libelle_type_credit}}</td>
                   <td>{{credit.libelle_activite}}</td>
-
+                </tr>
+                <tr *ngIf="CreditsPagines.length === 0">
+                  <td colspan="5" class="no-data">Aucun crédit trouvé</td>
                 </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="pagination" *ngIf="totalPages > 1">
-          <button class="btn" [disabled]="pageActuelle === 1" (click)="changePage(pageActuelle - 1)">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <span class="page-info">Page {{pageActuelle}} sur {{totalPages}}</span>
-          <button class="btn" [disabled]="pageActuelle === totalPages" (click)="changePage(pageActuelle + 1)">
-            <i class="fas fa-chevron-right"></i>
-          </button>
+        <div class="pagination-container">
+          <app-pagination
+            [lignesTotales]="CreditsFiltres.length"
+            [pageActuelle]="pageActuelle"
+            (changeurPage)="changerPage($event)"
+          ></app-pagination>
         </div>
       </div>
 
@@ -86,7 +89,8 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .prets-container {
       display: flex;
       height: 100%;
@@ -201,12 +205,18 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
       }
     }
 
+    .pagination-container {
+      padding: 1rem 0;
+      background-color: var(--background-color);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
     .pagination {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 1rem;
-      margin-top: 1rem;
       padding: 1rem;
       background-color: white;
       border-radius: 8px;
@@ -239,6 +249,7 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
       scrollbar-width: thin;
       position: relative;
       background-color: var(--background-color);
+      min-height: 200px;
       
       &::-webkit-scrollbar {
         height: 8px;
@@ -317,6 +328,13 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
           &.selected {
             td {
               background-color: var(--primary-color-light) !important;
+            }
+          }
+          &.highlight-excel {
+            td {
+              background-color: #ff1744 !important;
+              color: #fff !important;
+              font-weight: bold;
             }
           }
         }
@@ -425,31 +443,46 @@ import { catchError, Observable, of, Subscription, tap } from 'rxjs';
 
     .table-container table {
       thead tr {
-        background-color: #f8f9fa !important;
+        background-color: #f8f9fa;
         th {
-          background-color: inherit !important;
+          background-color: inherit;
         }
       }
       
       tbody tr {
-        background-color: white !important;
+        background-color: white;
         
         &:hover {
-          background-color: #f2f2f2 !important;
+          background-color: #f2f2f2;
         }
         
         td {
-          background-color: inherit !important;
+          background-color: inherit;
         }
       }
     }
-  `]
+    
+    /* Highlight Excel row */
+    .highlight-excel td {
+      background-color: #fffde7 !important;
+      border-left: 4px solid #ffd600 !important;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-color-light);
+      font-style: italic;
+    }
+    `
+  ]
 })
 export class PretsComponent implements OnInit {
   credits$: Observable<CreditDto[]> | undefined;
   private TousLesCredits: CreditDto[] = []; 
   private loadCreditsSubscription: Subscription | undefined;
   isLoading: boolean = false; 
+  selectedExcelFile:any;
 
   searchTerm: string = '';
   dateDebut: string = '';
@@ -457,25 +490,49 @@ export class PretsComponent implements OnInit {
   creditSelectionne: CreditDto | null = null;
 
   pageActuelle: number = 1;
-  lignesParPage: number = 10;
-  totalPages: number = 1;
+  lignesParPage: number = 5;
+  PagesTotales: number = 1;
   CreditsPagines: CreditDto[] = [];
-  filteredPrets: CreditDto[] = []; 
+  CreditsFiltres: CreditDto[] = []; 
 
   errorMessage: string | null = null;
+  excelSelectionSubscription: Subscription;
 
 
   ngOnInit() {
+    // Subscribe to the cached credits
+    this.creditService.getCreditsActuelles().subscribe(credits => {
+      this.TousLesCredits = credits;
+      this.route.queryParams.subscribe(params => {
+        const fichierId = params['fichierId'];
+        if (fichierId) {
+          this.CreditsFiltres = this.TousLesCredits.filter(credit => credit.id_excel === fichierId);
+        } else {
+          this.CreditsFiltres = this.TousLesCredits;
+        }
+        this.updatePagination();
+      });
+    });
+
+    // Initial load or refresh of credits
     this.loadCredits();
-  }
+}
 
   constructor(
     private router: Router,
-    private creditService: CreditsService
+    private creditService: CreditsService,
+    private excelSelectionService: ExcelSelectionService,
+    private route: ActivatedRoute
   ) {
+    this.excelSelectionSubscription = this.excelSelectionService.selectedExcel$.subscribe(excel => {
+      this.selectedExcelFile = excel;
+    });
   }
-
-  
+  ngOnDestroy() {
+    if (this.excelSelectionSubscription) {
+      this.excelSelectionSubscription.unsubscribe();
+    }
+  }
 
   onSearch() {
     this.pageActuelle = 1;
@@ -505,56 +562,30 @@ export class PretsComponent implements OnInit {
       return true;
     });
 
-    this.filteredPrets = filteredCredits;
+    this.CreditsFiltres = filteredCredits;
     this.updatePagination();
   }
 
-  changePage(page: number) {
+  changerPage(page: number) {
     this.pageActuelle = page;
     this.updatePagination();
   }
 
-  // updatePagination(): void {
-  //   if (!this.TousLesCredits) {
-  //     this.filteredPrets = [];
-  //     this.CreditsPagines = [];
-  //     this.totalPages = 1;
-  //     return;
-  //   }
-  //   let searchedCredits = this.TousLesCredits.filter(credit =>
-  //     credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false
-  //   );
-  //   this.totalPages = Math.ceil(this.filteredPrets.length / this.lignesParPage);
-  //   if (this.totalPages < 1) { this.totalPages = 1; } 
-
-  //   if(this.pageActuelle > this.totalPages) {
-  //       this.pageActuelle = this.totalPages;
-  //   }
-  //    if(this.pageActuelle < 1) {
-  //       this.pageActuelle = 1;
-  //   }
-  //   const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
-  //   this.CreditsPagines = this.filteredPrets.slice(startIndex, startIndex + this.lignesParPage);
-  // }
+  
 
   updatePagination(): void {
-    console.log('Updating pagination. Search:', this.searchTerm, 'Total Items:', this.TousLesCredits.length); // Debug line
-
-    this.filteredPrets = this.TousLesCredits.filter(credit =>
+    this.CreditsFiltres = this.TousLesCredits.filter(credit =>
       credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false
     );
-     console.log('Filtered count:', this.filteredPrets.length);
 
-    this.totalPages = Math.ceil(this.filteredPrets.length / this.lignesParPage);
-    this.totalPages = Math.max(1, this.totalPages); 
+    this.PagesTotales = Math.ceil(this.CreditsFiltres.length / this.lignesParPage);
+    this.PagesTotales = Math.max(1, this.PagesTotales); 
 
-    this.pageActuelle = Math.max(1, Math.min(this.pageActuelle, this.totalPages));
+    this.pageActuelle = Math.max(1, Math.min(this.pageActuelle, this.PagesTotales));
 
     const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
     const endIndex = startIndex + this.lignesParPage;
-    this.CreditsPagines = this.filteredPrets.slice(startIndex, endIndex);
-
-     console.log(`Page ${this.pageActuelle}/${this.totalPages}. Displaying items ${startIndex + 1} to ${Math.min(endIndex, this.filteredPrets.length)} (${this.CreditsPagines.length} items).`); 
+    this.CreditsPagines = this.CreditsFiltres.slice(startIndex, endIndex);
   }
 
   nouveauCredit() {
@@ -578,33 +609,17 @@ export class PretsComponent implements OnInit {
   loadCredits(): void {
     this.isLoading = true;      
     this.errorMessage = null; 
-    this.TousLesCredits = [];   
-    this.CreditsPagines = []; 
-    this.totalPages = 1;    
 
     this.loadCreditsSubscription?.unsubscribe();
-
     this.loadCreditsSubscription = this.creditService.getTousLesCredits()
       .subscribe({ 
-        next: (resultat: CreditDto[]) => {
-          console.log('Data received in subscribe:', resultat);
-          if (Array.isArray(resultat)) {
-             this.TousLesCredits =resultat; 
-             this.updatePagination();     
-          } else {
-            console.error(resultat);
-            this.TousLesCredits = [];
-            this.updatePagination();
-          }
-          this.isLoading = false; 
-        },
         error: (err) => {
           console.error(err);
           this.errorMessage = err?.message;
-          this.TousLesCredits = [];    
-          this.CreditsPagines = [];
-          this.totalPages = 1;
           this.isLoading = false; 
+        },
+        complete: () => {
+          this.isLoading = false;
         }
       });
   }

@@ -1,14 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExcelCrudService } from '../../core/services/excel/excel-crud.service';
 import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto';
+import { Router } from '@angular/router';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 
 
 @Component({
   selector: 'app-fichiers-excel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   template: `
       <div class="liste-fichiers">
       <h1>Fichiers En Cours </h1>
@@ -47,33 +49,28 @@ import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier">
+              <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" (click)="onRowClick(fichier)" class="clickable-row">
                 <td>{{ fichier.nom_fichier_excel }}</td>  
                 <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ fichier.integrateur }}</td>
-                
                 <td>
-                <div class="actions">
-                  
-                  <button class="btn-icon" >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                  
-                </div>
-              </td>
+                  <div class="actions">
+                    <button class="btn-icon" >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="pagination" *ngIf="totalPages > 1">
-          <button class="btn" [disabled]="pageActuelle === 1" (click)="changePage(pageActuelle - 1)">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <span class="page-info">Page {{ pageActuelle }} sur {{ totalPages }}</span>
-          <button class="btn" [disabled]="pageActuelle === totalPages" (click)="changePage(pageActuelle + 1)">
-            <i class="fas fa-chevron-right"></i>
-          </button>
+        <div class="pagination-container">
+          <app-pagination
+            [lignesTotales]="fichiers.length"
+            [pageActuelle]="pageActuelle"
+            (changeurPage)="changePage($event)"
+          ></app-pagination>
         </div>
       </div>
     </div>
@@ -166,12 +163,19 @@ import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto
         border-bottom: 1px solid #dee2e6;
       }
     }
+    .clickable-row {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .clickable-row:hover {
+      background: rgba(190, 0, 0, 0.1);
+    }
   `]
 })
 export class FichiersExcelComponent implements OnInit {
   fichiers: ExcelMetadonneesDto[] = [];
 
-  constructor(private excelCrudService: ExcelCrudService) {
+  constructor(private excelCrudService: ExcelCrudService, private router: Router) {
     this.updatePagination();
   }
 
@@ -180,7 +184,7 @@ export class FichiersExcelComponent implements OnInit {
   }
 
   pageActuelle = 1;
-  lignesParPage = 3;
+  lignesParPage = 5;
   FichiersExcelPagines: ExcelMetadonneesDto[] = [];
   totalPages = 2;
 
@@ -190,7 +194,6 @@ export class FichiersExcelComponent implements OnInit {
       .subscribe({
         next: (metadonnees) => {
           this.fichiers = metadonnees;
-          console.log(metadonnees);
           this.updatePagination();
         },
         error: (error) => {
@@ -217,4 +220,7 @@ export class FichiersExcelComponent implements OnInit {
     return fichier.id_fichier_excel; 
   }
   
+  onRowClick(fichier: ExcelMetadonneesDto) {
+    this.router.navigate(['/credits'], { queryParams: { fichierId: fichier.id_fichier_excel } });
+  }
 }

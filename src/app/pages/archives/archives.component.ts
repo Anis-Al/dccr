@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 
 @Component({
   selector: 'app-archives',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
     <div class="archives-container">
       <h1>Archives des données</h1>
@@ -52,6 +53,13 @@ import { FormsModule } from '@angular/forms';
                 
                 </tbody>
               </table>
+              <div class="pagination-container">
+                <app-pagination
+                  [lignesTotales]="donneesFiltrees.length"
+                  [pageActuelle]="pageActuelle"
+                  (changeurPage)="changerPage($event)"
+                ></app-pagination>
+              </div>
             </div>
 
             <!-- Credits Table -->
@@ -82,6 +90,13 @@ import { FormsModule } from '@angular/forms';
                 
                 </tbody>
               </table>
+              <div class="pagination-container">
+                <app-pagination
+                  [lignesTotales]="donneesFiltrees.length"
+                  [pageActuelle]="pageActuelle"
+                  (changeurPage)="changerPage($event)"
+                ></app-pagination>
+              </div>
             </div>
 
             <!-- XML Files Table -->
@@ -99,6 +114,13 @@ import { FormsModule } from '@angular/forms';
                 
                 </tbody>
               </table>
+              <div class="pagination-container">
+                <app-pagination
+                  [lignesTotales]="donneesFiltrees.length"
+                  [pageActuelle]="pageActuelle"
+                  (changeurPage)="changerPage($event)"
+                ></app-pagination>
+              </div>
             </div>
           </div>
         </div>
@@ -272,6 +294,25 @@ import { FormsModule } from '@angular/forms';
   ]
 })
 export class ArchivesComponent {
+  pageActuelle = 1;
+  lignesParPage = 5;
+  donneesFiltrees: any[] = [];
+  donneesPaginees: any[] = [];
+
+  ngOnInit() {
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
+    const endIndex = startIndex + this.lignesParPage;
+    this.donneesPaginees = this.donneesFiltrees.slice(startIndex, endIndex);
+  }
+
+  changerPage(page: number) {
+    this.pageActuelle = page;
+    this.updatePagination();
+  }
   selectedTable: 'excel' | 'prets' | 'xml' = 'excel';
   
   

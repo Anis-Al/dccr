@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ExcelMetadonneesDto } from '../../dtos/Excel/excel-metadonnees-dto';
 
@@ -8,23 +8,47 @@ import { ExcelMetadonneesDto } from '../../dtos/Excel/excel-metadonnees-dto';
   providedIn: 'root'
 })
 export class ExcelCrudService {
- private readonly baseUrl = environment.apiBaseUrl;
+  private readonly baseUrl = environment.apiBaseUrl;
+  private excelCache = new BehaviorSubject<ExcelMetadonneesDto[]>([]);
+  private tempsDerniereRequete: number = 0;
+  private readonly cacheTimeout = 5 * 60 * 1000;
 
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) { }
 
   getTousLesMetadonneesDuExcel(): Observable<ExcelMetadonneesDto[]> {
-    const url = `${this.baseUrl}${environment.endpoints.excel.tousLesFichiersExcelEnCours}`; 
-    return this.http.get<ExcelMetadonneesDto[]>(url)
-      .pipe(
-        tap(resultat=>{console.log(resultat)}),
-        catchError((error: HttpErrorResponse): Observable<never> => {
-          return throwError(() => new Error(error.message));
-        })
-      );
-      
-      
-        
-      
+    const now = Date.now();
+    const cacheAge = now - this.tempsDerniereRequete;
+
+    if (cacheAge < this.cacheTimeout && this.excelCache.value.length > 0) {
+      return of(this.excelCache.value);
+    }
+
+    const url = `${this.baseUrl}${environment.endpoints.excel.tousLesFichiersExcelEnCours}`;
+    return this.http.get<ExcelMetadonneesDto[]>(url).pipe(
+      tap(metadonnees => {
+        this.excelCache.next(metadonnees);
+        this.tempsDerniereRequete = now;
+      }),
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
   }
-  
+
+  actualiserMetadonnees(): Observable<ExcelMetadonneesDto[]> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.tousLesFichiersExcelEnCours}`;
+    return this.http.get<ExcelMetadonneesDto[]>(url).pipe(
+      tap(metadonnees => {
+        this.excelCache.next(metadonnees);
+        this.tempsDerniereRequete = Date.now();
+      }),
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
+
+  getMetadonneesActuelles(): Observable<ExcelMetadonneesDto[]> {
+    return this.excelCache.asObservable();
+  }
 }

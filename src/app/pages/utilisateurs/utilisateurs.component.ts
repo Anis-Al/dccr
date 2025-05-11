@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { User } from '../../core/models/user.model';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 
 @Component({
   selector: 'app-utilisateurs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   template: `
     <div class="utilisateurs">
       <div class="header">
@@ -83,16 +84,12 @@ import { User } from '../../core/models/user.model';
           </tbody>
         </table>
 
-        <div class="pagination">
-          <button class="btn btn-secondary" disabled>
-            <i class="fas fa-chevron-left"></i>
-            Précédent
-          </button>
-          <span>Page 1 sur 3</span>
-          <button class="btn btn-secondary">
-            Suivant
-            <i class="fas fa-chevron-right"></i>
-          </button>
+        <div class="pagination-container">
+          <app-pagination
+            [lignesTotales]="utilisateursFiltres.length"
+            [pageActuelle]="pageActuelle"
+            (changeurPage)="changerPage($event)"
+          ></app-pagination>
         </div>
       </div>
     </div>
@@ -212,28 +209,42 @@ import { User } from '../../core/models/user.model';
   `]
 })
 export class UtilisateursComponent {
+  pageActuelle = 1;
+  lignesParPage = 5;
+  utilisateursFiltres: User[] = [];
+  utilisateursPagines: User[] = [];
+  constructor(private router:Router){}
   utilisateurs: User[] = [
-    {
-      matricule: 77822231992,
+    {      matricule: 77822231992,
       fullName: 'Halil Ibrahim',
       email: 'Ibrahim.Halil@socgen.com',
       role: 'Admin',
-      
     },
-    {
-      matricule: 552221145,
+    {      matricule: 552221145,
       fullName: 'Alim Anis',
       email: 'anis.algiers@gmail.com',
       role: 'Consultant',
-      
-    },
-    
-    
+    }
   ];
 
-  constructor(private router:Router){}
+  ngOnInit() {
+    this.utilisateursFiltres = this.utilisateurs;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
+    const endIndex = startIndex + this.lignesParPage;
+    this.utilisateursPagines = this.utilisateursFiltres.slice(startIndex, endIndex);
+  }
+
+  changerPage(page: number) {
+    this.pageActuelle = page;
+    this.updatePagination();
+  };
+
 
   ajouterNouvelUtilisateur(){
     this.router.navigate(['/utilisateurs/nouveau'])
   }
-} 
+}

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 
 interface AuditLog {
   id: string;
@@ -14,7 +15,7 @@ interface AuditLog {
 @Component({
   selector: 'app-journaux-audit',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   template: `
     <div class="journaux-audit">
       <div class="header">
@@ -75,16 +76,12 @@ interface AuditLog {
           </tbody>
         </table>
 
-        <div class="pagination">
-          <button class="btn btn-secondary" disabled>
-            <i class="fas fa-chevron-left"></i>
-            Précédent
-          </button>
-          <span>Page 1 sur 5</span>
-          <button class="btn btn-secondary">
-            Suivant
-            <i class="fas fa-chevron-right"></i>
-          </button>
+        <div class="pagination-container">
+          <app-pagination
+            [lignesTotales]="journauxFiltres.length"
+            [pageActuelle]="pageActuelle"
+            (changeurPage)="changerPage($event)"
+          ></app-pagination>
         </div>
       </div>
     </div>
@@ -154,6 +151,10 @@ interface AuditLog {
   `]
 })
 export class JournauxAuditComponent {
+  pageActuelle = 1;
+  lignesParPage = 5;
+  journauxFiltres: AuditLog[] = [];
+  journauxPagines: AuditLog[] = [];
   journaux: AuditLog[] = [
     {
       id: '1',
@@ -174,4 +175,23 @@ export class JournauxAuditComponent {
       niveau: 'Info'
     }
   ];
-} 
+
+  ngOnInit() {
+    this.journauxFiltres = this.journaux;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
+    const endIndex = startIndex + this.lignesParPage;
+    this.journauxPagines = this.journauxFiltres.slice(startIndex, endIndex);
+    this.journaux = this.journauxPagines;
+  }
+
+  changerPage(page: number) {
+    this.pageActuelle = page;
+    this.updatePagination();
+  };
+
+  
+}

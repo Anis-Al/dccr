@@ -682,7 +682,7 @@ export class PretFormComponent implements OnInit {
         next: (response) => {
             console.log('Save successful:', response);
             this.isLoading = false;
-            this.router.navigate(['/prets']);
+            this.router.navigate(['/credits']);
         },
         error: (err) => {
             console.error('Error saving credit:', err);
@@ -693,7 +693,7 @@ export class PretFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/prets']);
+    this.router.navigate(['/credits']);
   }
 
   addIntervenant(): void {
