@@ -49,12 +49,12 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" (click)="onRowClick(fichier)" class="clickable-row">
+              <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" (click)="onRowClick($event, fichier)" class="clickable-row">
                 <td>{{ fichier.nom_fichier_excel }}</td>  
                 <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ fichier.integrateur }}</td>
                 <td>
-                  <div class="actions">
+                  <div class="actions" (click)="$event.stopPropagation()">
                     <button class="btn-icon" >
                       <i class="fas fa-trash"></i>
                     </button>
@@ -220,7 +220,12 @@ export class FichiersExcelComponent implements OnInit {
     return fichier.id_fichier_excel; 
   }
   
-  onRowClick(fichier: ExcelMetadonneesDto) {
-    this.router.navigate(['/credits'], { queryParams: { fichierId: fichier.id_fichier_excel } });
+  onRowClick(event: MouseEvent, fichier: ExcelMetadonneesDto) {
+    // Prevent navigation if the click is inside the actions column
+    const target = event.target as HTMLElement;
+    if (target.closest('.actions')) {
+      return;
+    }
+    this.router.navigate(['/credits'], { queryParams: { id_excel: fichier.id_fichier_excel } });
   }
 }

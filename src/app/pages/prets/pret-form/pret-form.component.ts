@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { CreditDto, GarantieDto, IntervenantDto } from '../../../core/dtos/Credits/credits';
-import { CreditsService } from '../../../core/services/credits/credits.service';
-import { Observable } from 'rxjs';
+import { CreditStateService } from '../../../core/services/credits/credit-state.service';
 
 @Component({
   selector: 'app-pret-form',
@@ -544,197 +545,133 @@ import { Observable } from 'rxjs';
     }
   `]
 })
-export class PretFormComponent implements OnInit {
+export class PretFormComponent implements OnInit, OnDestroy {
 
-  pret: CreditDto = this.createEmptyCredit();
-  isEditMode = false;
+  pret: CreditDto = {} as CreditDto;
   isLoading = false;
-  errorMessage = '';
+  errorMessage: string | null = null;
+  isEditMode = false;
+  private destroy$ = new Subject<void>();
 
-  lookupTypesCredit = [ { code: 'AUT', libelle: 'Credit automobile' }, { code: 'IMM', libelle: 'Credit Immobilier' } ];
-  lookupActivites = [ { code: 'AGR', libelle: 'Agriculture' }, { code: 'PCH', libelle: 'Pêche' } ];
-  lookupSituations = [ { code: '1', libelle: 'Régulier' }, { code: '2', libelle: 'Rejeté' }, { code: '3', libelle: 'Impayé' } ];
-  lookupTypesCle = [ { code:'NIF', libelle: 'NIF' }, { code:'RC', libelle: 'RC' }, { code: 'CLI', libelle:'N° Client'} ];
-  lookupNiveauxResponsabilite = [ { code:'PPAL', libelle: 'Principal'}, { code:'COEM', libelle: 'Co-emprunteur'}, { code:'GARA', libelle: 'Garant'} ];
-  lookupDevises = [ {code:'DZD', libelle:'DZD'}, {code:'EUR', libelle:'EUR'}, {code:'USD', libelle:'USD'} ];
-  lookupClassesRetard = [ { code: '0', libelle: 'Aucun' }, { code: '1', libelle: '< 30j' } ];
-  lookupTypesGarantie = [ {code:'HYPO', libelle: 'Hypothèque'}, {code:'CAUTP', libelle: 'Caution Personnelle'} ];
+ 
+  
+  lookupTypesCredit: any[] = [];
+  lookupActivites: any[] = [];
+  lookupSituations: any[] = [];
+  lookupTypesCle: any[] = [];
+  lookupNiveauxResponsabilite: any[] = [];
+  lookupDevises: any[] = [];
+  lookupTypesGarantie: any[] = [];
+  lookupClassesRetard: any[] = [];
 
-  constructor(
-    private router: Router,
+  constructor(private router: Router, 
     private route: ActivatedRoute,
-    private creditService: CreditsService
-  ) {}
+    private creditStateService: CreditStateService
+  ){} 
 
-  ngOnInit(): void {
-    const numContrat = this.route.snapshot.paramMap.get('numContrat');
-    const dateDeclStr = this.route.snapshot.paramMap.get('dateDecl');
-
-    if (numContrat && dateDeclStr) {
-      this.isEditMode = true;
-      this.loadCreditData(numContrat, dateDeclStr);
-    } else {
-      this.isEditMode = false;
-    }
-  }
-
-  createEmptyCredit(): CreditDto {
-    return {
-        num_contrat_credit: null,
-        date_declaration: this.getTodayDateString(),
-        type_credit: null,
-        libelle_type_credit: null,
-        est_plafond_accorde: false,
-        id_plafond: null,
-        code_activite: null,
-        libelle_activite: null,
-        situation: null,
-        libelle_situation: null,
-        motif: null,
-        code_agence: null,
-        libelle_agence: null,
-        code_wilaya: null,
-        libelle_wilaya: null,
-        code_pays: null,
-        libelle_pays: null,
-        credit_accorde: null,
-        monnaie: null,
-        libelle_monnaie: null,
-        taux_interets: null,
-        cout_total_credit: null,
-        solde_restant: null,
-        mensualite: null,
-        duree_initiale: null,
-        libelle_duree_initiale: null,
-        duree_restante: null,
-        libelle_duree_restante: null,
-        classe_retard: null,
-        libelle_classe_retard: null,
-        nombre_echeances_impayes: null,
-        date_constatation_echeances_impayes: null,
-        montant_capital_retard: null,
-        montant_interets_retard: null,
-        montant_interets_courus: null,
-        date_octroi: this.getTodayDateString(),
-        date_expiration: null,
-        date_execution: '',
-        date_rejet: null,
-        id_excel: null,
-        intervenants: [],
-        garanties: []
-    };
-  }
-
-  loadCreditData(numContrat: string, dateDecl: string): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-    console.warn('Placeholder: Implement loadCreditData in service.');
-    // Simulate loading existing data
-    this.pret = this.createEmptyCredit();
-    this.pret.num_contrat_credit = numContrat;
-    this.pret.date_declaration = dateDecl;
-    this.pret.type_credit = 'AUT';
-    this.pret.libelle_type_credit = 'Credit automobile';
-    this.pret.motif = 'Données de test chargées';
-    this.pret.est_plafond_accorde = true;
-    this.pret.id_plafond = 'PLAF123';
-    this.pret.intervenants.push({
-        cle: 'CLI-001', type_cle: 'CLI', niveau_responsabilite: 'PPAL',
-        libelle_niveau_responsabilite: 'Principal', nif:'1234', rib:'5678', cli:'001'
-       });
-    this.isLoading = false;
-    // Replace with actual service call:
-    // this.creditService.getCreditByKeys(numContrat, dateDecl).subscribe({ ... });
-  }
-
-
-  onSave(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-    const dataToSave: CreditDto = { ...this.pret };
-    let saveObservable: Observable<any>;
-
-    if (this.isEditMode) {
-      console.warn('Placeholder: Implement updateCredit in service.');
-      saveObservable = new Observable(subscriber => {
-        const timeoutId = setTimeout(() => {
-          subscriber.next({ success: true });
-          subscriber.complete();
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-      });
-      // saveObservable = this.creditService.updateCredit(dataToSave);
-    } else {
-      console.warn('Placeholder: Implement createCredit in service.');
-      saveObservable = new Observable(observer => {
-        const timeoutId = setTimeout(() => {
-          observer.next({ id: 'NEW_CONTRAT_123' });
-          observer.complete();
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-      });
-      // saveObservable = this.creditService.createCredit(dataToSave);
-    }
-
-    saveObservable.subscribe({
-        next: (response) => {
-            console.log('Save successful:', response);
-            this.isLoading = false;
-            this.router.navigate(['/credits']);
-        },
-        error: (err) => {
-            console.error('Error saving credit:', err);
-            this.errorMessage = `Échec de l'enregistrement: ${err?.error?.message || err?.message || 'Erreur inconnue'}`;
-            this.isLoading = false;
+  ngOnInit() {
+    this.pret.intervenants = [];
+    this.pret.garanties = [];
+    
+    this.creditStateService.selectedCredit$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(credit => {
+        if (credit) {
+          this.pret = { ...credit };
+          this.isEditMode=true;
+          this.pret.intervenants = credit.intervenants || [];
+          this.pret.garanties = credit.garanties || [];
+          console.log('Loaded credit data from state:', this.pret);
         }
-    });
+      });
+      
+    this.creditStateService.isEditMode$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isEdit => {
+        this.isEditMode = isEdit;
+      });
+      
+    this.creditStateService.isLoading$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isLoading => {
+        this.isLoading = isLoading;
+      });
+      
+    this.creditStateService.error$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(error => {
+        this.errorMessage = error;
+      });
+    
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state as { pret: CreditDto };
+    if (state?.pret) {
+      this.creditStateService.setLoading(true);
+      try {
+        this.creditStateService.setSelectedCredit(state.pret);
+      } catch (error) {
+        this.creditStateService.setError('Erreur lors du chargement des données du crédit');
+        console.error('Error initializing credit data:', error);
+      } finally {
+        this.creditStateService.setLoading(false);
+      }
+    }
   }
 
-  onCancel(): void {
+  onCancel() {
+    this.creditStateService.clearSelectedCredit();
     this.router.navigate(['/credits']);
   }
 
-  addIntervenant(): void {
-    const newIntervenant: IntervenantDto = {
-      cle: null, type_cle: null, niveau_responsabilite: null,
-      libelle_niveau_responsabilite: null, nif: null, rib: null, cli: null
-    };
+  onSave() {
+    this.creditStateService.setLoading(true);
+    // TODO: Implement save logic with API call
+    console.log('Saving credit:', this.pret);
+    
+    // Simulate successful save for now
+    setTimeout(() => {
+      // Update the state with the saved credit
+      this.creditStateService.setSelectedCredit(this.pret);
+      this.creditStateService.setLoading(false);
+      
+      // Show success message or navigate away
+      if (!this.isEditMode) {
+        // If it was a new credit, navigate back to list
+        this.creditStateService.clearSelectedCredit();
+        this.router.navigate(['/credits']);
+      }
+    }, 1000); // Simulate API delay
+    
+    // Error handling would look like this:
+    // this.creditStateService.setError('Erreur lors de l\'enregistrement');
+    // this.creditStateService.setLoading(false);
+  }
+
+  addIntervenant() {
     this.pret.intervenants = this.pret.intervenants || [];
-    this.pret.intervenants.push(newIntervenant);
+    this.pret.intervenants.push({} as IntervenantDto);
   }
 
-  removeIntervenant(index: number): void {
-    if (index >= 0 && index < this.pret.intervenants?.length) {
-      this.pret.intervenants.splice(index, 1);
-    }
+  removeIntervenant(index: number) {
+    this.pret.intervenants.splice(index, 1);
   }
 
-  addGarantie(): void {
-    const newGarantie: GarantieDto = {
-      cle_intervenant: null, type_garantie: null,
-      libelle_type_garantie: null, montant_garantie: null
-    };
+  addGarantie() {
     this.pret.garanties = this.pret.garanties || [];
-    this.pret.garanties.push(newGarantie);
+    this.pret.garanties.push({} as GarantieDto);
   }
 
-  removeGarantie(index: number): void {
-    if (index >= 0 && index < this.pret.garanties?.length) {
-      this.pret.garanties.splice(index, 1);
-    }
+  removeGarantie(index: number) {
+    this.pret.garanties.splice(index, 1);
   }
 
-  getTodayDateString(): string {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = (today.getMonth() + 1).toString().padStart(2, '0');
-      const day = today.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
+  trackByIndex(index: number): number {
+    return index;
   }
-
-  trackByIndex(index: number, item: any): number {
-      return index;
+  
+  ngOnDestroy(): void {
+    // Clean up subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

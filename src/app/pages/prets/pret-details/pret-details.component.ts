@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CreditDto } from '../../../core/dtos/Credits/credits';
+import { CreditStateService } from '../../../core/services/credits/credit-state.service';
 
 
 
@@ -523,20 +524,22 @@ export class PretDetailsComponent {
   @Output() close = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private creditStateService: CreditStateService
+  ) {}
 
   onClose() {
     this.close.emit();
   }
 
   onEdit() {
-    this.router.navigate(['/credits/modifier', this.pret.num_contrat_credit], {
-      state: { pret: this.pret }
-    }).then(() => {
-      console.log('');
-    }).catch(error => {
-      console.error(error);
-    });
+    this.creditStateService.setSelectedCredit(this.pret);
+    this.creditStateService.setEditMode(true);
+    this.router.navigate(['/credits/modifier', this.pret.num_contrat_credit])
+      .catch(error => {
+        console.error('Navigation error:', error);
+      });
   }
 
   onDelete() {

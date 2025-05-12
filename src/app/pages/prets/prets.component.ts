@@ -19,6 +19,9 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       <div class="prets-list">
         <div class="header">
           <h1>Crédits En Cours</h1>
+          <button class="btn btn-icon" title="Annuler le filtre" *ngIf="selectedExcelFile" (click)="annulerSelection($event)">
+            <i class="fas fa-times"></i>
+          </button>
           <button class="btn header-btn" (click)="nouveauCredit()" *ngIf="selectedExcelFile">
             <span>Nouveau</span>
             <i class="fas fa-plus"></i>
@@ -465,7 +468,6 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     /* Highlight Excel row */
     .highlight-excel td {
       background-color: #fffde7 !important;
-      border-left: 4px solid #ffd600 !important;
     }
 
     .no-data {
@@ -482,7 +484,7 @@ export class PretsComponent implements OnInit {
   private TousLesCredits: CreditDto[] = []; 
   private loadCreditsSubscription: Subscription | undefined;
   isLoading: boolean = false; 
-  selectedExcelFile:any;
+  selectedExcelFile: any = null;
 
   searchTerm: string = '';
   dateDebut: string = '';
@@ -500,6 +502,16 @@ export class PretsComponent implements OnInit {
 
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const id_excel = params['id_excel'];
+      if (id_excel) {
+        this.selectedExcelFile = { id_fichier_excel: +id_excel };
+        this.CreditsFiltres = this.CreditsFiltres.filter(c => c.id_excel === +id_excel);
+        this.updatePagination();
+      } else {
+        this.selectedExcelFile = null;
+      }
+    });
     // Subscribe to the cached credits
     this.creditService.getCreditsActuelles().subscribe(credits => {
       this.TousLesCredits = credits;
@@ -625,9 +637,16 @@ export class PretsComponent implements OnInit {
   }
 
 
-
+  annulerSelection(event: Event) {
+    event.stopPropagation();
+    this.selectedExcelFile = null;
+    this.CreditsFiltres = this.TousLesCredits;
+    this.updatePagination();
+  }
 
  
 
   
 }
+
+ 

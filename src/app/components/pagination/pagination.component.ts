@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="pagination" *ngIf="pagesTotales>0";>
+    <div class="pagination" *ngIf="pagesTotales>0">
       <button class="btn" [disabled]="pageActuelle === 1" (click)="changerPage(pageActuelle - 1)">
         <i class="fas fa-chevron-left"></i>
       </button>
@@ -26,7 +26,6 @@ import { CommonModule } from '@angular/common';
       padding: 1rem;
       background-color: transarent;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .btn {
