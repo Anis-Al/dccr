@@ -601,7 +601,13 @@ export class PretsComponent implements OnInit {
   }
 
   nouveauCredit() {
-    this.router.navigate(['/credits/nouveau']);
+    if (this.selectedExcelFile?.id_fichier_excel) {
+      this.router.navigate(['/credits/nouveau'], { 
+        queryParams: { id_excel: this.selectedExcelFile.id_fichier_excel } 
+      });
+    } else {
+      this.router.navigate(['/credits/nouveau']);
+    }
   }
 
   selectionnerCredit(credit: CreditDto): void {

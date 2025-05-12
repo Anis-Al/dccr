@@ -14,7 +14,7 @@ import { finalize } from 'rxjs/operators';
     <div class="upload-container">
       <div class="header-content">
         <h1>Intégration</h1>
-        <button class="btn-icon" title="Telecharger un modele .xslx">
+        <button class="btn-icon" title="Télécharger un modèle .xslx">
           <i class="fas fa-download"></i>
         </button>
       </div>

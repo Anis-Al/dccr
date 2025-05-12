@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ExcelCrudService } from '../../core/services/excel/excel-crud.service';
 import { ExcelMetadonneesDto } from '../../core/dtos/Excel/excel-metadonnees-dto';
 import { Router } from '@angular/router';
@@ -10,7 +11,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 @Component({
   selector: 'app-fichiers-excel',
   standalone: true,
-  imports: [CommonModule, PaginationComponent],
+  imports: [CommonModule, PaginationComponent, FormsModule],
   template: `
       <div class="liste-fichiers">
       <h1>Fichiers En Cours </h1>
@@ -21,17 +22,22 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
             <label>Rechercher</label>
             <div class="input-with-icon">
               <i class="fas fa-search"></i>
-              <input type="text" class="form-control" placeholder="Nom du fichier">
+              <input type="text" class="form-control" placeholder="Nom du fichier ou intégrateur" [(ngModel)]="searchTerm" (input)="onSearch()">
             </div>
           </div>
 
           <div class="form-group">
             <label>Date d'intégration</label>
-            <select class="form-control">
-              <option value="today">Aujourd'hui</option>
-              <option value="week">Cette semaine</option>
-              <option value="month">Ce mois</option>
-            </select>
+            <div class="date-filters">
+              <div class="date-input">
+                <label>Du:</label>
+                <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+              </div>
+              <div class="date-input">
+                <label>Au:</label>
+                <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -67,7 +73,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 
         <div class="pagination-container">
           <app-pagination
-            [lignesTotales]="fichiers.length"
+            [lignesTotales]="fichiersFiltres.length"
             [pageActuelle]="pageActuelle"
             (changeurPage)="changePage($event)"
           ></app-pagination>
@@ -76,6 +82,10 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     </div>
   `, 
   styles: [`
+    .card{
+    background-color:transparent;
+    border:none;
+    }
     .liste-fichiers {
       padding: 1rem;
     }
@@ -142,6 +152,39 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       padding-left: 2.5rem;
     }
 
+    .date-filters {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .date-input {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+
+        label {
+          white-space: nowrap;
+          font-size: 0.875rem;
+          color: var(--text-color);
+        }
+
+        input[type="date"] {
+          padding: 0.3rem;
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          font-size: 0.875rem;
+          color: var(--text-color);
+          background-color: white;
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+          }
+        }
+      }
+    }
+
     .fichiers-table {
       width: 100%;
       border-collapse: separate;
@@ -174,6 +217,10 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 })
 export class FichiersExcelComponent implements OnInit {
   fichiers: ExcelMetadonneesDto[] = [];
+  fichiersFiltres: ExcelMetadonneesDto[] = [];
+  dateDebut: string = '';
+  dateFin: string = '';
+  searchTerm: string = '';
 
   constructor(private excelCrudService: ExcelCrudService, private router: Router) {
     this.updatePagination();
@@ -203,10 +250,51 @@ export class FichiersExcelComponent implements OnInit {
   }
 
   updatePagination() {
+    // Apply search filter
+    this.fichiersFiltres = this.fichiers.filter(fichier =>
+      fichier.nom_fichier_excel?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      fichier.integrateur?.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+
+    // Apply date filter
+    if (this.dateDebut || this.dateFin) {
+      this.fichiersFiltres = this.fichiersFiltres.filter(fichier => {
+        if (!fichier.date_heure_integration_excel) return false;
+        
+        const fichierDate = new Date(fichier.date_heure_integration_excel);
+        if (isNaN(fichierDate.getTime())) return false;
+        
+        const dateDebutValid = this.dateDebut ? new Date(this.dateDebut) : null;
+        const dateFinValid = this.dateFin ? new Date(this.dateFin) : null;
+        
+        if (dateDebutValid && dateFinValid) {
+          return fichierDate >= dateDebutValid && fichierDate <= dateFinValid;
+        } else if (dateDebutValid) {
+          return fichierDate >= dateDebutValid;
+        } else if (dateFinValid) {
+          return fichierDate <= dateFinValid;
+        }
+        
+        return true;
+      });
+    }
+
+    // Update pagination
     const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
     const endIndex = startIndex + this.lignesParPage;
-    this.FichiersExcelPagines = this.fichiers.slice(startIndex, endIndex);
-    this.totalPages = Math.ceil(this.fichiers.length / this.lignesParPage);
+    this.FichiersExcelPagines = this.fichiersFiltres.slice(startIndex, endIndex);
+    this.totalPages = Math.max(1, Math.ceil(this.fichiersFiltres.length / this.lignesParPage));
+    this.pageActuelle = Math.max(1, Math.min(this.pageActuelle, this.totalPages));
+  }
+
+  onSearch() {
+    this.pageActuelle = 1;
+    this.updatePagination();
+  }
+
+  filtrerParDate() {
+    this.pageActuelle = 1;
+    this.updatePagination();
   }
 
   changePage(page: number) {

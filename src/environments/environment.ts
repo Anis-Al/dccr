@@ -10,6 +10,7 @@ export const environment = {
     },
     credits: {
       tousLesCreditsEnCours: '/credits/get-tous-credits',
+      tableDomaines: '/credits/get-tables-domaines',
     },
     users: {
       getAll: '/api/Users',
