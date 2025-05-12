@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule,DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PretDetailsComponent } from './pret-details/pret-details.component';
@@ -600,13 +600,32 @@ export class PretsComponent implements OnInit {
     this.CreditsPagines = this.CreditsFiltres.slice(startIndex, endIndex);
   }
 
-  nouveauCredit() {
-    if (this.selectedExcelFile?.id_fichier_excel) {
-      this.router.navigate(['/credits/nouveau'], { 
-        queryParams: { id_excel: this.selectedExcelFile.id_fichier_excel } 
-      });
-    } else {
-      this.router.navigate(['/credits/nouveau']);
+  async nouveauCredit() {
+    try {
+      console.log('Starting navigation...');
+      console.log('Selected Excel File:', this.selectedExcelFile);
+      
+      const navigationExtras = this.selectedExcelFile?.id_fichier_excel 
+        ? { 
+            queryParams: { id_excel: this.selectedExcelFile.id_fichier_excel },
+            queryParamsHandling: 'merge' as const
+          }
+        : undefined;
+      
+      console.log('Navigation extras:', navigationExtras);
+      
+      const result = await this.router.navigate(
+        ['/credits/nouveau'], 
+        navigationExtras
+      );
+      
+      console.log('Navigation result:', result);
+      
+      if (!result) {
+        console.error('Navigation failed: No route matched');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
     }
   }
 

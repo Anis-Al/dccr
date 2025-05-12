@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, forkJoin, of } from 'rxjs';
@@ -12,6 +12,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
   selector: 'app-pret-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  providers: [DatePipe],
   template: `
 
 <div class="pret-form">
@@ -47,7 +48,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
             </div>
              <div class="form-group">
                 <label for="typeCredit">Type de Crédit</label>
-                <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit">
+                <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit" (change)="onTypeCreditChange()">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                    <option *ngFor="let type of lookupTypesCredit" [value]="type.code">
                      {{type.libelle}}
@@ -67,7 +68,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
               </div>
                <div class="form-group">
                  <label for="activite">Activité</label>
-                 <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite">
+                 <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite" (change)="onActiviteChange()">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                    <option *ngFor="let act of lookupActivites" [value]="act.code">
                       {{act.libelle}}
@@ -76,7 +77,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                 </div>
                 <div class="form-group">
                    <label for="situation">Situation</label>
-                   <select id="situation" [(ngModel)]="pret.situation" name="situation">
+                   <select id="situation" [(ngModel)]="pret.situation" name="situation" (change)="onSituationChange()">
                      <option [ngValue]="null" disabled>-- Sélectionner --</option>
                      <option *ngFor="let sit of lookupSituations" [value]="sit.code">
                          {{sit.libelle}}
@@ -90,11 +91,11 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
 
                  <div class="form-group"> 
                    <label for="dateDeclaration">Date de Déclaration</label>
-                   <input id="dateDeclaration" type="date" [(ngModel)]="pret.date_declaration" name="dateDeclaration">
-                 </div>
-                 <div class="form-group"> 
-                   <label for="idExcel">ID Import Excel</label>
-                   <input id="idExcel" type="number" [(ngModel)]="pret.id_excel" name="idExcel" disabled>
+                   <input id="dateDeclaration" type="text" 
+                     [ngModel]="formaterDate(pret.date_declaration)" 
+                     (ngModelChange)="onDateChange('date_declaration', $event)" 
+                     name="dateDeclaration" 
+                     placeholder="jj/mm/aaaa">
                  </div>
              </div>
         </div>
@@ -121,14 +122,14 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
              </div>
              <div class="form-group">
                <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
-               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
+               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}" (change)="onIntervenantChange(i)">
                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
                   <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
                 </select>
              </div>
              <div class="form-group">
                <label for="intervenantNiveau_{{i}}">Niveau de Responsabilité</label>
-               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}">
+               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}" (change)="onIntervenantChange(i)">
                  <option [ngValue]="null" disabled>-- Sélectionner --</option>
                   <option *ngFor="let niv of lookupNiveauxResponsabilite" [value]="niv.code">{{niv.libelle}}</option>
                 </select>
@@ -202,7 +203,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
 
               <div class="form-group">
                  <label for="devise">Devise</label>
-                 <select id="devise" [(ngModel)]="pret.monnaie" name="devise">
+                 <select id="devise" [(ngModel)]="pret.monnaie" name="devise" (change)="onMonnaieChange()">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                     <option *ngFor="let dev of lookupDevises" [value]="dev.code">{{dev.libelle}}</option>
                   </select>
@@ -217,7 +218,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                     <input id="coutCredits" type="number" [(ngModel)]="pret.cout_total_credit" name="coutCredits" step="any">
                  </div>
                  <div class="form-group">
-                    <label for="soldeRestant">Solde Restant Dû</label>
+                    <label for="soldeRestant">Solde Restant </label>
                     <input id="soldeRestant" type="number" [(ngModel)]="pret.solde_restant" name="soldeRestant" step="any">
                  </div>
               </div>
@@ -258,7 +259,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <div class="form-grid">
              <div class="form-group">
                 <label for="classeRetard">Classe de Retard</label>
-               <select id="classeRetard" [(ngModel)]="pret.classe_retard" name="classeRetard">
+               <select id="classeRetard" [(ngModel)]="pret.classe_retard" name="classeRetard" (change)="onClasseRetardChange()">
                   <option [ngValue]="null">-- Sélectionner --</option> 
                   <option *ngFor="let cl of lookupClassesRetard" [value]="cl.code">{{cl.libelle}}</option>
                 </select>
@@ -269,7 +270,11 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
               </div>
               <div class="form-group">
                  <label for="dateConstat">Date de Constatation</label>
-                 <input id="dateConstat" type="date" [(ngModel)]="pret.date_constatation_echeances_impayes" name="dateConstat">
+                 <input id="dateConstat" type="text" 
+                   [ngModel]="formaterDate(pret.date_constatation_echeances_impayes)" 
+                   (ngModelChange)="onDateChange('date_constatation_echeances_impayes', $event)" 
+                   name="dateConstat"
+                   placeholder="jj/mm/aaaa">
               </div>
               <div class="form-group">
                   <label for="montantCapRetard">Montant Capital en Retard</label>
@@ -292,19 +297,35 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <div class="form-grid">
              <div class="form-group">
                <label for="dateOctroi">Date d'Octroi</label>
-               <input id="dateOctroi" type="date" [(ngModel)]="pret.date_octroi" name="dateOctroi">
+               <input id="dateOctroi" type="text" 
+                 [ngModel]="formaterDate(pret.date_octroi)" 
+                 (ngModelChange)="onDateChange('date_octroi', $event)" 
+                 name="dateOctroi"
+                 placeholder="jj/mm/aaaa">
              </div>
              <div class="form-group">
                <label for="dateExpiration">Date d'Expiration</label>
-               <input id="dateExpiration" type="date" [(ngModel)]="pret.date_expiration" name="dateExpiration">
+               <input id="dateExpiration" type="text" 
+                 [ngModel]="formaterDate(pret.date_expiration)" 
+                 (ngModelChange)="onDateChange('date_expiration', $event)" 
+                 name="dateExpiration"
+                 placeholder="jj/mm/aaaa">
              </div>
              <div class="form-group">
                  <label for="dateExecution">Date Exécution</label>
-                 <input id="dateExecution" type="date" [(ngModel)]="pret.date_execution" name="dateExecution">
+                 <input id="dateExecution" type="text" 
+                   [ngModel]="formaterDate(pret.date_execution)" 
+                   (ngModelChange)="onDateChange('date_execution', $event)" 
+                   name="dateExecution"
+                   placeholder="jj/mm/aaaa">
              </div>
              <div class="form-group">
                  <label for="dateRejet">Date de Rejet</label>
-                 <input id="dateRejet" type="date" [(ngModel)]="pret.date_rejet" name="dateRejet">
+                 <input id="dateRejet" type="text" 
+                   [ngModel]="formaterDate(pret.date_rejet)" 
+                   (ngModelChange)="onDateChange('date_rejet', $event)" 
+                   name="dateRejet"
+                   placeholder="jj/mm/aaaa">
              </div>
            </div>
        </div>
@@ -336,7 +357,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                </div>
                <div class="form-group">
                  <label for="garantieType_{{i}}">Type</label>
-                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}">
+                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}" (change)="onGarantieChange(i)">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                    <option *ngFor="let type of lookupTypesGarantie" [value]="type.code">{{type.libelle}}</option>
                  </select>
@@ -597,7 +618,8 @@ export class PretFormComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private creditStateService: CreditStateService,
-    private creditsService: CreditsService
+    private creditsService: CreditsService,
+    private datePipe: DatePipe
   ) { }
 
   loadLookupData() {
@@ -682,8 +704,16 @@ export class PretFormComponent implements OnInit, OnDestroy {
     this.pret.intervenants = [];
     this.pret.garanties = [];
 
-    // Load lookup data first
     this.loadLookupData();
+
+    this.route.queryParams.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      if (params['id_excel']) {
+        this.pret.id_excel = +params['id_excel'];
+        console.log('Set id_excel from query params:', this.pret.id_excel);
+      }
+    });
 
     this.creditStateService.selectedCredit$
       .pipe(takeUntil(this.destroy$))
@@ -724,7 +754,6 @@ export class PretFormComponent implements OnInit, OnDestroy {
       this.creditStateService.setLoading(true);
       try {
         this.creditStateService.setSelectedCredit(state.pret);
-        // Set default values after setting the credit
         this.setValeursParDefault();
       } catch (error) {
         this.creditStateService.setError('Erreur lors du chargement des données du crédit');
@@ -876,16 +905,84 @@ export class PretFormComponent implements OnInit, OnDestroy {
   }
 
   onDureeRestanteChange() {
-    if (this.pret.duree_restante) {
-      const duree = this.lookupDureesCredit.find(d => d.code === this.pret.duree_restante);
-      this.pret.libelle_duree_restante = duree?.libelle || '';
-    } else {
-      this.pret.libelle_duree_restante = '';
+    const selectedDuree = this.lookupDureesCredit.find(d => d.code === this.pret.duree_restante);
+    if (selectedDuree) {
+      this.pret.libelle_duree_restante = selectedDuree.libelle;
+    }
+  }
+
+  onGarantieChange(index: number) {
+    const garantie = this.pret.garanties[index];
+    if (garantie) {
+      const typeGarantie = this.lookupTypesGarantie.find(t => t.code === garantie.type_garantie);
+      if (typeGarantie) {
+        garantie.libelle_type_garantie = typeGarantie.libelle;
+      }
+    }
+  }
+
+  onIntervenantChange(index: number) {
+    const intervenant = this.pret.intervenants[index];
+    if (intervenant) {
+      // Update niveau responsabilité label
+      const niveau = this.lookupNiveauxResponsabilite.find(n => n.code === intervenant.niveau_responsabilite);
+      if (niveau) {
+        intervenant.libelle_niveau_responsabilite = niveau.libelle;
+      }
+    }
+  }
+
+  formaterDate(date: string | null): string {
+    if (!date) return '';
+    return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+  }
+
+   estDate(cle: string): cle is keyof CreditDto {
+    const champsDates: (keyof CreditDto)[] = [
+      'date_declaration',
+      'date_constatation_echeances_impayes',
+      'date_octroi',
+      'date_expiration',
+      'date_execution',
+      'date_rejet'
+    ];
+    return champsDates.includes(cle as keyof CreditDto);
+  }
+
+  onDateChange(champ: string, event: Event) {
+    if (!this.estDate(champ)) return;
+    
+    const input = event.target as HTMLInputElement;
+    const dateParts = input.value.split('/');
+    
+    if (dateParts.length === 3) {
+      const [day, month, year] = dateParts;
+      const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      
+      switch (champ) {
+        case 'date_declaration':
+          this.pret.date_declaration = formattedDate;
+          break;
+        case 'date_constatation_echeances_impayes':
+          this.pret.date_constatation_echeances_impayes = formattedDate;
+          break;
+        case 'date_octroi':
+          this.pret.date_octroi = formattedDate;
+          break;
+        case 'date_expiration':
+          this.pret.date_expiration = formattedDate;
+          break;
+        case 'date_execution':
+          this.pret.date_execution = formattedDate;
+          break;
+        case 'date_rejet':
+          this.pret.date_rejet = formattedDate;
+          break;
+      }
     }
   }
 
   private setValeursParDefault() {
-    // Set default values for dropdown labels based on their codes
     if (this.pret.type_credit) {
       this.onTypeCreditChange();
     }
