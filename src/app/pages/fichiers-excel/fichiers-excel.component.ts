@@ -42,7 +42,6 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
         </div>
       </div>
 
-      <div class="card">
         <div class="table-responsive">
           <table class="table fichiers-table">
             <thead>
@@ -56,12 +55,12 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
             </thead>
             <tbody>
               <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" (click)="onRowClick($event, fichier)" class="clickable-row">
-                <td>{{ fichier.nom_fichier_excel }}</td>  
-                <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td>{{ fichier.integrateur }}</td>
+                <td title="Voir ses crédits">{{ fichier.nom_fichier_excel }}</td>
+                <td title="Voir ses crédits">{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td title="Voir ses crédits">{{ fichier.integrateur }}</td>
                 <td>
                   <div class="actions" (click)="$event.stopPropagation()">
-                    <button class="btn-icon" >
+                    <button class="btn-icon" title="Supprimer">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -69,7 +68,6 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
               </tr>
             </tbody>
           </table>
-        </div>
 
         <div class="pagination-container">
           <app-pagination
@@ -82,10 +80,11 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     </div>
   `, 
   styles: [`
-    .card{
-    background-color:transparent;
-    border:none;
+    .card {
+      background-color: #ffffff;
+      border: none;
     }
+    
     .liste-fichiers {
       padding: 1rem;
     }
@@ -102,25 +101,9 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       padding: 0 1rem;
     }
 
-    .status-badge.validé {
-      background-color: #e8f5e9;
-      color: green;
-    }
-
-    .status-badge.non-validé {
-      background-color: #ffebee;
-      color: red;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 1rem;
-    }
     .actions {
       display: flex;
-      }
+    }
 
     .btn-icon {
       background: none;
@@ -133,23 +116,24 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       &:hover {
         opacity: 1;
       }
-    } 
+    }
+
 
     .input-with-icon {
       position: relative;
-    }
 
-    .input-with-icon i {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 1rem;
-      color: var(--text-color);
-      opacity: 0.7;
-    }
+      i {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 1rem;
+        color: var(--text-color);
+        opacity: 0.7;
+      }
 
-    .input-with-icon input {
-      padding-left: 2.5rem;
+      input {
+        padding-left: 2.5rem;
+      }
     }
 
     .date-filters {
@@ -185,6 +169,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       }
     }
 
+
     .fichiers-table {
       width: 100%;
       border-collapse: separate;
@@ -198,20 +183,37 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 
       tbody tr {
         background-color: white !important;
+        position: relative;
+        transition: background 0.2s;
+        
+        &:hover {
+          cursor: pointer;
+          background: rgba(0, 0, 0, 0.02) !important;
+        }
       }
+    }
 
-      th, td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #dee2e6;
+    /* Native browser tooltip styling */
+    [title] {
+      position: relative;
+      
+      &:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0.9;
+        margin-bottom: 5px;
       }
-    }
-    .clickable-row {
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .clickable-row:hover {
-      background: rgba(190, 0, 0, 0.1);
     }
   `]
 })

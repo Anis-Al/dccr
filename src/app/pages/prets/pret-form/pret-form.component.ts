@@ -91,11 +91,11 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
 
                  <div class="form-group"> 
                    <label for="dateDeclaration">Date de Déclaration</label>
-                   <input id="dateDeclaration" type="text" 
-                     [ngModel]="formaterDate(pret.date_declaration)" 
+                   <input id="dateDeclaration" type="date" 
+                     [ngModel]="formatDateForInput(pret.date_declaration)" 
                      (ngModelChange)="onDateChange('date_declaration', $event)" 
-                     name="dateDeclaration" 
-                     placeholder="jj/mm/aaaa">
+                     name="dateDeclaration"
+                     class="form-control">
                  </div>
              </div>
         </div>
@@ -270,11 +270,11 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
               </div>
               <div class="form-group">
                  <label for="dateConstat">Date de Constatation</label>
-                 <input id="dateConstat" type="text" 
-                   [ngModel]="formaterDate(pret.date_constatation_echeances_impayes)" 
+                 <input id="dateConstat" type="date" 
+                   [ngModel]="formatDateForInput(pret.date_constatation_echeances_impayes)" 
                    (ngModelChange)="onDateChange('date_constatation_echeances_impayes', $event)" 
                    name="dateConstat"
-                   placeholder="jj/mm/aaaa">
+                   class="form-control">
               </div>
               <div class="form-group">
                   <label for="montantCapRetard">Montant Capital en Retard</label>
@@ -297,35 +297,35 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <div class="form-grid">
              <div class="form-group">
                <label for="dateOctroi">Date d'Octroi</label>
-               <input id="dateOctroi" type="text" 
-                 [ngModel]="formaterDate(pret.date_octroi)" 
+               <input id="dateOctroi" type="date" 
+                 [ngModel]="formatDateForInput(pret.date_octroi)" 
                  (ngModelChange)="onDateChange('date_octroi', $event)" 
                  name="dateOctroi"
-                 placeholder="jj/mm/aaaa">
+                 class="form-control">
              </div>
              <div class="form-group">
                <label for="dateExpiration">Date d'Expiration</label>
-               <input id="dateExpiration" type="text" 
-                 [ngModel]="formaterDate(pret.date_expiration)" 
+               <input id="dateExpiration" type="date" 
+                 [ngModel]="formatDateForInput(pret.date_expiration)" 
                  (ngModelChange)="onDateChange('date_expiration', $event)" 
                  name="dateExpiration"
-                 placeholder="jj/mm/aaaa">
+                 class="form-control">
              </div>
              <div class="form-group">
                  <label for="dateExecution">Date Exécution</label>
-                 <input id="dateExecution" type="text" 
-                   [ngModel]="formaterDate(pret.date_execution)" 
+                 <input id="dateExecution" type="date" 
+                   [ngModel]="formatDateForInput(pret.date_execution)" 
                    (ngModelChange)="onDateChange('date_execution', $event)" 
                    name="dateExecution"
-                   placeholder="jj/mm/aaaa">
+                   class="form-control">
              </div>
              <div class="form-group">
                  <label for="dateRejet">Date de Rejet</label>
-                 <input id="dateRejet" type="text" 
-                   [ngModel]="formaterDate(pret.date_rejet)" 
+                 <input id="dateRejet" type="date" 
+                   [ngModel]="formatDateForInput(pret.date_rejet)" 
                    (ngModelChange)="onDateChange('date_rejet', $event)" 
                    name="dateRejet"
-                   placeholder="jj/mm/aaaa">
+                   class="form-control">
              </div>
            </div>
        </div>
@@ -384,6 +384,26 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
       height: 100%;
       overflow-y: auto;
       background-color: #f8f9fa;
+    }
+    
+    /* Style for date inputs */
+    input[type="date"] {
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      width: 100%;
+    }
+    
+    /* Style the calendar icon in date inputs */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    
+    input[type="date"]:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 
     .header {
@@ -701,6 +721,10 @@ export class PretFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = 'fr-FR';
+    }
+
     this.pret.intervenants = [];
     this.pret.garanties = [];
 
@@ -725,7 +749,7 @@ export class PretFormComponent implements OnInit, OnDestroy {
           this.pret.garanties = credit.garanties || [];
           console.log('Loaded credit data from state:', this.pret);
 
-          // Set default values after loading credit data
+
           this.setValeursParDefault();
         }
       });
@@ -783,9 +807,7 @@ export class PretFormComponent implements OnInit, OnDestroy {
       }
     }, 1000);
 
-    // Error handling would look like this:
-    // this.creditStateService.setError('Erreur lors de l\'enregistrement');
-    // this.creditStateService.setLoading(false);
+
   }
 
   addIntervenant() {
@@ -924,7 +946,6 @@ export class PretFormComponent implements OnInit, OnDestroy {
   onIntervenantChange(index: number) {
     const intervenant = this.pret.intervenants[index];
     if (intervenant) {
-      // Update niveau responsabilité label
       const niveau = this.lookupNiveauxResponsabilite.find(n => n.code === intervenant.niveau_responsabilite);
       if (niveau) {
         intervenant.libelle_niveau_responsabilite = niveau.libelle;
@@ -932,53 +953,116 @@ export class PretFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  formaterDate(date: string | null): string {
-    if (!date) return '';
-    return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
+  formatDateForInput(dateString: string | null): string {
+    if (!dateString) return '';
+    try {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        if (isNaN(date.getTime())) return '';
+        return dateString;
+      }
+      
+      if (dateString.includes('/')) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        const date = new Date(year, month - 1, day);
+        if (isNaN(date.getTime())) return '';
+        
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return '';
+    }
+  }
+  
+  formatDateFromInput(dateString: string): string {
+    if (!dateString) return '';
+    try {
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        return dateString;
+      }
+      
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) return '';
+      
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      
+      return `${dd}/${mm}/${yyyy}`;
+    } catch (e) {
+      console.error('Error parsing date:', e);
+      return '';
+    }
   }
 
-   estDate(cle: string): cle is keyof CreditDto {
-    const champsDates: (keyof CreditDto)[] = [
+  onDateChange(field: keyof CreditDto, event: Event): void {
+    if (!this.estDate(field) || !this.pret) return;
+    
+    const input = event.target as HTMLInputElement;
+    if (input.type === 'date') {
+      const formattedDate = this.formatDateFromInput(input.value);
+      if (formattedDate) {
+        (this.pret[field] as string) = formattedDate;
+        setTimeout(() => {
+          input.value = this.formatDateForInput(formattedDate);
+        });
+      }
+    }
+  }
+
+
+  private estDate(field: string): field is keyof CreditDto {
+    const dateFields = [
       'date_declaration',
       'date_constatation_echeances_impayes',
       'date_octroi',
       'date_expiration',
       'date_execution',
       'date_rejet'
-    ];
-    return champsDates.includes(cle as keyof CreditDto);
+    ] as const;
+    return dateFields.includes(field as any);
   }
 
-  onDateChange(champ: string, event: Event) {
-    if (!this.estDate(champ)) return;
-    
-    const input = event.target as HTMLInputElement;
-    const dateParts = input.value.split('/');
-    
-    if (dateParts.length === 3) {
-      const [day, month, year] = dateParts;
-      const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      
-      switch (champ) {
-        case 'date_declaration':
-          this.pret.date_declaration = formattedDate;
-          break;
-        case 'date_constatation_echeances_impayes':
-          this.pret.date_constatation_echeances_impayes = formattedDate;
-          break;
-        case 'date_octroi':
-          this.pret.date_octroi = formattedDate;
-          break;
-        case 'date_expiration':
-          this.pret.date_expiration = formattedDate;
-          break;
-        case 'date_execution':
-          this.pret.date_execution = formattedDate;
-          break;
-        case 'date_rejet':
-          this.pret.date_rejet = formattedDate;
-          break;
+  formaterDate(date: string | null): string {
+    if (!date) return '';
+    try {
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+        return date;
       }
+      
+      if (date.includes('-')) {
+        const [year, month, day] = date.split('T')[0].split('-');
+        if (year && month && day) {
+          return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+        }
+      }
+      
+      const parsedDate = new Date(date);
+      if (!isNaN(parsedDate.getTime())) {
+        const dd = String(parsedDate.getDate()).padStart(2, '0');
+        const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+        const yyyy = parsedDate.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+      }
+      
+      return '';
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return '';
     }
   }
 

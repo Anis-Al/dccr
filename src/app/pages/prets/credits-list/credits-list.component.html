@@ -1,0 +1,78 @@
+<div class="prets-container" [class.details-open]="creditSelectionne">
+  <div class="prets-list">
+    <div class="header">
+      <h1>Crédits En Cours</h1>
+      <div class="header-actions" *ngIf="selectedExcelFile">
+        <button class="btn btn-secondary" (click)="annulerSelection($event)">
+          <i class="fas fa-times"></i>
+          <span>Annuler le filtre</span>
+        </button>
+        <button class="btn btn-primary" (click)="nouveauCredit()">
+          <i class="fas fa-plus"></i>
+          <span>Nouveau</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="date-filters">
+        <div class="date-input">
+          <label>Du:</label>
+          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+        </div>
+        <div class="date-input">
+          <label>Au:</label>
+          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="collante">N° Contrat</th>
+            <th>Date Déclaration</th>
+            <th>Situation</th>
+            <th>Type</th>
+            <th>Activité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let credit of CreditsPagines"
+              (click)="selectionnerCredit(credit)"
+              [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit"
+              [class.highlight-excel]="selectedExcelFile && credit.id_excel === selectedExcelFile.id_fichier_excel">
+            <td class="collante">{{credit.num_contrat_credit}}</td>
+            <td>{{credit.date_declaration}}</td>
+            <td>{{credit.libelle_situation}}</td>
+            <td>{{credit.libelle_type_credit}}</td>
+            <td>{{credit.libelle_activite}}</td>
+          </tr>
+          <tr *ngIf="CreditsPagines.length === 0">
+            <td colspan="5" class="no-data">Aucun crédit trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="CreditsFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+
+  <div class="details-panel" *ngIf="creditSelectionne">
+    <app-pret-details 
+      [pret]="creditSelectionne" 
+      (close)="fermerDetails()">
+    </app-pret-details>
+  </div>
+</div>

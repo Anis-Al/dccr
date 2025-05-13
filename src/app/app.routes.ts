@@ -27,7 +27,7 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./pages/prets/prets.component').then(m => m.PretsComponent)
+              import('./pages/prets/credits-list/credits-list.component').then(m => m.CreditsListComponent)
           },
           {
             path: 'nouveau',
