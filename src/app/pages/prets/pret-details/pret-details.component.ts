@@ -81,11 +81,15 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
             <div class="intervenant-list">
               <div *ngFor="let intervenant of pret.intervenants" class="intervenant-item card">
                 <div class="intervenant-header">
-                  <h3>{{intervenant.niveau_responsabilite}}</h3>
+                  <h3>{{intervenant.libelle_niveau_responsabilite}}</h3>
                 </div>
                 <div class="intervenant-details">
                   <div class="detail-item">
-                    <span class="label">Identifiant</span>
+                    <span class="label">Client</span>
+                    <span class="value">{{intervenant.cli}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Clé</span>
                     <span class="value">{{intervenant.cle}}</span>
                   </div>
                   <div class="detail-item">
@@ -100,10 +104,7 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
                     <span class="label">RIB</span>
                     <span class="value">{{intervenant.rib}}</span>
                   </div>
-                  <div class="detail-item">
-                    <span class="label">Client</span>
-                    <span class="value">{{intervenant.cli}}</span>
-                  </div>
+                  
                   
                 </div>
               </div>
@@ -212,9 +213,15 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
               </span>
             </div>
             <div class="detail-item">
-              <span class="label">Intérêts de Retard</span>
+              <span class="label">Intérêts En Retard</span>
               <span class="value" >
                 {{pret.montant_interets_retard !== null && pret.monnaie ? (pret.montant_interets_retard | currency:pret.monnaie) : ''}}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Intérêts Courus</span>
+              <span class="value" >
+                {{pret.montant_interets_courus !== null && pret.monnaie ? (pret.montant_interets_courus | currency:pret.monnaie) : ''}}
               </span>
             </div>
           </div>
@@ -226,22 +233,27 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
             Dates
           </h2>
           <div class="details-content">
+          <div class="detail-item">
+              <span class="label">Date de Déclaration</span>
+              <span class="value">{{pret.date_declaration}}</span>
+            </div>
             <div class="detail-item">
               <span class="label">Date d'Octroi</span>
               <span class="value">{{pret.date_octroi}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date de Rejet</span>
+              <span class="value">{{pret.date_rejet}}</span>
             </div>
             <div class="detail-item">
               <span class="label">Date d'Expiration</span>
               <span class="value">{{pret.date_expiration}}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Date de Déclaration</span>
-              <span class="value">{{pret.date_declaration}}</span>
+              <span class="label">Date d'execution</span>
+              <span class="value">{{pret.date_execution}}</span>
             </div>
-            <div class="detail-item">
-              <span class="label">Date de Rejet</span>
-              <span class="value">{{pret.date_rejet}}</span>
-            </div>
+            
           </div>
         </div>
 
@@ -271,21 +283,7 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
           </div>
         </div>
 
-        <div class="details-section card">
-          <h2>
-            <i class="fas fa-file-import"></i>
-            Source
-          </h2>
-          <div class="details-content">
-            <div class="detail-item">
-              <span class="label">Type de Création</span>
-              <span class="value source-badge" >
-                {{pret.id_excel}}
-              </span>
-            </div>
-            
-          </div>
-        </div>
+       
       </div>
     </div>
   `,

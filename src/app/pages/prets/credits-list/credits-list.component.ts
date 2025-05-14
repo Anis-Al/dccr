@@ -89,9 +89,46 @@ export class CreditsListComponent implements OnInit {
   }
 
   filtrerParDate() {
+    // this.CreditsFiltres = this.TousLesCredits.filter(credit => {
+    //   if (!this.dateDebut && !this.dateFin) {
+    //     return true;
+    //   }
+      
+    //   // const creditDate = new Date(credit.date_declaration);
+      
+    //   if (isNaN(creditDate.getTime())) {
+    //     console.warn('Invalid date format:', credit.date_declaration);
+    //     return false;
+    //   }
+      
+    //   // Apply start date filter if set
+    //   if (this.dateDebut) {
+    //     const debutDate = new Date(this.dateDebut);
+    //     // Set time to beginning of day
+    //     debutDate.setHours(0, 0, 0, 0);
+    //     if (creditDate < debutDate) {
+    //       return false;
+    //     }
+    //   }
+      
+    //   // Apply end date filter if set
+    //   if (this.dateFin) {
+    //     const finDate = new Date(this.dateFin);
+    //     // Set time to end of day
+    //     finDate.setHours(23, 59, 59, 999);
+    //     if (creditDate > finDate) {
+    //       return false;
+    //     }
+    //   }
+      
+    //   return true;
+    // });
+    
+    // Reset to first page and update pagination
     this.pageActuelle = 1;
     this.updatePagination();
   }
+  
 
   changerPage(page: number) {
     this.pageActuelle = page;
