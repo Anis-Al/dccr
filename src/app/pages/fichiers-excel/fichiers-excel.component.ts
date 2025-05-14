@@ -42,7 +42,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
           <table>
             <thead>
               <tr>
-                <th>Nom du fichier</th>
+                <th class="collante">Nom du fichier</th>
                 <th>Date d'intégration</th>
                 <th>Intégrateur</th>
                 <th>Actions</th>
@@ -52,14 +52,13 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
               <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" 
                   (click)="onRowClick($event, fichier)"
                   class="clickable-row"
-                  title="Voir ses crédits"
-                  >
-                <td>{{ fichier.nom_fichier_excel }}</td>  
+                  title="Voir ses crédits">
+                <td class="collante">{{ fichier.nom_fichier_excel }}</td>  
                 <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>{{ fichier.integrateur }}</td>
                 <td>
                   <div class="actions" (click)="$event.stopPropagation()">
-                    <button class="btn-icon">
+                    <button class="btn-icon" (click)="supprimerFichier(fichier)">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -84,135 +83,208 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
   `,
   styles: [`
     .fichiers-container {
-      padding: 1rem;
+      display: flex;
+      height: 100%;
     }
 
     .fichiers-list {
       width: 100%;
+      overflow: auto;
+      padding: 1rem;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-    }
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
 
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+      }
 
-    .btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .btn-primary {
-      background-color: var(--primary-color, #ff2d30);
-      color: white;
-      border: none;
-    }
-
-    .btn-secondary {
-      background-color: #e9ecef;
-      color: #495057;
-      border: none;
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
     }
 
     .filters {
       display: flex;
-      flex-wrap: wrap;
       gap: 1rem;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background-color: #f8f9fa;
-      border-radius: 0.5rem;
-    }
-
-    .search-box {
-      position: relative;
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .search-box i {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6c757d;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      border: 1px solid #ced4da;
-      border-radius: 0.25rem;
-    }
-
-    .date-filters {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .date-input {
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
 
-    .date-input label {
-      white-space: nowrap;
-    }
+      .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
 
-    .date-input input {
-      padding: 0.5rem;
-      border: 1px solid #ced4da;
-      border-radius: 0.25rem;
+        i {
+          position: absolute;
+          left: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-color-light);
+        }
+
+        input {
+          width: 100%;
+          padding: 0.5rem 1rem 0.5rem 2.25rem;
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          font-size: 0.875rem;
+
+          &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+          }
+        }
+      }
+
+      .date-filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+
+        .date-input {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          label {
+            color: var(--text-color);
+            font-size: 0.875rem;
+          }
+
+          input[type="date"] {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            background-color: white;
+
+            &:focus {
+              outline: none;
+              border-color: var(--primary-color);
+            }
+          }
+        }
+      }
     }
 
     .table-container {
-      margin-bottom: 1rem;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      overflow-x: auto;
+      margin: 0 -1rem;
+      padding: 0 1rem;
+      scrollbar-width: thin;
+      position: relative;
+      background-color: var(--background-color);
+      min-height: 200px;
+      
+      &::-webkit-scrollbar {
+        height: 8px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: var(--background-color);
+        border-radius: 4px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+        
+        &:hover {
+          background: #bdbdbd;
+        }
+      }
+
+      table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed;
+        
+        th:last-child, td:last-child {
+          width: 80px;
+          text-align: center;
+        }
+
+        thead tr {
+          background-color: #f8f9fa !important;
+        }
+        
+        tbody tr {
+          background-color: white !important;
+          
+          &:hover {
+            background-color: #f2f2f2 !important;
+            cursor: pointer;
+          }
+        }
+
+        th, td {
+          padding: 0.75rem;
+          text-align: left;
+          border-bottom: 1px solid var(--border-color);
+          background-color: var(--background-color);
+        }
+
+        th {
+          font-weight: 600;
+          background-color: var(--background-color);
+          border-bottom: 2px solid var(--border-color);
+        }
+
+        .collante {
+          position: sticky;
+          left: 0;
+          z-index: 1;
+          background-color: var(--background-color);
+          border-right: 2px solid var(--border-color);
+          box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        thead th.collante {
+          z-index: 2;
+        }
+
+        tbody {
+          background-color: white;
+        }
+
+        tbody tr {
+          &:hover {
+            td {
+              background-color: var(--hover-color);
+            }
+          }
+        }
+      }
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .pagination-container {
+      padding: 1rem 0;
+      background-color: var(--background-color);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
     }
 
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #dee2e6;
-    }
-
-    th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-    }
-
-    .clickable-row {
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .clickable-row:hover {
-      background-color: rgba(190, 0, 0, 0.1);
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-color-light);
+      font-style: italic;
     }
 
     .btn-icon {
@@ -220,22 +292,26 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       border: none;
       cursor: pointer;
       padding: 0.25rem;
-      color: var(--text-color, #212529);
+      color: var(--text-color);
       opacity: 0.7;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin: 0 auto;
+
+      &:hover {
+        opacity: 1;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
     }
 
-    .btn-icon:hover {
-      opacity: 1;
-    }
-
-    .no-data {
-      text-align: center;
-      color: #6c757d;
-      padding: 2rem;
-    }
-
-    .pagination-container {
-      margin-top: 1rem;
+    .actions {
+      display: flex;
+      justify-content: center;
+      width: 100%;
     }
   `]
 })
@@ -330,7 +406,6 @@ export class FichiersExcelComponent implements OnInit {
   }
   
   onRowClick(event: MouseEvent, fichier: ExcelMetadonneesDto) {
-    // Prevent navigation if the click is inside the actions column
     const target = event.target as HTMLElement;
     if (target.closest('.actions')) {
       return;
@@ -338,5 +413,8 @@ export class FichiersExcelComponent implements OnInit {
     this.router.navigate(['/credits'], { queryParams: { id_excel: fichier.id_fichier_excel } });
   }
 
-  
+  supprimerFichier(fichier: ExcelMetadonneesDto) {
+    if (confirm(`Sur de vouloir supprimer ce fichier : "${fichier.nom_fichier_excel}" ?`)) {
+    }
+  }
 }

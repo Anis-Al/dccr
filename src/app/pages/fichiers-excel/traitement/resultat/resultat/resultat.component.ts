@@ -672,14 +672,12 @@ export class ResultatComponent implements OnInit {
         console.log(blob);
 
         if (!blob || blob.size === 0) {
-          console.warn(`No error data found or empty file received for File ID: ${this.idExcel}.`);
-          alert(`No errors found to download for File ID: ${this.idExcel}.`); // User feedback
           return;
         }
 
         const filename = this.extraireNomFichier(response) ?? `erreurs_${this.result.NomFichierExcel}.xlsx`;
         this.declencherTelechargement(blob, filename);
-        console.log(`Download triggered for: ${filename}`);
+        this.router.navigate(['/fichiers-excel/integration']);
       },
       error: (err) => {
         alert(err.status); 
