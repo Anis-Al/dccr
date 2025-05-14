@@ -14,7 +14,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     <div class="fichiers-container">
       <div class="fichiers-list">
         <div class="header">
-          <h1>Fichiers En Cours</h1>
+          <h1>Fichiers d'Entrée En Cours</h1>
           <div class="header-actions">
             <span>
             </span>

@@ -309,7 +309,7 @@ export class LayoutComponent {
   navItems: NavItem[] = [
     { label: 'Tableau de Bord', route: '/tableau-de-bord', icon: 'fa-chart-line' },
     {
-      label: 'Fichiers d\'entrée',
+      label: 'Fichiers d\'Entrée',
       icon: 'fa-file-excel',
       expanded: false,
       children: [
