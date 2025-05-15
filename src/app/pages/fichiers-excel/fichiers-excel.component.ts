@@ -29,12 +29,13 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
           <div class="date-filters">
             <div class="date-input">
               <label>Du:</label>
-              <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+              <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()" placeholder="YYYY-MM-DD" [max]="today">
             </div>
             <div class="date-input">
               <label>Au:</label>
-              <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+              <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()" placeholder="YYYY-MM-DD" [max]="today">
             </div>
+            
           </div>
         </div>
 
@@ -327,6 +328,7 @@ export class FichiersExcelComponent implements OnInit {
   searchTerm = '';
   dateDebut: string | null = null;
   dateFin: string | null = null;
+  today: string = new Date().toISOString().split('T')[0];
 
   constructor(private excelCrudService: ExcelCrudService, private router: Router) {}
 
@@ -372,12 +374,10 @@ export class FichiersExcelComponent implements OnInit {
 
   filtrerFichiers() {
     this.fichiersFiltres = this.fichiers.filter(fichier => {
-      // Filter by search term
       const matchesSearch = !this.searchTerm || 
         fichier.nom_fichier_excel.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         fichier.integrateur.toLowerCase().includes(this.searchTerm.toLowerCase());
       
-      // Filter by date range
       let matchesDateRange = true;
       if (this.dateDebut || this.dateFin) {
         const fichierDate = new Date(fichier.date_heure_integration_excel);
@@ -389,7 +389,7 @@ export class FichiersExcelComponent implements OnInit {
         
         if (this.dateFin) {
           const fin = new Date(this.dateFin);
-          fin.setHours(23, 59, 59, 999); // End of day
+          fin.setHours(23, 59, 59, 999); 
           matchesDateRange = matchesDateRange && fichierDate <= fin;
         }
       }

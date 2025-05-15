@@ -45,6 +45,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
               <tr>
                 <th>Nom du fichier</th>
                 <th>Excel Source</th>
+                <th>Date de géneration</th>
                 <th>Nombre des crédits</th>
                 <th>Intégrateur</th>
                 <th class="actions-header">Actions</th>
@@ -54,6 +55,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
               <tr *ngFor="let fichier of fichiersPagines">
                 <td>{{fichier?.nom_fichier || 'N/A'}}</td>
                 <td>{{fichier?.excel_source || 'N/A'}}</td>
+                <td>{{fichier?.date_generation || 'N/A'}}</td>
                 <td>{{fichier?.nombre_credits || 0}}</td>
                 <td>{{fichier?.integrateur || 'N/A'}}</td>
                 <td class="actions-cell">

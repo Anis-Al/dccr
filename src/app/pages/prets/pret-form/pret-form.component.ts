@@ -46,30 +46,28 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
               <label for="numContrat">N° Contrat</label>
               <input id="numContrat" type="text" [(ngModel)]="pret.num_contrat_credit" [disabled]="isEditMode" name="numContrat">
             </div>
+            <div class="form-group"> 
+                   <label for="dateDeclaration">Date de Déclaration</label>
+                   <input id="dateDeclaration" type="date" 
+                     [ngModel]="formatDateForInput(pret.date_declaration)" 
+                     (ngModelChange)="onDateChange('date_declaration', $event)" 
+                     name="dateDeclaration"
+                     class="form-control">
+                 </div>
              <div class="form-group">
                 <label for="typeCredit">Type de Crédit</label>
                 <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit" (change)="onTypeCreditChange()">
-                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option [ngValue]="null" ></option>
                    <option *ngFor="let type of lookupTypesCredit" [value]="type.code">
                      {{type.libelle}}
                    </option>
                  </select>
              </div>
-             <div class="form-group">
-                <label>Plafond Accordé</label>
-                <div class="radio-group">
-                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="true"> Oui</label>
-                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="false"> Non</label>
-                 </div>
-             </div>
-             <div class="form-group" *ngIf="pret.est_plafond_accorde">
-                <label for="numPlafond">N° Plafond</label>
-                <input id="numPlafond" type="text" [(ngModel)]="pret.id_plafond" name="numPlafond">
-              </div>
+             
                <div class="form-group">
                  <label for="activite">Activité</label>
                  <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite" (change)="onActiviteChange()">
-                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option [ngValue]="null" ></option>
                    <option *ngFor="let act of lookupActivites" [value]="act.code">
                       {{act.libelle}}
                     </option>
@@ -78,7 +76,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                 <div class="form-group">
                    <label for="situation">Situation</label>
                    <select id="situation" [(ngModel)]="pret.situation" name="situation" (change)="onSituationChange()">
-                     <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option [ngValue]="null" ></option>
                      <option *ngFor="let sit of lookupSituations" [value]="sit.code">
                          {{sit.libelle}}
                       </option>
@@ -88,15 +86,19 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                    <label for="motif">Motif</label>
                    <input id="motif" type="text" [(ngModel)]="pret.motif" name="motif">
                  </div>
-
-                 <div class="form-group"> 
-                   <label for="dateDeclaration">Date de Déclaration</label>
-                   <input id="dateDeclaration" type="date" 
-                     [ngModel]="formatDateForInput(pret.date_declaration)" 
-                     (ngModelChange)="onDateChange('date_declaration', $event)" 
-                     name="dateDeclaration"
-                     class="form-control">
+                 <div class="form-group">
+                <label>Plafond Accordé ?</label>
+                <div class="radio-group">
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="true"> Oui</label>
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="false"> Non</label>
                  </div>
+             </div>
+             <div class="form-group" *ngIf="pret.est_plafond_accorde">
+                <label for="numPlafond">N° Plafond</label>
+                <input id="numPlafond" type="text" [(ngModel)]="pret.id_plafond" name="numPlafond">
+              </div>
+
+                 
              </div>
         </div>
 
@@ -162,7 +164,6 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <div class="form-group">
               <label for="agence">Agence</label>
               <select id="agence" [(ngModel)]="pret.code_agence" name="agence" (change)="onAgenceChange()">
-                <option [ngValue]="null" disabled>-- Sélectionner une agence --</option>
                 <option *ngFor="let agence of lookupAgences" [value]="agence.code">
                   {{ agence.libelle }}
                 </option>
@@ -260,7 +261,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
              <div class="form-group">
                 <label for="classeRetard">Classe de Retard</label>
                <select id="classeRetard" [(ngModel)]="pret.classe_retard" name="classeRetard" (change)="onClasseRetardChange()">
-                  <option [ngValue]="null">-- Sélectionner --</option> 
+                   <option [ngValue]="null" ></option>
                   <option *ngFor="let cl of lookupClassesRetard" [value]="cl.code">{{cl.libelle}}</option>
                 </select>
               </div>
