@@ -318,8 +318,8 @@ export class LayoutComponent {
       ]
     },
     {
-      label: 'Crédits',
-      icon: 'fa-money-bill-transfer',
+      label: 'Crédits En Cours',
+      icon: 'fa-money-bill-transfer',   
       expanded: false,
       route: '/credits'
     },

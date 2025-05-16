@@ -7,6 +7,7 @@ export const environment = {
       integrationPart2:'/Excel/confirmer-integration',
       exportationErreurs: '/Excel/exporter-erreurs-excel', 
       tousLesFichiersExcelEnCours: '/Excel/get-tous-metadonnes-excel',
+      telechargerModele:'',
     },
     credits: {
       tousLesCreditsEnCours: '/credits/get-tous-credits',

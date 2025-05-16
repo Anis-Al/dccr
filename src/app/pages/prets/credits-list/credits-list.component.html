@@ -20,13 +20,12 @@
         <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
       </div>
       <div class="date-filters">
-        <div class="date-input">
-          <label>Du:</label>
-          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
-        </div>
-        <div class="date-input">
-          <label>Au:</label>
-          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        <div class="date-select">
+          <label>Date de Déclaration:</label>
+          <select [(ngModel)]="selectedDate" (change)="filtrerParDate()">
+            <option value="">Toutes les dates</option>
+            <option *ngFor="let date of datesDeclaration" [value]="date">{{date}}</option>
+          </select>
         </div>
       </div>
     </div>

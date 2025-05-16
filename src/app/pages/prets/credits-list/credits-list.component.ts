@@ -25,8 +25,8 @@ export class CreditsListComponent implements OnInit {
   selectedExcelFile: any = null;
 
   searchTerm: string = '';
-  dateDebut: string = '';
-  dateFin: string = '';
+  selectedDate: string = '';
+  datesDeclaration: string[] = [];
   creditSelectionne: CreditDto | null = null;
 
   pageActuelle: number = 1;
@@ -40,30 +40,17 @@ export class CreditsListComponent implements OnInit {
 
 
   ngOnInit() {
+    // Handle query parameters for Excel file filtering
     this.route.queryParams.subscribe(params => {
       const id_excel = params['id_excel'];
       if (id_excel) {
         this.selectedExcelFile = { id_fichier_excel: +id_excel };
-        this.CreditsFiltres = this.CreditsFiltres.filter(c => c.id_excel === +id_excel);
-        this.updatePagination();
       } else {
         this.selectedExcelFile = null;
       }
     });
-    this.creditService.getCreditsActuelles().subscribe(credits => {
-      this.TousLesCredits = credits;
-      this.route.queryParams.subscribe(params => {
-        const fichierId = params['fichierId'];
-        if (fichierId) {
-          this.CreditsFiltres = this.TousLesCredits.filter(credit => credit.id_excel === fichierId);
-        } else {
-          this.CreditsFiltres = this.TousLesCredits;
-        }
-        this.updatePagination();
-      });
-    });
 
-    // Initial load or refresh of credits
+    // Initial load of credits - this will format dates and extract unique dates
     this.loadCredits();
 }
 
@@ -89,44 +76,38 @@ export class CreditsListComponent implements OnInit {
   }
 
   filtrerParDate() {
-    // this.CreditsFiltres = this.TousLesCredits.filter(credit => {
-    //   if (!this.dateDebut && !this.dateFin) {
-    //     return true;
-    //   }
-      
-    //   // const creditDate = new Date(credit.date_declaration);
-      
-    //   if (isNaN(creditDate.getTime())) {
-    //     console.warn('Invalid date format:', credit.date_declaration);
-    //     return false;
-    //   }
-      
-    //   // Apply start date filter if set
-    //   if (this.dateDebut) {
-    //     const debutDate = new Date(this.dateDebut);
-    //     // Set time to beginning of day
-    //     debutDate.setHours(0, 0, 0, 0);
-    //     if (creditDate < debutDate) {
-    //       return false;
-    //     }
-    //   }
-      
-    //   // Apply end date filter if set
-    //   if (this.dateFin) {
-    //     const finDate = new Date(this.dateFin);
-    //     // Set time to end of day
-    //     finDate.setHours(23, 59, 59, 999);
-    //     if (creditDate > finDate) {
-    //       return false;
-    //     }
-    //   }
-      
-    //   return true;
-    // });
-    
     // Reset to first page and update pagination
     this.pageActuelle = 1;
     this.updatePagination();
+  }
+  
+  /**
+   * Extracts unique declaration dates from credits for the dropdown
+   */
+  extractUniqueDates() {
+    // Create a Set to store unique dates
+    const uniqueDates = new Set<string>();
+    
+    // Add all declaration dates to the set
+    this.TousLesCredits.forEach(credit => {
+      if (credit.date_declaration) {
+        // Format date if not already formatted
+        const formattedDate = this.formatDate(credit.date_declaration);
+        uniqueDates.add(formattedDate);
+      }
+    });
+    
+    // Convert set to array and sort dates
+    this.datesDeclaration = Array.from(uniqueDates).sort((a, b) => {
+      // Convert dd/MM/yyyy to Date objects for proper sorting
+      const [dayA, monthA, yearA] = a.split('/').map(Number);
+      const [dayB, monthB, yearB] = b.split('/').map(Number);
+      
+      const dateA = new Date(yearA, monthA - 1, dayA);
+      const dateB = new Date(yearB, monthB - 1, dayB);
+      
+      return dateA.getTime() - dateB.getTime();
+    });
   }
   
 
@@ -148,26 +129,13 @@ export class CreditsListComponent implements OnInit {
       );
     }
 
-    // Apply date filters if they exist
-    if (this.dateDebut || this.dateFin) {
+    // Apply date filter if selected
+    if (this.selectedDate) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) => {
+        // Compare formatted dates
         if (!credit.date_declaration) return false;
-        
-        const creditDate = new Date(credit.date_declaration);
-        if (isNaN(creditDate.getTime())) return false;
-        
-        const dateDebutValid = this.dateDebut ? new Date(this.dateDebut) : null;
-        const dateFinValid = this.dateFin ? new Date(this.dateFin) : null;
-        
-        if (dateDebutValid && dateFinValid) {
-          return creditDate >= dateDebutValid && creditDate <= dateFinValid;
-        } else if (dateDebutValid) {
-          return creditDate >= dateDebutValid;
-        } else if (dateFinValid) {
-          return creditDate <= dateFinValid;
-        }
-        
-        return true;
+        const formattedCreditDate = this.formatDate(credit.date_declaration);
+        return formattedCreditDate === this.selectedDate;
       });
     }
 
@@ -234,6 +202,9 @@ export class CreditsListComponent implements OnInit {
   formatDate(dateString: string | null | undefined): string {
     if (!dateString) return '';
     
+    // Handle already formatted dates (prevent double formatting)
+    if (dateString.includes('/')) return dateString;
+    
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '';
     
@@ -244,6 +215,19 @@ export class CreditsListComponent implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
+  annulerSelection(event: Event) {
+    event.stopPropagation();
+    this.selectedExcelFile = null;
+    this.selectedDate = ''; // Reset date filter
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { id_excel: null },
+      queryParamsHandling: 'merge'
+    });
+    this.CreditsFiltres = this.TousLesCredits;
+    this.updatePagination();
+  }
+
   loadCredits(): void {
     this.isLoading = true;      
     this.errorMessage = null; 
@@ -252,11 +236,14 @@ export class CreditsListComponent implements OnInit {
     this.loadCreditsSubscription = this.creditService.getTousLesCredits()
       .subscribe({ 
         next: (credits) => {
-          // Format dates in the credits array
+          // Format dates in the credits array to dd/MM/yyyy format
           this.TousLesCredits = credits.map((credit: CreditDto) => ({
             ...credit,
             date_declaration: this.formatDate(credit.date_declaration)
           }));
+          
+          // Extract unique dates after formatting
+          this.extractUniqueDates();
           this.updatePagination();
         },
         error: (err) => {
@@ -269,16 +256,6 @@ export class CreditsListComponent implements OnInit {
         }
       });
   }
-
-
-  annulerSelection(event: Event) {
-    event.stopPropagation();
-    this.selectedExcelFile = null;
-    this.CreditsFiltres = this.TousLesCredits;
-    this.updatePagination();
-  }
-
- 
 
   
 }
