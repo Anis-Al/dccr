@@ -501,7 +501,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
   `]
 })
 export class FichiersExcelComponent implements OnInit {
-  // Propriétés pour les fichiers Excel
+
   fichiers: ExcelMetadonneesDto[] = [];
   fichiersFiltres: ExcelMetadonneesDto[] = [];
   FichiersExcelPagines: ExcelMetadonneesDto[] = [];
@@ -516,7 +516,6 @@ export class FichiersExcelComponent implements OnInit {
   dateFin: string | null = null;
   today: string = new Date().toISOString().split('T')[0];
   
-  // Propriétés pour les crédits
   tousLesCredits: CreditDto[] = [];
   creditsFiltres: CreditDto[] = [];
   creditsPagines: CreditDto[] = [];
@@ -626,11 +625,10 @@ export class FichiersExcelComponent implements OnInit {
 
   supprimerFichier(fichier: ExcelMetadonneesDto) {
     if (confirm(`Sur de vouloir supprimer ce fichier : "${fichier.nom_fichier_excel}" ?`)) {
-      // Logique de suppression à implémenter
     }
   }
   
-  // Méthodes pour la gestion des crédits
+
   loadCreditsForFichier(idExcel: number) {
     this.isLoading = true;
     this.loadCreditsSubscription?.unsubscribe();
@@ -638,7 +636,6 @@ export class FichiersExcelComponent implements OnInit {
     this.loadCreditsSubscription = this.creditService.getTousLesCredits()
       .subscribe({
         next: (credits) => {
-          // Filtrer les crédits par id_excel et formater les dates
           this.tousLesCredits = credits
             .filter(credit => credit.id_excel === idExcel)
             .map(credit => ({
@@ -646,7 +643,6 @@ export class FichiersExcelComponent implements OnInit {
               date_declaration: this.formatDate(credit.date_declaration)
             }));
           
-          // Extraire les dates uniques après formatage
           this.extractUniqueDates();
           this.updateCreditPagination();
           this.isLoading = false;
@@ -661,7 +657,6 @@ export class FichiersExcelComponent implements OnInit {
   formatDate(dateString: string | null | undefined): string {
     if (!dateString) return '';
     
-    // Gérer les dates déjà formatées
     if (dateString.includes('/')) return dateString;
     
     const date = new Date(dateString);
@@ -675,7 +670,6 @@ export class FichiersExcelComponent implements OnInit {
   }
   
   extractUniqueDates() {
-    // Créer un Set pour stocker les dates uniques
     const uniqueDates = new Set<string>();
     
     // Ajouter toutes les dates de déclaration au set
@@ -685,9 +679,7 @@ export class FichiersExcelComponent implements OnInit {
       }
     });
     
-    // Convertir le set en tableau et trier les dates
     this.datesDeclaration = Array.from(uniqueDates).sort((a, b) => {
-      // Convertir dd/MM/yyyy en objets Date pour un tri correct
       const [dayA, monthA, yearA] = a.split('/').map(Number);
       const [dayB, monthB, yearB] = b.split('/').map(Number);
       
@@ -699,17 +691,14 @@ export class FichiersExcelComponent implements OnInit {
   }
   
   updateCreditPagination() {
-    // Créer une copie pour éviter de modifier les données originales
     let filteredCredits = JSON.parse(JSON.stringify(this.tousLesCredits));
 
-    // Appliquer le filtre de recherche
     if (this.creditSearchTerm) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) =>
         credit.num_contrat_credit?.toLowerCase().includes(this.creditSearchTerm.toLowerCase()) ?? false
       );
     }
 
-    // Appliquer le filtre de date
     if (this.selectedDate) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) => {
         if (!credit.date_declaration) return false;
