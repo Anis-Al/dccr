@@ -67,9 +67,19 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'declarations-ba',
-        loadComponent: () =>
-          import('./pages/fichiers-xml/fichiers-xml.component').then(m => m.FichiersXMLComponent)
+        path: 'fichiers-xml',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/fichiers-xml/fichiers-xml.component').then(m => m.FichiersXMLComponent)
+          },
+          {
+            path: 'generation',
+            loadComponent: () =>
+              import('./pages/fichiers-xml/fichiers-xml-generation/fichiers-xml-generation.component').then(m => m.FichiersXmlGenerationComponent)
+          }
+        ]
       },
       {
         path: 'archives',

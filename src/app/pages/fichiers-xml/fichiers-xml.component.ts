@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
+import { Router } from '@angular/router';
+import { DeclarationsBAService } from '../../core/services/declarationsBA/declarations-ba.service';
+import { XmlDto } from '../../core/dtos/DeclarationsBA/declarationsBA-dto';
 
 
 
@@ -15,7 +18,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
         <div class="header">
           <h1>Déclarations BA</h1>
           <div class="header-actions">
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" (click)="naviguerVersGeneration()">
               <i class="fas fa-plus"></i>
               <span>Générer XML</span>
             </button>
@@ -53,11 +56,11 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
             </thead>
             <tbody>
               <tr *ngFor="let fichier of fichiersPagines">
-                <td>{{fichier?.nom_fichier || 'N/A'}}</td>
-                <td>{{fichier?.excel_source || 'N/A'}}</td>
-                <td>{{fichier?.date_generation || 'N/A'}}</td>
-                <td>{{fichier?.nombre_credits || 0}}</td>
-                <td>{{fichier?.integrateur || 'N/A'}}</td>
+                <td>{{fichier?.nomFichierXml || 'N/A'}}</td>
+                <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
+                <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+                <td>0</td>
+                <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
                 <td class="actions-cell">
                   <div class="tooltip-container button-group">
                     <button 
@@ -238,35 +241,14 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     }
 
     .table-container {
-      overflow-x: auto;
       margin: 0 -1rem;
       padding: 0 1rem;
-      scrollbar-width: thin;
       position: relative;
       background-color: var(--background-color);
       min-height: 200px;
-      
-      &::-webkit-scrollbar {
-        height: 8px;
-      }
-      
-      &::-webkit-scrollbar-track {
-        background: var(--background-color);
-        border-radius: 4px;
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
-        
-        &:hover {
-          background: #bdbdbd;
-        }
-      }
 
       table {
         width: 100%;
-        min-width: 800px;
         border-collapse: separate;
         border-spacing: 0;
         table-layout: fixed;
@@ -289,10 +271,18 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
           text-align: left;
           border-bottom: 1px solid var(--border-color);
           background-color: var(--background-color);
+          white-space: normal;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
-        
+
+        th:nth-child(1), td:nth-child(1) { width: 25%; }
+        th:nth-child(2), td:nth-child(2) { width: 20%; }
+        th:nth-child(3), td:nth-child(3) { width: 15%; }
+        th:nth-child(4), td:nth-child(4) { width: 10%; }
+        th:nth-child(5), td:nth-child(5) { width: 15%; }
         th:last-child, td:last-child {
-          width: 100px;
+          width: 15%;
           text-align: center;
         }
 
@@ -418,7 +408,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     }
   `]
 })
-export class FichiersXMLComponent {
+export class FichiersXMLComponent implements OnInit {
   // Pagination
   pageActuelle: number = 1;
   itemsPerPage: number = 10;
@@ -430,38 +420,30 @@ export class FichiersXMLComponent {
   dateFin: string = '';
   
   // Data
-  fichiers: any[] = [];
-  fichiersFiltres: any[] = [];
-  fichiersPagines: any[] = [];
+  fichiers: XmlDto[] = [];
+  fichiersFiltres: XmlDto[] = [];
+  fichiersPagines: XmlDto[] = [];
   
-  constructor() {
-    // Mock data for demonstration
-    this.fichiers = [
-      { 
-        id: 1, 
-        nom_fichier: 'declaration_20230501.xml', 
-        excel_source: 'credits_mai_2023.xlsx',
-        nombre_credits: 45,
-        integrateur: 'Anis'
+  constructor(
+    private router: Router,
+    private declarationsBAService: DeclarationsBAService
+  ) {}
+
+  ngOnInit(): void {
+    this.chargerDeclarations();
+  }
+
+  private chargerDeclarations(): void {
+    this.declarationsBAService.getTousLesDeclarations().subscribe({
+      next: (declarations) => {
+        this.fichiers = declarations;
+        this.fichiersFiltres = [...this.fichiers];
+        this.updatePaginatedData();
       },
-      { 
-        id: 2, 
-        nom_fichier: 'declaration_20230601.xml', 
-        excel_source: 'credits_juin_2023.xlsx',
-        nombre_credits: 32,
-        integrateur: 'Brahim'
-      },
-      { 
-        id: 3, 
-        nom_fichier: 'declaration_20230701.xml', 
-        excel_source: 'credits_juillet_2023.xlsx',
-        nombre_credits: 67,
-        integrateur: 'Aziz'
+      error: (error) => {
+        console.error('Erreur lors du chargement des déclarations:', error);
       }
-    ];
-    
-    this.fichiersFiltres = [...this.fichiers];
-    this.updatePaginatedData();
+    });
   }
   
   // Pagination methods
@@ -489,9 +471,9 @@ export class FichiersXMLComponent {
     this.fichiersFiltres = this.fichiers.filter(fichier => {
       // Apply search term filter
       const searchMatch = !this.searchTerm || 
-        fichier.nom_fichier.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        fichier.excel_source.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        fichier.integrateur.toLowerCase().includes(this.searchTerm.toLowerCase());
+        fichier.nomFichierXml.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        fichier.nomFichierExcelSource.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        fichier.nomUtilisateurGenerateur.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       // Apply date filters if implemented
       // This would require actual date fields in the data
@@ -504,9 +486,28 @@ export class FichiersXMLComponent {
   }
   
   // Action methods
-  downloadFiles(fichier: any): void {
-    console.log('Downloading files for:', fichier.nom_fichier);
-    // Implementation for downloading files
+  downloadFiles(fichier: XmlDto): void {
+    if (!fichier?.idFichierXml) {
+      console.error('ID du fichier XML manquant');
+      return;
+    }
+
+    this.declarationsBAService.telechargerDeclarations(fichier.idFichierXml).subscribe({
+      next: (blob: Blob) => {
+        const zipBlob = new Blob([blob], { type: 'application/zip' });
+        const url = window.URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fichier.nomFichierXml || 'declaration'}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Erreur lors du téléchargement du fichier:', error);
+      }
+    });
   }
   
   markAsSubmitted(fichier: any): void {
@@ -531,5 +532,9 @@ export class FichiersXMLComponent {
       tooltip.style.visibility = 'hidden';
       tooltip.style.opacity = '0';
     }
+  }
+  
+  naviguerVersGeneration(): void {
+    this.router.navigate(['/fichiers-xml/generation']);
   }
 }

@@ -15,9 +15,9 @@ export const environment = {
     },
     declarationsBA :{
      tousLesDeclarations:'declarationsBA',
-     genererDeclarationsParExcel :'declarationsBA/generer-declarations/{idExcel}',
-     telechargerDeclarations:'declarationsBA/telecharger-declarations/{idXml}',
-     archiverDonnees:'declarationsBA/archiver-donnees/{idXml}',
+     genererDeclarationsParExcel :'declarationsBA/generer-declarations',
+     telechargerDeclarations:'declarationsBA/telecharger-declarations',
+     archiverDonnees:'declarationsBA/archiver-donnees',
     },
     users: {
       getAll: '/api/Users',

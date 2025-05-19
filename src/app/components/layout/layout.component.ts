@@ -326,7 +326,7 @@ export class LayoutComponent {
     {
       label: 'Déclarations BA',
       icon: 'fa-file',
-      route: '/declarations-ba'
+      route: '/fichiers-xml'
     },
     { label: 'Archives', route: '/archives', icon: 'fa-clock-rotate-left' },
     { label: 'Journaux d\'audit', route: '/journaux-audit', icon: 'fa-eye' },
@@ -348,4 +348,4 @@ export class LayoutComponent {
 
   toggleGuide() {
   }
-} 
+}
