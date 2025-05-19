@@ -50,26 +50,26 @@ import { CommonModule } from '@angular/common';
 })
 export class PaginationComponent {
   private readonly lignesParPage = 5;
+  private _lignesTotales = 0;
+  private _pageActuelle = 1;
 
   @Input() set lignesTotales(value: number) {
     this._lignesTotales = value;
     this.calculerPages();
   }
+  @Input() set pageActuelle(value: number) {
+    this._pageActuelle = value;
+  }  
+  @Output() changeurPage = new EventEmitter<number>();
+
+  
   get lignesTotales(): number {
     return this._lignesTotales;
   }
 
-  @Input() set pageActuelle(value: number) {
-    this._pageActuelle = value;
-  }
   get pageActuelle(): number {
     return this._pageActuelle;
   }
-
-  @Output() changeurPage = new EventEmitter<number>();
-
-  private _lignesTotales = 0;
-  private _pageActuelle = 1;
 
   get pagesTotales(): number {
     return Math.ceil(this.lignesTotales / this.lignesParPage);

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, forkJoin, of } from 'rxjs';
@@ -12,7 +12,6 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
   selector: 'app-pret-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  providers: [DatePipe],
   template: `
 
 <div class="pret-form">
@@ -41,53 +40,52 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
 
         <div class="form-section">
           <h2><i class="fas fa-info-circle"></i> Informations Générales</h2>
-          <div class="form-grid">
+          
+          <div class="form-row">
             <div class="form-group">
               <label for="numContrat">N° Contrat</label>
               <input id="numContrat" type="text" [(ngModel)]="pret.num_contrat_credit" [disabled]="isEditMode" name="numContrat">
             </div>
             <div class="form-group"> 
-                   <label for="dateDeclaration">Date de Déclaration</label>
-                   <input id="dateDeclaration" type="date" 
-                     [ngModel]="formatDateForInput(pret.date_declaration)" 
-                     (ngModelChange)="onDateChange('date_declaration', $event)" 
-                     name="dateDeclaration"
-                     class="form-control">
-                 </div>
+              <label for="dateDeclaration">Date de Déclaration</label>
+              <input id="dateDeclaration" type="date" [(ngModel)]="pret.date_declaration" name="dateDeclaration">
+            </div>
+          </div>
+          
+          <div class="form-grid">
              <div class="form-group">
                 <label for="typeCredit">Type de Crédit</label>
-                <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit" (change)="onTypeCreditChange()">
-                   <option [ngValue]="null" ></option>
+                <select id="typeCredit" [(ngModel)]="pret.type_credit" name="typeCredit">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
                    <option *ngFor="let type of lookupTypesCredit" [value]="type.code">
                      {{type.libelle}}
                    </option>
                  </select>
              </div>
-             
+             <div class="form-group">
+                   <label for="situation">Situation</label>
+                   <select id="situation" [(ngModel)]="pret.situation" name="situation">
+                     <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                     <option *ngFor="let sit of lookupSituations" [value]="sit.code">
+                         {{sit.libelle}}
+                      </option>
+                   </select>
+              </div>
                <div class="form-group">
                  <label for="activite">Activité</label>
-                 <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite" (change)="onActiviteChange()">
-                   <option [ngValue]="null" ></option>
+                 <select id="activite" [(ngModel)]="pret.code_activite" name="codeActivite">
+                   <option [ngValue]="" >vide</option>
                    <option *ngFor="let act of lookupActivites" [value]="act.code">
                       {{act.libelle}}
                     </option>
                   </select>
                 </div>
                 <div class="form-group">
-                   <label for="situation">Situation</label>
-                   <select id="situation" [(ngModel)]="pret.situation" name="situation" (change)="onSituationChange()">
-                   <option [ngValue]="null" ></option>
-                     <option *ngFor="let sit of lookupSituations" [value]="sit.code">
-                         {{sit.libelle}}
-                      </option>
-                   </select>
-                 </div>
-                 <div class="form-group">
                    <label for="motif">Motif</label>
                    <input id="motif" type="text" [(ngModel)]="pret.motif" name="motif">
                  </div>
-                 <div class="form-group">
-                <label>Plafond Accordé ?</label>
+             <div class="form-group">
+                <label>Plafond Accordé</label>
                 <div class="radio-group">
                    <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="true"> Oui</label>
                    <label><input type="radio" name="plafondAccorde" [(ngModel)]="pret.est_plafond_accorde" [value]="false"> Non</label>
@@ -97,7 +95,8 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                 <label for="numPlafond">N° Plafond</label>
                 <input id="numPlafond" type="text" [(ngModel)]="pret.id_plafond" name="numPlafond">
               </div>
-
+                
+                 
                  
              </div>
         </div>
@@ -124,14 +123,14 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
              </div>
              <div class="form-group">
                <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
-               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}" (change)="onIntervenantChange(i)">
+               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
                   <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
                 </select>
              </div>
              <div class="form-group">
                <label for="intervenantNiveau_{{i}}">Niveau de Responsabilité</label>
-               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}" (change)="onIntervenantChange(i)">
+               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}">
                  <option [ngValue]="null" disabled>-- Sélectionner --</option>
                   <option *ngFor="let niv of lookupNiveauxResponsabilite" [value]="niv.code">{{niv.libelle}}</option>
                 </select>
@@ -161,26 +160,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <h2><i class="fas fa-map-marker-alt"></i> Localisation</h2>
           <div class="form-grid">
 
-          <div class="form-group">
-              <label for="agence">Agence</label>
-              <select id="agence" [(ngModel)]="pret.code_agence" name="agence" (change)="onAgenceChange()">
-                <option *ngFor="let agence of lookupAgences" [value]="agence.code">
-                  {{ agence.libelle }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="wilaya">Wilaya</label>
-              <select id="wilaya" [(ngModel)]="pret.code_wilaya" name="wilaya" (change)="onWilayaChange()">
-                <option [ngValue]="null" disabled>-- Sélectionner une wilaya --</option>
-                <option *ngFor="let wilaya of lookupWilayas" [value]="wilaya.code">
-                  {{ wilaya.libelle }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
+           <div class="form-group">
               <label for="pays">Pays</label>
               <select id="pays" [(ngModel)]="pret.code_pays" name="pays" (change)="onPaysChange()">
                 <option [ngValue]="null" disabled>-- Sélectionner un pays --</option>
@@ -189,6 +169,25 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                 </option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="wilaya">Wilaya</label>
+              <select id="wilaya" [(ngModel)]="pret.code_wilaya" name="wilaya" (change)="onWilayaChange()">
+                <option [ngValue]="" >vide</option>
+                <option *ngFor="let wilaya of lookupWilayas" [value]="wilaya.code">
+                  {{ wilaya.libelle }}
+                </option>
+              </select>
+            </div>
+          <div class="form-group">
+              <label for="agence">Agence</label>
+              <select id="agence" [(ngModel)]="pret.code_agence" name="agence" (change)="onAgenceChange()">
+                <option [ngValue]="null" disabled>-- Sélectionner une agence --</option>
+                <option *ngFor="let agence of lookupAgences" [value]="agence.code">
+                  {{ agence.libelle }}
+                </option>
+              </select>
+            </div>
+
           </div>
         </div>
 
@@ -204,7 +203,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
 
               <div class="form-group">
                  <label for="devise">Devise</label>
-                 <select id="devise" [(ngModel)]="pret.monnaie" name="devise" (change)="onMonnaieChange()">
+                 <select id="devise" [(ngModel)]="pret.monnaie" name="devise">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                     <option *ngFor="let dev of lookupDevises" [value]="dev.code">{{dev.libelle}}</option>
                   </select>
@@ -219,7 +218,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                     <input id="coutCredits" type="number" [(ngModel)]="pret.cout_total_credit" name="coutCredits" step="any">
                  </div>
                  <div class="form-group">
-                    <label for="soldeRestant">Solde Restant </label>
+                    <label for="soldeRestant">Solde Restant Dû</label>
                     <input id="soldeRestant" type="number" [(ngModel)]="pret.solde_restant" name="soldeRestant" step="any">
                  </div>
               </div>
@@ -239,7 +238,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
              <label for="dureeInit">Durée Initiale</label>
              <select id="dureeInit" [(ngModel)]="pret.duree_initiale" name="dureeInit" (change)="onDureeInitialeChange()">
                <option [ngValue]="null" disabled>-- Sélectionner --</option>
-               <option *ngFor="let duree of lookupDureesCredit" [value]="duree.code">{{duree.libelle}}</option>
+               <option *ngFor="let duree of lookupDureesCredit" [value]="duree.code"> {{duree.libelle}} </option>
              </select>
            </div>
 
@@ -261,7 +260,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
              <div class="form-group">
                 <label for="classeRetard">Classe de Retard</label>
                <select id="classeRetard" [(ngModel)]="pret.classe_retard" name="classeRetard" (change)="onClasseRetardChange()">
-                   <option [ngValue]="null" ></option>
+                  <option [ngValue]="null">-- Sélectionner --</option> 
                   <option *ngFor="let cl of lookupClassesRetard" [value]="cl.code">{{cl.libelle}}</option>
                 </select>
               </div>
@@ -271,11 +270,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
               </div>
               <div class="form-group">
                  <label for="dateConstat">Date de Constatation</label>
-                 <input id="dateConstat" type="date" 
-                   [ngModel]="formatDateForInput(pret.date_constatation_echeances_impayes)" 
-                   (ngModelChange)="onDateChange('date_constatation_echeances_impayes', $event)" 
-                   name="dateConstat"
-                   class="form-control">
+                 <input id="dateConstat" type="date" [(ngModel)]="pret.date_constatation_echeances_impayes" name="dateConstat">
               </div>
               <div class="form-group">
                   <label for="montantCapRetard">Montant Capital en Retard</label>
@@ -298,35 +293,19 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
           <div class="form-grid">
              <div class="form-group">
                <label for="dateOctroi">Date d'Octroi</label>
-               <input id="dateOctroi" type="date" 
-                 [ngModel]="formatDateForInput(pret.date_octroi)" 
-                 (ngModelChange)="onDateChange('date_octroi', $event)" 
-                 name="dateOctroi"
-                 class="form-control">
+               <input id="dateOctroi" type="date" [(ngModel)]="pret.date_octroi" name="dateOctroi">
              </div>
              <div class="form-group">
                <label for="dateExpiration">Date d'Expiration</label>
-               <input id="dateExpiration" type="date" 
-                 [ngModel]="formatDateForInput(pret.date_expiration)" 
-                 (ngModelChange)="onDateChange('date_expiration', $event)" 
-                 name="dateExpiration"
-                 class="form-control">
+               <input id="dateExpiration" type="date" [(ngModel)]="pret.date_expiration" name="dateExpiration">
              </div>
              <div class="form-group">
                  <label for="dateExecution">Date Exécution</label>
-                 <input id="dateExecution" type="date" 
-                   [ngModel]="formatDateForInput(pret.date_execution)" 
-                   (ngModelChange)="onDateChange('date_execution', $event)" 
-                   name="dateExecution"
-                   class="form-control">
+                 <input id="dateExecution" type="date" [(ngModel)]="pret.date_execution" name="dateExecution">
              </div>
              <div class="form-group">
                  <label for="dateRejet">Date de Rejet</label>
-                 <input id="dateRejet" type="date" 
-                   [ngModel]="formatDateForInput(pret.date_rejet)" 
-                   (ngModelChange)="onDateChange('date_rejet', $event)" 
-                   name="dateRejet"
-                   class="form-control">
+                 <input id="dateRejet" type="date" [(ngModel)]="pret.date_rejet" name="dateRejet">
              </div>
            </div>
        </div>
@@ -358,7 +337,7 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
                </div>
                <div class="form-group">
                  <label for="garantieType_{{i}}">Type</label>
-                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}" (change)="onGarantieChange(i)">
+                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}">
                    <option [ngValue]="null" disabled>-- Sélectionner --</option>
                    <option *ngFor="let type of lookupTypesGarantie" [value]="type.code">{{type.libelle}}</option>
                  </select>
@@ -386,25 +365,17 @@ import { CreditsService } from '../../../core/services/credits/credits.service';
       overflow-y: auto;
       background-color: #f8f9fa;
     }
-    
-    /* Style for date inputs */
-    input[type="date"] {
-      padding: 0.5rem;
-      border: 1px solid #ced4da;
-      border-radius: 0.25rem;
-      width: 100%;
+
+    .form-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e9ecef;
     }
     
-    /* Style the calendar icon in date inputs */
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      opacity: 0.7;
-    }
-    
-    input[type="date"]:focus {
-      border-color: #80bdff;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    .form-row .form-group {
+      flex: 1;
     }
 
     .header {
@@ -607,41 +578,38 @@ export class PretFormComponent implements OnInit, OnDestroy {
     date_execution: '',
     date_rejet: ''
   };
-
   isLoading = false;
   errorMessage: string | null = null;
   isEditMode = false;
   private destroy$ = new Subject<void>();
+  
+  lookupTypesCredit: any[] = [];
+  lookupActivites: any[] = [];
+  lookupSituations: any[] = [];
+  lookupTypesCle: any[] = [];
+  lookupNiveauxResponsabilite: any[] = [];
+  lookupDevises: any[] = [];
+  lookupTypesGarantie: any[] = [];
+  lookupClassesRetard: any[] = [];
+  lookupDureesCredit: any[] = [];
+  lookupAgences: any[] = [];
+  lookupWilayas: any[] = [];
+  lookupPays: any[] = [];
+  
+  selectedAgence: any;
+  selectedWilaya: any;
+  selectedPays: any;
+  selectedTypeCredit: any;
+  selectedActivite: any;
+  selectedSituation: any;
+  selectedDevise: any;
+  selectedClasseRetard: any = null;
 
-  lookupTypesCredit: { code: string; libelle: string }[] = [];
-  lookupActivites: { code: string; libelle: string }[] = [];
-  lookupSituations: { code: string; libelle: string }[] = [];
-  lookupTypesCle: { code: string; libelle: string }[] = [];
-  lookupNiveauxResponsabilite: { code: string; libelle: string }[] = [];
-  lookupDevises: { code: string; libelle: string }[] = [];
-  lookupTypesGarantie: { code: string; libelle: string }[] = [];
-  lookupClassesRetard: { code: string; libelle: string }[] = [];
-  lookupDureesCredit: { code: string; libelle: string }[] = [];
-  lookupAgences: { code: string; libelle: string }[] = [];
-  lookupWilayas: { code: string; libelle: string }[] = [];
-  lookupPays: { code: string; libelle: string }[] = [];
-
-  selectedAgence: { code: string; libelle: string } | null = null;
-  selectedWilaya: { code: string; libelle: string } | null = null;
-  selectedPays: { code: string; libelle: string } | null = null;
-  selectedTypeCredit: { code: string; libelle: string } | null = null;
-  selectedActivite: { code: string; libelle: string } | null = null;
-  selectedSituation: { code: string; libelle: string } | null = null;
-  selectedDevise: { code: string; libelle: string } | null = null;
-  selectedClasseRetard: { code: string; libelle: string } | null = null;
-
-  constructor(
-    private router: Router,
+  constructor(private router: Router, 
     private route: ActivatedRoute,
     private creditStateService: CreditStateService,
-    private creditsService: CreditsService,
-    private datePipe: DatePipe
-  ) { }
+    private creditsService: CreditsService
+  ){} 
 
   loadLookupData() {
     forkJoin([
@@ -662,12 +630,12 @@ export class PretFormComponent implements OnInit, OnDestroy {
         return of([[], [], [], [], [], [], [], [], [], [], []]);
       })
     ).subscribe(([
-      typesCredit,
-      activites,
-      situations,
-      niveauxResponsabilite,
-      devises,
-      typesGarantie,
+      typesCredit, 
+      activites, 
+      situations, 
+      niveauxResponsabilite, 
+      devises, 
+      typesGarantie, 
       classesRetard,
       dureesCredit,
       agences,
@@ -702,18 +670,22 @@ export class PretFormComponent implements OnInit, OnDestroy {
         code: item.code,
         libelle: item.domaine
       }));
+      
       this.lookupDureesCredit = dureesCredit.map((item: any) => ({
         code: item.code,
         libelle: item.domaine
       }));
+      
       this.lookupAgences = agences.map((item: any) => ({
         code: item.code,
         libelle: item.domaine
       }));
+      
       this.lookupWilayas = wilayas.map((item: any) => ({
         code: item.code,
         libelle: item.domaine
       }));
+      
       this.lookupPays = pays.map((item: any) => ({
         code: item.code,
         libelle: item.domaine
@@ -722,24 +694,20 @@ export class PretFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = 'fr-FR';
-    }
-
     this.pret.intervenants = [];
     this.pret.garanties = [];
-
+    
     this.loadLookupData();
-
-    this.route.queryParams.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(params => {
-      if (params['id_excel']) {
-        this.pret.id_excel = +params['id_excel'];
-        console.log('Set id_excel from query params:', this.pret.id_excel);
-      }
-    });
-
+    
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const excelId = params['id_excel'];
+        if (excelId) {
+          this.pret.id_excel = +excelId; 
+        }
+      });
+    
     this.creditStateService.selectedCredit$
       .pipe(takeUntil(this.destroy$))
       .subscribe(credit => {
@@ -749,36 +717,37 @@ export class PretFormComponent implements OnInit, OnDestroy {
           this.pret.intervenants = credit.intervenants || [];
           this.pret.garanties = credit.garanties || [];
           console.log('Loaded credit data from state:', this.pret);
-
-
+          
+          // Set default values after loading credit data
           this.setValeursParDefault();
         }
       });
-
+      
     this.creditStateService.isEditMode$
       .pipe(takeUntil(this.destroy$))
       .subscribe(isEdit => {
         this.isEditMode = isEdit;
       });
-
+      
     this.creditStateService.isLoading$
       .pipe(takeUntil(this.destroy$))
       .subscribe(isLoading => {
         this.isLoading = isLoading;
       });
-
+      
     this.creditStateService.error$
       .pipe(takeUntil(this.destroy$))
       .subscribe(error => {
         this.errorMessage = error;
       });
-
+    
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state as { pret: CreditDto };
     if (state?.pret) {
       this.creditStateService.setLoading(true);
       try {
         this.creditStateService.setSelectedCredit(state.pret);
+        // Set default values after setting the credit
         this.setValeursParDefault();
       } catch (error) {
         this.creditStateService.setError('Erreur lors du chargement des données du crédit');
@@ -797,18 +766,20 @@ export class PretFormComponent implements OnInit, OnDestroy {
   onSave() {
     this.creditStateService.setLoading(true);
     console.log('Saving credit:', this.pret);
-
+    
     setTimeout(() => {
       this.creditStateService.setSelectedCredit(this.pret);
       this.creditStateService.setLoading(false);
-
+      
       if (!this.isEditMode) {
         this.creditStateService.clearSelectedCredit();
         this.router.navigate(['/credits']);
       }
-    }, 1000);
-
-
+    }, 1000); 
+    
+    // Error handling would look like this:
+    // this.creditStateService.setError('Erreur lors de l\'enregistrement');
+    // this.creditStateService.setLoading(false);
   }
 
   addIntervenant() {
@@ -832,7 +803,7 @@ export class PretFormComponent implements OnInit, OnDestroy {
   trackByIndex(index: number): number {
     return index;
   }
-
+  
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -840,230 +811,92 @@ export class PretFormComponent implements OnInit, OnDestroy {
 
   onAgenceChange() {
     if (this.pret.code_agence) {
-      this.selectedAgence = this.lookupAgences.find(a => a.code === this.pret.code_agence) || null;
-      this.pret.libelle_agence = this.selectedAgence?.libelle || '';
+      this.selectedAgence = this.lookupAgences.find(a => a.code === this.pret.code_agence);
     } else {
       this.selectedAgence = null;
-      this.pret.libelle_agence = '';
     }
   }
 
   onWilayaChange() {
     if (this.pret.code_wilaya) {
-      this.selectedWilaya = this.lookupWilayas.find(w => w.code === this.pret.code_wilaya) || null;
-      this.pret.libelle_wilaya = this.selectedWilaya?.libelle || '';
+      this.selectedWilaya = this.lookupWilayas.find(w => w.code === this.pret.code_wilaya);
     } else {
       this.selectedWilaya = null;
-      this.pret.libelle_wilaya = '';
     }
   }
 
   onPaysChange() {
     if (this.pret.code_pays) {
-      this.selectedPays = this.lookupPays.find(p => p.code === this.pret.code_pays) || null;
-      this.pret.libelle_pays = this.selectedPays?.libelle || '';
+      this.selectedPays = this.lookupPays.find(p => p.code === this.pret.code_pays);
     } else {
       this.selectedPays = null;
-      this.pret.libelle_pays = '';
     }
   }
 
   onTypeCreditChange() {
     if (this.pret.type_credit) {
-      this.selectedTypeCredit = this.lookupTypesCredit.find(t => t.code === this.pret.type_credit) || null;
-      this.pret.libelle_type_credit = this.selectedTypeCredit?.libelle || '';
+      this.selectedTypeCredit = this.lookupTypesCredit.find(tc => tc.code === this.pret.type_credit);
+      this.pret.libelle_type_credit = this.selectedTypeCredit?.libelle || null;
     } else {
       this.selectedTypeCredit = null;
-      this.pret.libelle_type_credit = '';
+      this.pret.libelle_type_credit = null;
     }
   }
 
   onActiviteChange() {
     if (this.pret.code_activite) {
-      this.selectedActivite = this.lookupActivites.find(a => a.code === this.pret.code_activite) || null;
-      this.pret.libelle_activite = this.selectedActivite?.libelle || '';
+      this.selectedActivite = this.lookupActivites.find(a => a.code === this.pret.code_activite);
+      this.pret.libelle_activite = this.selectedActivite?.libelle || null;
     } else {
       this.selectedActivite = null;
-      this.pret.libelle_activite = '';
+      this.pret.libelle_activite = null;
     }
   }
 
   onSituationChange() {
     if (this.pret.situation) {
-      this.selectedSituation = this.lookupSituations.find(s => s.code === this.pret.situation) || null;
-      this.pret.libelle_situation = this.selectedSituation?.libelle || '';
+      this.selectedSituation = this.lookupSituations.find(s => s.code === this.pret.situation);
+      this.pret.libelle_situation = this.selectedSituation?.libelle || null;
     } else {
       this.selectedSituation = null;
-      this.pret.libelle_situation = '';
+      this.pret.libelle_situation = null;
     }
   }
-
   onMonnaieChange() {
     if (this.pret.monnaie) {
-      this.selectedDevise = this.lookupDevises.find(d => d.code === this.pret.monnaie) || null;
-      this.pret.libelle_monnaie = this.selectedDevise?.libelle || '';
+      this.selectedDevise = this.lookupDevises.find(d => d.code === this.pret.monnaie);
+      this.pret.libelle_monnaie = this.selectedDevise?.libelle || null;
     } else {
       this.selectedDevise = null;
-      this.pret.libelle_monnaie = '';
+      this.pret.libelle_monnaie = null;
     }
   }
 
   onClasseRetardChange() {
     if (this.pret.classe_retard) {
-      this.selectedClasseRetard = this.lookupClassesRetard.find(cr => cr.code === this.pret.classe_retard) || null;
-      this.pret.libelle_classe_retard = this.selectedClasseRetard?.libelle || '';
+      this.selectedClasseRetard = this.lookupClassesRetard.find(cr => cr.code === this.pret.classe_retard);
+      this.pret.libelle_classe_retard = this.selectedClasseRetard?.libelle || null;
     } else {
       this.selectedClasseRetard = null;
-      this.pret.libelle_classe_retard = '';
+      this.pret.libelle_classe_retard = null;
     }
   }
 
   onDureeInitialeChange() {
     if (this.pret.duree_initiale) {
-      const duree = this.lookupDureesCredit.find(d => d.code === this.pret.duree_initiale);
-      this.pret.libelle_duree_initiale = duree?.libelle || '';
+      const dureeInitiale = this.lookupDureesCredit.find(d => d.code === this.pret.duree_initiale);
+      this.pret.libelle_duree_initiale = dureeInitiale?.libelle || '';
     } else {
       this.pret.libelle_duree_initiale = '';
     }
   }
 
   onDureeRestanteChange() {
-    const selectedDuree = this.lookupDureesCredit.find(d => d.code === this.pret.duree_restante);
-    if (selectedDuree) {
-      this.pret.libelle_duree_restante = selectedDuree.libelle;
-    }
-  }
-
-  onGarantieChange(index: number) {
-    const garantie = this.pret.garanties[index];
-    if (garantie) {
-      const typeGarantie = this.lookupTypesGarantie.find(t => t.code === garantie.type_garantie);
-      if (typeGarantie) {
-        garantie.libelle_type_garantie = typeGarantie.libelle;
-      }
-    }
-  }
-
-  onIntervenantChange(index: number) {
-    const intervenant = this.pret.intervenants[index];
-    if (intervenant) {
-      const niveau = this.lookupNiveauxResponsabilite.find(n => n.code === intervenant.niveau_responsabilite);
-      if (niveau) {
-        intervenant.libelle_niveau_responsabilite = niveau.libelle;
-      }
-    }
-  }
-
-  formatDateForInput(dateString: string | null): string {
-    if (!dateString) return '';
-    try {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        const [year, month, day] = dateString.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        if (isNaN(date.getTime())) return '';
-        return dateString;
-      }
-      
-      if (dateString.includes('/')) {
-        const [day, month, year] = dateString.split('/').map(Number);
-        const date = new Date(year, month - 1, day);
-        if (isNaN(date.getTime())) return '';
-        
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const dd = String(date.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-      }
-      
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      return '';
-    }
-  }
-  
-  formatDateFromInput(dateString: string): string {
-    if (!dateString) return '';
-    try {
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
-        return dateString;
-      }
-      
-      const [year, month, day] = dateString.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      if (isNaN(date.getTime())) return '';
-      
-      const dd = String(date.getDate()).padStart(2, '0');
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const yyyy = date.getFullYear();
-      
-      return `${dd}/${mm}/${yyyy}`;
-    } catch (e) {
-      console.error('Error parsing date:', e);
-      return '';
-    }
-  }
-
-  onDateChange(field: keyof CreditDto, event: Event): void {
-    if (!this.estDate(field) || !this.pret) return;
-    
-    const input = event.target as HTMLInputElement;
-    if (input.type === 'date') {
-      const formattedDate = this.formatDateFromInput(input.value);
-      if (formattedDate) {
-        (this.pret[field] as string) = formattedDate;
-        setTimeout(() => {
-          input.value = this.formatDateForInput(formattedDate);
-        });
-      }
-    }
-  }
-
-
-  private estDate(field: string): field is keyof CreditDto {
-    const dateFields = [
-      'date_declaration',
-      'date_constatation_echeances_impayes',
-      'date_octroi',
-      'date_expiration',
-      'date_execution',
-      'date_rejet'
-    ] as const;
-    return dateFields.includes(field as any);
-  }
-
-  formaterDate(date: string | null): string {
-    if (!date) return '';
-    try {
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
-        return date;
-      }
-      
-      if (date.includes('-')) {
-        const [year, month, day] = date.split('T')[0].split('-');
-        if (year && month && day) {
-          return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
-        }
-      }
-      
-      const parsedDate = new Date(date);
-      if (!isNaN(parsedDate.getTime())) {
-        const dd = String(parsedDate.getDate()).padStart(2, '0');
-        const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
-        const yyyy = parsedDate.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      }
-      
-      return '';
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      return '';
+    if (this.pret.duree_restante) {
+      const dureeRestante = this.lookupDureesCredit.find(d => d.code === this.pret.duree_restante);
+      this.pret.libelle_duree_restante = dureeRestante?.libelle || '';
+    } else {
+      this.pret.libelle_duree_restante = '';
     }
   }
 
