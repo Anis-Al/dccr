@@ -438,7 +438,6 @@ export class ArchivesComponent implements OnInit {
   
   // Pagination
   pageActuelle = 1;
-  lignesParPage = 10;
   donneesFiltrees: any[] = [];
   donneesPaginees: any[] = [];
   
@@ -447,18 +446,39 @@ export class ArchivesComponent implements OnInit {
     { id: 1, nom: 'Fichier_Janvier_2023.xlsx', date: '2023-01-15T10:30:00', integrateur: 'Ahmed', nombreCredits: 45, statut: 'Traité' },
     { id: 2, nom: 'Fichier_Février_2023.xlsx', date: '2023-02-20T14:15:00', integrateur: 'Karim', nombreCredits: 32, statut: 'En cours' },
     { id: 3, nom: 'Fichier_Mars_2023.xlsx', date: '2023-03-10T09:45:00', integrateur: 'Fatima', nombreCredits: 28, statut: 'Traité' },
+    { id: 4, nom: 'Fichier_Avril_2023.xlsx', date: '2023-04-05T11:20:00', integrateur: 'Youssef', nombreCredits: 55, statut: 'Traité' },
+    { id: 5, nom: 'Fichier_Mai_2023.xlsx', date: '2023-05-12T13:40:00', integrateur: 'Sarah', nombreCredits: 40, statut: 'En cours' },
+    { id: 6, nom: 'Fichier_Juin_2023.xlsx', date: '2023-06-18T15:25:00', integrateur: 'Mohammed', nombreCredits: 38, statut: 'Erreur' },
+    { id: 7, nom: 'Fichier_Juillet_2023.xlsx', date: '2023-07-22T09:15:00', integrateur: 'Leila', nombreCredits: 42, statut: 'Traité' },
+    { id: 8, nom: 'Fichier_Aout_2023.xlsx', date: '2023-08-08T16:30:00', integrateur: 'Omar', nombreCredits: 30, statut: 'En cours' },
+    { id: 9, nom: 'Fichier_Septembre_2023.xlsx', date: '2023-09-14T10:45:00', integrateur: 'Amina', nombreCredits: 35, statut: 'Traité' },
+    { id: 10, nom: 'Fichier_Octobre_2023.xlsx', date: '2023-10-20T14:50:00', integrateur: 'Hassan', nombreCredits: 48, statut: 'En cours' }
   ];
   
   creditsData: any[] = [
     { id: 1, numContrat: 'CR-2023-001', type: 'Immobilier', activite: 'Construction', situation: 'En cours', dateDeclaration: '15/01/2023', montant: 500000, devise: 'DZD', duree: 60, taux: 4.5, fichierSource: 'Fichier_Janvier_2023.xlsx' },
     { id: 2, numContrat: 'CR-2023-002', type: 'Consommation', activite: 'Achat véhicule', situation: 'En cours', dateDeclaration: '20/02/2023', montant: 150000, devise: 'DZD', duree: 36, taux: 5.2, fichierSource: 'Fichier_Février_2023.xlsx' },
     { id: 3, numContrat: 'CR-2023-003', type: 'Professionnel', activite: 'Investissement', situation: 'Clôturé', dateDeclaration: '10/03/2023', montant: 1200000, devise: 'DZD', duree: 84, taux: 3.8, fichierSource: 'Fichier_Mars_2023.xlsx' },
+    { id: 4, numContrat: 'CR-2023-004', type: 'Immobilier', activite: 'Rénovation', situation: 'En cours', dateDeclaration: '05/04/2023', montant: 300000, devise: 'DZD', duree: 48, taux: 4.2, fichierSource: 'Fichier_Avril_2023.xlsx' },
+    { id: 5, numContrat: 'CR-2023-005', type: 'Consommation', activite: 'Équipement', situation: 'En cours', dateDeclaration: '12/05/2023', montant: 80000, devise: 'DZD', duree: 24, taux: 5.5, fichierSource: 'Fichier_Mai_2023.xlsx' },
+    { id: 6, numContrat: 'CR-2023-006', type: 'Professionnel', activite: 'Expansion', situation: 'En cours', dateDeclaration: '18/06/2023', montant: 2000000, devise: 'DZD', duree: 96, taux: 3.5, fichierSource: 'Fichier_Juin_2023.xlsx' },
+    { id: 7, numContrat: 'CR-2023-007', type: 'Immobilier', activite: 'Achat terrain', situation: 'Clôturé', dateDeclaration: '22/07/2023', montant: 800000, devise: 'DZD', duree: 72, taux: 4.0, fichierSource: 'Fichier_Juillet_2023.xlsx' },
+    { id: 8, numContrat: 'CR-2023-008', type: 'Consommation', activite: 'Mariage', situation: 'En cours', dateDeclaration: '08/08/2023', montant: 200000, devise: 'DZD', duree: 36, taux: 5.8, fichierSource: 'Fichier_Aout_2023.xlsx' },
+    { id: 9, numContrat: 'CR-2023-009', type: 'Professionnel', activite: 'Stock', situation: 'En cours', dateDeclaration: '14/09/2023', montant: 500000, devise: 'DZD', duree: 48, taux: 4.1, fichierSource: 'Fichier_Septembre_2023.xlsx' },
+    { id: 10, numContrat: 'CR-2023-010', type: 'Immobilier', activite: 'Local commercial', situation: 'En cours', dateDeclaration: '20/10/2023', montant: 1500000, devise: 'DZD', duree: 120, taux: 3.9, fichierSource: 'Fichier_Octobre_2023.xlsx' }
   ];
   
   declarationsData: any[] = [
     { id: 1, nom: 'Declaration_BA_Janvier_2023.xml', dateGeneration: '2023-01-20T16:45:00', excelSource: 'Fichier_Janvier_2023.xlsx', nombreCredits: 45, generateur: 'Système' },
     { id: 2, nom: 'Declaration_BA_Février_2023.xml', dateGeneration: '2023-02-25T11:30:00', excelSource: 'Fichier_Février_2023.xlsx', nombreCredits: 32, generateur: 'Système' },
     { id: 3, nom: 'Declaration_BA_Mars_2023.xml', dateGeneration: '2023-03-15T14:20:00', excelSource: 'Fichier_Mars_2023.xlsx', nombreCredits: 28, generateur: 'Système' },
+    { id: 4, nom: 'Declaration_BA_Avril_2023.xml', dateGeneration: '2023-04-10T09:15:00', excelSource: 'Fichier_Avril_2023.xlsx', nombreCredits: 55, generateur: 'Système' },
+    { id: 5, nom: 'Declaration_BA_Mai_2023.xml', dateGeneration: '2023-05-18T13:40:00', excelSource: 'Fichier_Mai_2023.xlsx', nombreCredits: 40, generateur: 'Système' },
+    { id: 6, nom: 'Declaration_BA_Juin_2023.xml', dateGeneration: '2023-06-22T15:25:00', excelSource: 'Fichier_Juin_2023.xlsx', nombreCredits: 38, generateur: 'Système' },
+    { id: 7, nom: 'Declaration_BA_Juillet_2023.xml', dateGeneration: '2023-07-28T10:30:00', excelSource: 'Fichier_Juillet_2023.xlsx', nombreCredits: 42, generateur: 'Système' },
+    { id: 8, nom: 'Declaration_BA_Aout_2023.xml', dateGeneration: '2023-08-15T16:30:00', excelSource: 'Fichier_Aout_2023.xlsx', nombreCredits: 30, generateur: 'Système' },
+    { id: 9, nom: 'Declaration_BA_Septembre_2023.xml', dateGeneration: '2023-09-20T11:45:00', excelSource: 'Fichier_Septembre_2023.xlsx', nombreCredits: 35, generateur: 'Système' },
+    { id: 10, nom: 'Declaration_BA_Octobre_2023.xml', dateGeneration: '2023-10-25T14:50:00', excelSource: 'Fichier_Octobre_2023.xlsx', nombreCredits: 48, generateur: 'Système' }
   ];
 
   ngOnInit() {
@@ -515,8 +535,9 @@ export class ArchivesComponent implements OnInit {
   }
 
   updatePagination() {
-    const startIndex = (this.pageActuelle - 1) * this.lignesParPage;
-    const endIndex = startIndex + this.lignesParPage;
+    const lignesParPage = 5; // Using the same value as PaginationComponent
+    const startIndex = (this.pageActuelle - 1) * lignesParPage;
+    const endIndex = startIndex + lignesParPage;
     this.donneesPaginees = this.donneesFiltrees.slice(startIndex, endIndex);
   }
 

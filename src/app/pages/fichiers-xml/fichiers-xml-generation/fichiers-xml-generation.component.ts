@@ -55,7 +55,7 @@ import { ExcelMetadonneesDto } from '../../../core/dtos/Excel/excel-metadonnees-
                   </tr>
                   <tr *ngFor="let fichier of fichiersExcelFiltres">
                     <td>{{fichier.nom_fichier_excel || 'N/A'}}</td>
-                    <td>{{fichier.date_heure_integration_excel || 'N/A'}}</td>
+                    <td>{{fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
                     <td>{{fichier.integrateur || 'N/A'}}</td>
                     <td class="actions-cell">
                       <button 

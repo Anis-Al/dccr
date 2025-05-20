@@ -64,22 +64,31 @@ import { XmlDto } from '../../core/dtos/DeclarationsBA/declarationsBA-dto';
                 <td class="actions-cell">
                   <div class="tooltip-container button-group">
                     <button 
-                      (click)="downloadFiles(fichier)" 
+                      (click)="telechargerLesFichiersDeCetteInstance(fichier)" 
                       class="btn-icon"
-                      (mouseenter)="showTooltip($event, 'download')"
-                      (mouseleave)="hideTooltip($event, 'download')"
+                      (mouseenter)="montrerIndiceLol($event, 'download')"
+                      (mouseleave)="cacherIndice($event, 'download')"
                     >
                       <i class="fas fa-download"></i>
                       <span class="tooltip-text">Télécharger les versions de 'correction' et 'supression' pour ce fichier</span>
                     </button>
                     <button 
-                      (click)="markAsSubmitted(fichier)" 
+                      (click)="marquerCommeSoumisALaBA(fichier)" 
                       class="btn-icon"
-                      (mouseenter)="showTooltip($event, 'submit')"
-                      (mouseleave)="hideTooltip($event, 'submit')"
+                      (mouseenter)="montrerIndiceLol($event, 'submit')"
+                      (mouseleave)="cacherIndice($event, 'submit')"
                     >
                       <i class="fas fa-check"></i>
                       <span class="tooltip-text">Marquer comme soumis à la BA</span>
+                    </button>
+                    <button 
+                      (click)="supprimerFichier(fichier)" 
+                      class="btn-icon"
+                      (mouseenter)="montrerIndiceLol($event, 'delete')"
+                      (mouseleave)="cacherIndice($event, 'delete')"
+                    >
+                      <i class="fas fa-trash"></i>
+                      <span class="tooltip-text">Supprimer ce fichier</span>
                     </button>
                   </div>
                 </td>
@@ -409,17 +418,14 @@ import { XmlDto } from '../../core/dtos/DeclarationsBA/declarationsBA-dto';
   `]
 })
 export class FichiersXMLComponent implements OnInit {
-  // Pagination
   pageActuelle: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 1;
   
-  // Search and filters
   searchTerm: string = '';
   dateDebut: string = '';
   dateFin: string = '';
   
-  // Data
   fichiers: XmlDto[] = [];
   fichiersFiltres: XmlDto[] = [];
   fichiersPagines: XmlDto[] = [];
@@ -446,7 +452,6 @@ export class FichiersXMLComponent implements OnInit {
     });
   }
   
-  // Pagination methods
   changerPage(page: number): void {
     this.pageActuelle = page;
     this.updatePaginatedData();
@@ -458,7 +463,6 @@ export class FichiersXMLComponent implements OnInit {
     this.totalPages = Math.ceil(this.fichiersFiltres.length / this.itemsPerPage);
   }
   
-  // Search and filter methods
   onSearch(): void {
     this.applyFilters();
   }
@@ -469,15 +473,12 @@ export class FichiersXMLComponent implements OnInit {
   
   applyFilters(): void {
     this.fichiersFiltres = this.fichiers.filter(fichier => {
-      // Apply search term filter
       const searchMatch = !this.searchTerm || 
         fichier.nomFichierXml.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         fichier.nomFichierExcelSource.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         fichier.nomUtilisateurGenerateur.toLowerCase().includes(this.searchTerm.toLowerCase());
       
-      // Apply date filters if implemented
-      // This would require actual date fields in the data
-      
+     
       return searchMatch;
     });
     
@@ -485,8 +486,7 @@ export class FichiersXMLComponent implements OnInit {
     this.updatePaginatedData();
   }
   
-  // Action methods
-  downloadFiles(fichier: XmlDto): void {
+  telechargerLesFichiersDeCetteInstance(fichier: XmlDto): void {
     if (!fichier?.idFichierXml) {
       console.error('ID du fichier XML manquant');
       return;
@@ -496,12 +496,13 @@ export class FichiersXMLComponent implements OnInit {
       next: (blob: Blob) => {
         const zipBlob = new Blob([blob], { type: 'application/zip' });
         const url = window.URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${fichier.nomFichierXml || 'declaration'}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const lien = document.createElement('a');
+        lien.href = url;
+        const nomFichierATelecharger = `declaration-ba_${fichier.nomFichierXml.split('.')[0]}.zip`;
+        lien.download = nomFichierATelecharger;
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
@@ -510,13 +511,24 @@ export class FichiersXMLComponent implements OnInit {
     });
   }
   
-  markAsSubmitted(fichier: any): void {
+  marquerCommeSoumisALaBA(fichier: any): void {
     console.log('Marking as submitted:', fichier.nom_fichier);
-    // Implementation for marking as submitted
+  }
+
+  supprimerFichier(fichier: XmlDto): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
+      // this.declarationsBAService.supprimerDeclaration(fichier.idFichierXml).subscribe({
+      //   next: () => {
+      //     this.chargerDeclarations();
+      //   },
+      //   error: (error) => {
+      //     console.error('Erreur lors de la suppression du fichier:', error);
+      //   }
+      // });
+    }
   }
   
-  // Tooltip methods
-  showTooltip(event: MouseEvent, type: string) {
+  montrerIndiceLol(event: MouseEvent, type: string) {
     const button = event.target as HTMLElement;
     const tooltip = button.querySelector('.tooltip-text') as HTMLElement;
     if (tooltip) {
@@ -525,7 +537,7 @@ export class FichiersXMLComponent implements OnInit {
     }
   }
   
-  hideTooltip(event: MouseEvent, type: string) {
+  cacherIndice(event: MouseEvent, type: string) {
     const button = event.target as HTMLElement;
     const tooltip = button.querySelector('.tooltip-text') as HTMLElement;
     if (tooltip) {
