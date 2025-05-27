@@ -13,11 +13,10 @@ import { ExcelMetadonneesDto } from '../../../core/dtos/Excel/excel-metadonnees-
   template: `
     <div class="generation-container">
       <div class="header">
-        <h1>Génération de Fichiers XML</h1>
+        <h1>Génération de Déclarations BA</h1>
         <div class="header-actions">
           <button class="btn btn-secondary" (click)="retourListe()">
             <i class="fas fa-arrow-left"></i>
-            <span>Retour</span>
           </button>
         </div>
       </div>
@@ -128,6 +127,9 @@ import { ExcelMetadonneesDto } from '../../../core/dtos/Excel/excel-metadonnees-
         display: flex;
         gap: 0.75rem;
         align-items: center;
+        .btn{
+          border-radius:40%;
+        }
       }
     }
 

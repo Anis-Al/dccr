@@ -40,7 +40,6 @@ export class CreditsListComponent implements OnInit {
 
 
   ngOnInit() {
-    // Handle query parameters for Excel file filtering
     this.route.queryParams.subscribe(params => {
       const id_excel = params['id_excel'];
       if (id_excel) {
@@ -49,8 +48,6 @@ export class CreditsListComponent implements OnInit {
         this.selectedExcelFile = null;
       }
     });
-
-    // Initial load of credits - this will format dates and extract unique dates
     this.loadCredits();
 }
 
@@ -81,25 +78,18 @@ export class CreditsListComponent implements OnInit {
     this.updatePagination();
   }
   
-  /**
-   * Extracts unique declaration dates from credits for the dropdown
-   */
+  
   extractUniqueDates() {
-    // Create a Set to store unique dates
     const uniqueDates = new Set<string>();
     
-    // Add all declaration dates to the set
     this.TousLesCredits.forEach(credit => {
       if (credit.date_declaration) {
-        // Format date if not already formatted
         const formattedDate = this.formatDate(credit.date_declaration);
         uniqueDates.add(formattedDate);
       }
     });
     
-    // Convert set to array and sort dates
     this.datesDeclaration = Array.from(uniqueDates).sort((a, b) => {
-      // Convert dd/MM/yyyy to Date objects for proper sorting
       const [dayA, monthA, yearA] = a.split('/').map(Number);
       const [dayB, monthB, yearB] = b.split('/').map(Number);
       
@@ -119,20 +109,16 @@ export class CreditsListComponent implements OnInit {
   
 
   updatePagination(): void {
-    // Create a deep copy to avoid modifying the original data
     let filteredCredits = JSON.parse(JSON.stringify(this.TousLesCredits));
 
-    // Apply search term filter if it exists
     if (this.searchTerm) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) =>
         credit.num_contrat_credit?.toLowerCase().includes(this.searchTerm.toLowerCase()) ?? false
       );
     }
 
-    // Apply date filter if selected
     if (this.selectedDate) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) => {
-        // Compare formatted dates
         if (!credit.date_declaration) return false;
         const formattedCreditDate = this.formatDate(credit.date_declaration);
         return formattedCreditDate === this.selectedDate;
@@ -239,7 +225,6 @@ export class CreditsListComponent implements OnInit {
           // Format dates in the credits array to dd/MM/yyyy format
           this.TousLesCredits = credits.map((credit: CreditDto) => ({
             ...credit,
-            date_declaration: this.formatDate(credit.date_declaration)
           }));
           
           // Extract unique dates after formatting

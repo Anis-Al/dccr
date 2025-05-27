@@ -51,4 +51,19 @@ export class ExcelCrudService {
   getMetadonneesActuelles(): Observable<ExcelMetadonneesDto[]> {
     return this.excelCache.asObservable();
   }
+
+  supprimerFichierExcel(idFichierExcel: number): Observable<void> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.supprimerFichierExcel}/${idFichierExcel}`;
+    return this.http.delete<void>(url).pipe(
+      tap(() => {
+        const fichiers = this.excelCache.value.filter(f => f.id_fichier_excel !== idFichierExcel);
+        this.excelCache.next(fichiers);
+      }),
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
+
+  
 }

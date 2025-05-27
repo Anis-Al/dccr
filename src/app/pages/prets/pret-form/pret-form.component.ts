@@ -747,11 +747,9 @@ export class PretFormComponent implements OnInit, OnDestroy {
       this.creditStateService.setLoading(true);
       try {
         this.creditStateService.setSelectedCredit(state.pret);
-        // Set default values after setting the credit
         this.setValeursParDefault();
       } catch (error) {
         this.creditStateService.setError('Erreur lors du chargement des données du crédit');
-        console.error('Error initializing credit data:', error);
       } finally {
         this.creditStateService.setLoading(false);
       }

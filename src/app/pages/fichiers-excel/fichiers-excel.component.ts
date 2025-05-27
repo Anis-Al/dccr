@@ -15,14 +15,11 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
   standalone: true,
   imports: [CommonModule, FormsModule, PaginationComponent, DatePipe, PretDetailsComponent],
   template: `
-    <div class="fichiers-container" [class.details-open]="creditSelectionne">
-      <div class="fichiers-list" [class.with-credits]="fichierSelectionne">
+    <!-- Excel Files View -->
+    <div class="prets-container" [class.details-open]="creditSelectionne" *ngIf="!fichierSelectionne">
+      <div class="prets-list">
         <div class="header">
           <h1>Fichiers d'Entrée En Cours</h1>
-          <div class="header-actions">
-            <span>
-            </span>
-          </div>
         </div>
 
         <div class="filters">
@@ -56,7 +53,6 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
               <tr *ngFor="let fichier of FichiersExcelPagines; trackBy: trackByFichier" 
                   (click)="onRowClick($event, fichier)"
                   class="clickable-row"
-                  [class.selected]="fichierSelectionne?.id_fichier_excel === fichier.id_fichier_excel"
                   title="Voir ses crédits">
                 <td class="collante">{{ fichier.nom_fichier_excel }}</td>  
                 <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -84,20 +80,32 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
           </app-pagination>
         </div>
       </div>
-      
-      <div class="credits-section" *ngIf="fichierSelectionne">
+    </div>
+
+    <!-- Credits View (Full Screen) -->
+    <div class="prets-container" [class.details-open]="creditSelectionne" *ngIf="fichierSelectionne">
+      <div class="prets-list">
         <div class="header">
-          <h2>Crédits du fichier: {{ fichierSelectionne.nom_fichier_excel }}</h2>
+          <div>
+            <div class="breadcrumb" *ngIf="fichierSelectionne">
+              <a (click)="fermerCredits()">Fichiers d'Entrée</a>
+              <i class="fas fa-chevron-right"></i>
+              <span>{{ fichierSelectionne.nom_fichier_excel }}</span>
+            </div>
+            <h1>Crédits En Cours<small style="font-size: 0.875rem; opacity: 0.8;">- {{ fichierSelectionne.nom_fichier_excel }}</small></h1>
+          </div>
           <div class="header-actions">
-            <button class="btn btn-primary" (click)="ajouterNouveauCredit()">
-              <i class="fas fa-plus"></i> Nouveau
+            <button class="btn btn-secondary" (click)="fermerCredits()">
+              <i class="fas fa-arrow-left"></i>
+              <span>Retour</span>
             </button>
-            <button class="btn btn-secondary close-btn" (click)="fermerCredits()">
-              <i class="fas fa-times"></i>
+            <button class="btn btn-primary" (click)="ajouterNouveauCredit()">
+              <i class="fas fa-plus"></i>
+              <span>Nouveau</span>
             </button>
           </div>
         </div>
-        
+
         <div class="filters">
           <div class="search-box">
             <i class="fas fa-search"></i>
@@ -113,7 +121,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
             </div>
           </div>
         </div>
-        
+
         <div class="table-container">
           <table>
             <thead>
@@ -130,7 +138,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
                   (click)="selectionnerCredit(credit)"
                   [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit">
                 <td class="collante">{{credit.num_contrat_credit}}</td>
-                <td>{{credit.date_declaration}}</td>
+                <td>{{credit.date_declaration |date:'dd/MM/yyyy'}}</td>
                 <td>{{credit.libelle_situation}}</td>
                 <td>{{credit.libelle_type_credit}}</td>
                 <td>{{credit.libelle_activite}}</td>
@@ -141,7 +149,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
             </tbody>
           </table>
         </div>
-        
+
         <div class="pagination-container">
           <app-pagination
             [lignesTotales]="creditsFiltres.length"
@@ -150,8 +158,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
           </app-pagination>
         </div>
       </div>
-      
-      <!-- Panneau de détails du crédit -->
+
       <div class="details-panel" *ngIf="creditSelectionne">
         <app-pret-details 
           [pret]="creditSelectionne" 
@@ -161,56 +168,63 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
     </div>
   `,
   styles: [`
-    .fichiers-container {
+    .breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-color-light);
+
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  i {
+    font-size: 0.75rem;
+    opacity: 0.5;
+  }
+
+  span {
+    color: var(--text-color);
+  }
+}
+    .prets-container {
       display: flex;
       height: 100%;
-      position: relative;
+      transition: all 0.3s ease;
+
+      &.details-open {
+        .prets-list {
+          width: 40%;
+          min-width: 600px;
+        }
+
+        .details-panel {
+          width: 60%;
+        }
+      }
     }
 
-    .fichiers-list {
+    .prets-list {
       width: 100%;
+      transition: width 0.3s ease;
       overflow: auto;
       padding: 1rem;
-      transition: width 0.3s ease;
     }
-    
-    .fichiers-list.with-credits {
-      width: 40%;
-    }
-    
-    .credits-section {
-      width: 60%;
-      padding: 1rem;
-      border-left: 1px solid var(--border-color);
+
+    .details-panel {
+      width: 0;
       overflow: auto;
       background-color: var(--background-color);
-    }
-    
-    .details-panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 40%;
-      height: 100%;
-      background-color: white;
-      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-    
-    .fichiers-container.details-open .credits-section {
-      width: 40%;
-    }
-    
-    .close-btn {
-      padding: 0.5rem;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border-left: 1px solid var(--border-color);
+      transition: width 0.3s ease;
     }
 
     .header {
@@ -221,7 +235,7 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border-color);
 
-      h1, h2 {
+      h1 {
         margin: 0;
         font-size: 1.5rem;
         font-weight: 600;
@@ -232,6 +246,43 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
         display: flex;
         gap: 0.75rem;
         align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+
+        i {
+          font-size: 0.875rem;
+        }
+
+        &-primary {
+          background-color: var(--primary-color);
+          color: white;
+          border-color: var(--primary-color);
+
+          &:hover {
+            background-color: darken(#000000, 5%);
+          }
+        }
+
+        &-secondary {
+          background-color: #f5f5f5;
+          color: var(--text-color);
+          border-color: #ddd;
+
+          &:hover {
+            background-color: #e9e9e9;
+          }
+        }
       }
     }
 
@@ -408,18 +459,15 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
         }
 
         tbody tr {
-          &:hover {
+          &.selected {
             td {
-              background-color: var(--hover-color);
+              background-color: var(--primary-color-light) !important;
             }
           }
           
-          &.selected {
+          &:hover {
             td {
-              background-color: var(--primary-color-light, #e3f2fd);
-            }
-            td.collante {
-              border-left: 3px solid var(--primary-color, #1976d2);
+              background-color: var(--hover-color);
             }
           }
         }
@@ -461,42 +509,18 @@ import { PretDetailsComponent } from '../prets/pret-details/pret-details.compone
       }
     }
     
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      
-      &.btn-primary {
-        background-color: var(--primary-color, #1976d2);
-        color: white;
-        
-        &:hover {
-          background-color: var(--primary-color-dark, #1565c0);
-        }
-      }
-      
-      &.btn-secondary {
-        background-color: var(white, #f5f5f5);
-        color: var(--text-color, #333);
-        
-        &:hover {
-          background-color: var(--border-color, #e0e0e0);
-        }
-      }
-    }
-
     .actions {
       display: flex;
       justify-content: center;
       width: 100%;
+    }
+
+    .clickable-row {
+      cursor: pointer;
+      
+      &:hover {
+        background-color: var(--hover-color) !important;
+      }
     }
   `]
 })
@@ -624,10 +648,18 @@ export class FichiersExcelComponent implements OnInit {
   }
 
   supprimerFichier(fichier: ExcelMetadonneesDto) {
-    if (confirm(`Sur de vouloir supprimer ce fichier : "${fichier.nom_fichier_excel}" ?`)) {
+    if (confirm(`Sûr de vouloir supprimer ce fichier : "${fichier.nom_fichier_excel}" ?`)) {
+      this.excelCrudService.supprimerFichierExcel(fichier.id_fichier_excel)
+        .subscribe({
+          next: () => {
+            this.getTousLesMetadonneesduExcel();
+          },
+          error: (error) => {
+            console.error( error);
+          }
+        });
     }
   }
-  
 
   loadCreditsForFichier(idExcel: number) {
     this.isLoading = true;
@@ -640,7 +672,6 @@ export class FichiersExcelComponent implements OnInit {
             .filter(credit => credit.id_excel === idExcel)
             .map(credit => ({
               ...credit,
-              date_declaration: this.formatDate(credit.date_declaration)
             }));
           
           this.extractUniqueDates();
@@ -746,9 +777,9 @@ export class FichiersExcelComponent implements OnInit {
   fermerCredits() {
     this.fichierSelectionne = null;
     this.creditSelectionne = null;
-    this.tousLesCredits = [];
-    this.creditsFiltres = [];
-    this.creditsPagines = [];
+    this.creditSearchTerm = '';
+    this.selectedDate = '';
+    this.creditPageActuelle = 1;
   }
   
   ajouterNouveauCredit() {
@@ -765,3 +796,4 @@ export class FichiersExcelComponent implements OnInit {
     }
   }
 }
+

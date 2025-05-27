@@ -1,13 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { User } from '../../../core/models/user.model';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { User } from '../../../core/models/user.model';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-user-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.css']
 })
@@ -18,9 +20,18 @@ export class UserFormComponent implements OnInit {
 
   userForm!: FormGroup;
   isEditMode = false;
+  isLdapMode = false;
   roles: User['role'][] = ['Consultant', 'Importateur', 'Validateur']; 
 
-  constructor(private router:Router,private fb:FormBuilder){}
+  constructor(
+    private router: Router,
+    private fb: FormBuilder,
+    private userService: UserService
+  ) {}
+
+  onModeChange(): void {
+    this.initForm();
+  }
   ngOnInit(): void {
     this.isEditMode = !!this.user;
     this.initForm();
@@ -31,12 +42,19 @@ export class UserFormComponent implements OnInit {
   }
 
   private initForm(): void {
-    this.userForm = this.fb.group({
-      matricule: [this.user?.matricule || null],  
-      fullName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: [this.roles[1], Validators.required] 
-    });
+    const baseControls = {
+      matricule: [this.user?.matricule || null, Validators.required],
+      role: [this.roles[1], Validators.required]
+    };
+
+    if (!this.isLdapMode) {
+      Object.assign(baseControls, {
+        fullName: [this.user?.fullName || '', Validators.required],
+        email: [this.user?.email || '', [Validators.required, Validators.email]]
+      });
+    }
+
+    this.userForm = this.fb.group(baseControls);
   }
 
   get matricule() { return this.userForm.get('matricule'); }
@@ -46,7 +64,35 @@ export class UserFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.userForm.valid) {
-      this.formSubmit.emit(this.userForm.value as User);
+      if (this.isEditMode) {
+        this.userService.updateUser(this.userForm.value).subscribe({
+          next: (user) => {
+            this.formSubmit.emit(user);
+            this.router.navigate(['/utilisateurs']);
+          },
+          error: (error) => console.error('Erreur lors de la mise à jour:', error)
+        });
+      } else if (this.isLdapMode) {
+        const ldapData = {
+          matricule: this.userForm.value.matricule,
+          role: this.userForm.value.role
+        };
+        this.userService.addLdapUser(ldapData).subscribe({
+          next: (user) => {
+            this.formSubmit.emit(user);
+            this.router.navigate(['/utilisateurs']);
+          },
+          error: (error) => console.error('Erreur lors de l\'ajout LDAP:', error)
+        });
+      } else {
+        this.userService.addUser(this.userForm.value).subscribe({
+          next: (user) => {
+            this.formSubmit.emit(user);
+            this.router.navigate(['/utilisateurs']);
+          },
+          error: (error) => console.error('Erreur lors de l\'ajout:', error)
+        });
+      }
     }
   }
 

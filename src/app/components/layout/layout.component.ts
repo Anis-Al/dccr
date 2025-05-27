@@ -26,37 +26,64 @@ interface NavItem {
         </div>
 
         <nav class="nav-menu">
-          <ng-container *ngFor="let item of navItems">
+          <a
+            class="nav-item"
+            [routerLink]="'/tableau-de-bord'"
+            routerLinkActive="active"
+          >
+            <i class="fas fa-chart-line"></i>
+            <span class="nav-label">Tableau de Bord</span>
+          </a>
+
+          <div class="nav-section">
+            <div class="section-header" *ngIf="!sidebarCollapsed">
+              <span class="section-title">En cours</span>
+            </div>
+            <div class="section-content">
+              <ng-container *ngFor="let item of [navItems[1], navItems[2], navItems[3]]">
+                <a
+                  class="nav-item"
+                  [routerLink]="item.route"
+                  *ngIf="!item.children"
+                  routerLinkActive="active"
+                >
+                  <i [class]="'fas ' + item.icon"></i>
+                  <span class="nav-label">{{ item.label }}</span>
+                </a>
+
+                <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)">
+                  <i [class]="'fas ' + item.icon"></i>
+                  <span class="nav-label">{{ item.label }}</span>
+                  <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
+                </div>
+                <div
+                  class="sub-menu"
+                  *ngIf="item.children && item.expanded && !sidebarCollapsed"
+                >
+                  <a
+                    *ngFor="let child of item.children"
+                    [routerLink]="child.route"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="child.routerLinkActiveOptions || { exact: false }"
+                    class="nav-item sub-item"
+                  >
+                    <i [class]="'fas ' + child.icon"></i>
+                    <span class="nav-label">{{ child.label }}</span>
+                  </a>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <ng-container *ngFor="let item of [navItems[4], navItems[5], navItems[6]]">
             <a
               class="nav-item"
               [routerLink]="item.route"
-              *ngIf="!item.children"
               routerLinkActive="active"
             >
               <i [class]="'fas ' + item.icon"></i>
               <span class="nav-label">{{ item.label }}</span>
             </a>
-
-            <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)">
-              <i [class]="'fas ' + item.icon"></i>
-              <span class="nav-label">{{ item.label }}</span>
-              <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
-            </div>
-            <div
-              class="sub-menu"
-              *ngIf="item.children && item.expanded && !sidebarCollapsed"
-            >
-              <a
-                *ngFor="let child of item.children"
-                [routerLink]="child.route"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="child.routerLinkActiveOptions || { exact: false }"
-                class="nav-item sub-item"
-              >
-                <i [class]="'fas ' + child.icon"></i>
-                <span class="nav-label">{{ child.label }}</span>
-              </a>
-            </div>
           </ng-container>
         </nav>
 
@@ -95,6 +122,31 @@ interface NavItem {
     </div>
   `,
   styles: [`
+    .nav-section {
+      margin: 1rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 0.75rem 1rem;
+      background-color: var(--background-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      color: var(--text-color-light);
+    }
+
+    .section-content {
+      background-color: white;
+    }
+
     .layout {
       display: flex;
       height: 100vh;
@@ -314,11 +366,11 @@ export class LayoutComponent {
       expanded: false,
       children: [
         { label: 'Intégration', route: '/fichiers-excel/integration', icon: 'fa-file-import' },
-        { label: 'En cours', route: '/fichiers-excel', icon: 'fa-spinner', routerLinkActiveOptions: { exact: true } }
+        { label: 'Liste', route: '/fichiers-excel', icon: 'fa-spinner', routerLinkActiveOptions: { exact: true } }
       ]
     },
     {
-      label: 'Crédits En Cours',
+      label: 'Crédits',
       icon: 'fa-money-bill-transfer',   
       expanded: false,
       route: '/credits'

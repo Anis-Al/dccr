@@ -14,7 +14,6 @@ private apiUrl = environment.apiBaseUrl;
   genererDeclarations(idExcel: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}${environment.endpoints.declarationsBA.genererDeclarationsParExcel}/${idExcel}`, {});
   }
-
   
   telechargerDeclarations(idXml: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}${environment.endpoints.declarationsBA.telechargerDeclarations}/${idXml}`, {

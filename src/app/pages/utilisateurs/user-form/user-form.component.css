@@ -7,6 +7,49 @@
   margin: 2rem auto; /* Center form */
 }
 
+.mode-selector {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.mode-selector label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.mode-selector select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 1rem;
+  color: #495057;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.mode-selector select:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.optional-field {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.optional-field:hover,
+.optional-field:focus-within {
+  opacity: 1;
+}
+
 .user-form-card h2 {
   text-align: center;
   margin-bottom: 25px;

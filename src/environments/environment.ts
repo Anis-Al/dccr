@@ -8,6 +8,7 @@ export const environment = {
       exportationErreurs: 'Excel/exporter-erreurs-excel', 
       tousLesFichiersExcelEnCours: 'Excel/get-tous-metadonnes-excel',
       telechargerModele:'',
+      supprimerFichierExcel:'Excel/supprimer-fichier-excel',
     },
     credits: {
       tousLesCreditsEnCours: 'credits/get-tous-credits',
@@ -19,11 +20,11 @@ export const environment = {
      telechargerDeclarations:'declarationsBA/telecharger-declarations',
      archiverDonnees:'declarationsBA/archiver-donnees',
     },
-    users: {
-      getAll: '/api/Users',
-      getById: '/api/Users/{userId}',
-      create: '/api/Users',
-      update: '/api/Users/{userId}'
+    utilisateurs: {
+      tousLesUtilisateurs: 'utilisateurs',
+      ajouterUtilisateur: 'utilisateurs/ajouter-utilisateur',
+      majUtilisateur: 'utilisateurs/modifier-utilisateur',
+      supprimerUtilisateur: 'utilisateurs/supprimer-utilisateur',
     },
     auth: {
       login: '/api/Auth/login',
