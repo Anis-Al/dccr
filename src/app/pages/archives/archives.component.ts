@@ -11,11 +11,6 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
     <div class="archives-container">
       <div class="header">
         <h1>Archives des données</h1>
-        <div class="header-actions">
-          <button class="btn btn-primary export-btn" title="Exporter les données au format Excel">
-            <i class="fas fa-file-excel"></i> Exporter
-          </button>
-        </div>
       </div>
 
       <div class="archives-content">
@@ -29,6 +24,9 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
           <div class="tab" [class.active]="selectedTab === 'declarations'" (click)="changeTab('declarations')">
             <i class="fas fa-file-alt"></i> Déclarations BA
           </div>
+          <button class="btn export-btn green-button" title="Exporter les données au format Excel">
+            <i class="fas fa-file-excel"></i> Exporter
+          </button>
           <div class="search-box">
             <i class="fas fa-search"></i>
             <input 
@@ -193,58 +191,68 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       border-bottom: 1px solid var(--border-color);
       align-items: center;
       padding-right: 1rem;
-
-      .tab {
-        padding: 1rem 1.5rem;
-        font-weight: 500;
-        color: var(--text-color-light);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        border-bottom: 3px solid transparent;
-
-        i {
-          font-size: 1rem;
-        }
-
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.03);
-          color: var(--text-color);
-        }
-
-        &.active {
-          color: var(--primary-color);
-          border-bottom: 3px solid var(--primary-color);
-          background-color: white;
-        }
-      }
+      gap: 1rem;
 
       .search-box {
-        position: relative;
-        margin-left: auto;
+        margin-left: 0;
         width: 250px;
+      }
 
-        i {
-          position: absolute;
-          left: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
-          color: var(--text-color-light);
-        }
+      .export-btn {
+        margin-left: auto;
+      }
+    }
 
-        input {
-          width: 100%;
-          padding: 0.5rem 1rem 0.5rem 2.25rem;
-          border: 1px solid var(--border-color);
-          border-radius: 4px;
-          font-size: 0.875rem;
+    .tab {
+      padding: 1rem 1.5rem;
+      font-weight: 500;
+      color: var(--text-color-light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 3px solid transparent;
 
-          &:focus {
-            outline: none;
-            border-color: var(--primary-color);
-          }
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+        color: var(--text-color);
+      }
+
+      &.active {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+        background-color: white;
+      }
+    }
+
+    .search-box {
+      position: relative;
+      margin-left: auto;
+      width: 250px;
+
+      i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-color-light);
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.25rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 0.875rem;
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
         }
       }
     }
@@ -333,8 +341,6 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       font-style: italic;
     }
 
-
-
     .btn {
       display: inline-flex;
       align-items: center;
@@ -347,57 +353,21 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
       cursor: pointer;
       transition: all 0.2s ease;
       border: none;
-      
-      &.btn-primary {
-        background-color: var(--primary-color, #1976d2);
-        color: white;
-        
-        &:hover {
-          background-color: var(--primary-color-dark, #1565c0);
-        }
-      }
-      
-      &.btn-outline {
-        background-color: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-color);
-        
-        &:hover {
-          background-color: var(--background-color);
-        }
-      }
+    }
+
+    .green-button {
+      background-color: #28a745 !important;
+      color: white !important;
+    }
+
+    .green-button:hover {
+      background-color: #218838 !important;
     }
 
     .export-btn {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .btn-icon {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.25rem;
-      color: var(--text-color);
-      opacity: 0.7;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-
-      &:hover {
-        opacity: 1;
-        background-color: rgba(0, 0, 0, 0.05);
-      }
-    }
-
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
     }
   `]
 })

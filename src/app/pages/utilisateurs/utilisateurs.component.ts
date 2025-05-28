@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { User } from '../../core/models/user.model';
+import { Utilisateur } from '../../core/dtos/Utilisateurs/utilisateur-dto';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
-
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-utilisateurs',
@@ -70,7 +70,7 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
                     <button class="btn-icon" title="Modifier">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon" title="Supprimer">
+                    <button class="btn-icon" title="Supprimer" (click)="supprimerUtilisateur(user)">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -355,28 +355,27 @@ export class UtilisateursComponent implements OnInit {
   lignesParPage = 5;
   searchTerm = '';
   selectedRole = '';
-  utilisateursFiltres: User[] = [];
-  utilisateursPagines: User[] = [];
+  utilisateursFiltres: Utilisateur[] = [];
+  utilisateursPagines: Utilisateur[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
-  utilisateurs: User[] = [
-    {
-      matricule: 77822231992,
-      fullName: 'Halil Ibrahim',
-      email: 'Ibrahim.Halil@socgen.com',
-      role: 'Admin',
-    },
-    {
-      matricule: 552221145,
-      fullName: 'Alim Anis',
-      email: 'anis.algiers@gmail.com',
-      role: 'Consultant',
-    }
-  ];
+  utilisateurs: Utilisateur[] = [];
 
   ngOnInit() {
-    this.updateFiltres();
+    this.loadUsers();
+  }
+
+  loadUsers() {
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        this.utilisateurs = users;
+        this.updateFiltres();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des utilisateurs:', error);
+      }
+    });
   }
 
   updateFiltres() {
@@ -412,5 +411,18 @@ export class UtilisateursComponent implements OnInit {
 
   ajouterNouvelUtilisateur() {
     this.router.navigate(['/utilisateurs/nouveau']);
+  }
+
+  supprimerUtilisateur(user: Utilisateur) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.fullName} ?`)) {
+      this.userService.deleteUser(user.matricule).subscribe({
+        next: () => {
+          this.loadUsers();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+        }
+      });
+    }
   }
 }

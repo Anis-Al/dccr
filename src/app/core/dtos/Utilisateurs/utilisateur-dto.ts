@@ -1,4 +1,4 @@
-export interface User {
+export interface Utilisateur {
   matricule: number; 
   email: string;
   fullName: string;

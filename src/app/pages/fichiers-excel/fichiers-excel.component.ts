@@ -652,10 +652,16 @@ export class FichiersExcelComponent implements OnInit {
       this.excelCrudService.supprimerFichierExcel(fichier.id_fichier_excel)
         .subscribe({
           next: () => {
-            this.getTousLesMetadonneesduExcel();
+            this.creditService.actualiserCredits().subscribe(() => {
+              this.tousLesCredits = [];
+              this.creditsFiltres = [];
+              this.creditsPagines = [];
+              this.creditSelectionne = null;
+              this.getTousLesMetadonneesduExcel();
+            });
           },
           error: (error) => {
-            console.error( error);
+            console.error(error);
           }
         });
     }

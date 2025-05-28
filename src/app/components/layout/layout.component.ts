@@ -37,7 +37,7 @@ interface NavItem {
 
           <div class="nav-section">
             <div class="section-header" *ngIf="!sidebarCollapsed">
-              <span class="section-title">En cours</span>
+              <span class="section-title">En Cours</span>
             </div>
             <div class="section-content">
               <ng-container *ngFor="let item of [navItems[1], navItems[2], navItems[3]]">
@@ -137,7 +137,6 @@ interface NavItem {
 
     .section-title {
       font-size: 0.75rem;
-      text-transform: uppercase;
       letter-spacing: 0.05em;
       font-weight: 500;
       color: var(--text-color-light);

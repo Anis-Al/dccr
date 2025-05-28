@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { User } from '../../../core/models/user.model';
+import { Utilisateur } from '../../../core/dtos/Utilisateurs/utilisateur-dto';
 import { UserService } from '../../../core/services/user.service';
 
 @Component({
@@ -14,14 +14,14 @@ import { UserService } from '../../../core/services/user.service';
   styleUrls: ['./user-form.component.css']
 })
 export class UserFormComponent implements OnInit {
-  @Input() user: User | null = null; 
-  @Output() formSubmit = new EventEmitter<User>();
+  @Input() user: Utilisateur | null = null; 
+  @Output() formSubmit = new EventEmitter<Utilisateur>();
   @Output() formCancel = new EventEmitter<void>();
 
   userForm!: FormGroup;
   isEditMode = false;
   isLdapMode = false;
-  roles: User['role'][] = ['Consultant', 'Importateur', 'Validateur']; 
+  roles: Utilisateur['role'][] = ['Consultant', 'Importateur', 'Validateur']; 
 
   constructor(
     private router: Router,
