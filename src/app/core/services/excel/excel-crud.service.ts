@@ -11,7 +11,7 @@ export class ExcelCrudService {
   private readonly baseUrl = environment.apiBaseUrl;
   private excelCache = new BehaviorSubject<ExcelMetadonneesDto[]>([]);
   private tempsDerniereRequete: number = 0;
-  private readonly cacheTimeout = 5 * 60 * 1000;
+  private readonly timeout = 60 * 60 * 1000;
 
   constructor(private http: HttpClient) { }
 
@@ -19,7 +19,7 @@ export class ExcelCrudService {
     const now = Date.now();
     const cacheAge = now - this.tempsDerniereRequete;
 
-    if (cacheAge < this.cacheTimeout && this.excelCache.value.length > 0) {
+    if (cacheAge < this.timeout && this.excelCache.value.length > 0) {
       return of(this.excelCache.value);
     }
 

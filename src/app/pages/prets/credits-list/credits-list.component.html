@@ -70,7 +70,8 @@
 
   <div class="details-panel" *ngIf="creditSelectionne">
     <app-pret-details 
-      [pret]="creditSelectionne" 
+      [pret]="creditSelectionne"
+      [fromCreditsList]="true"
       (close)="fermerDetails()">
     </app-pret-details>
   </div>

@@ -365,7 +365,7 @@ export class LayoutComponent {
       expanded: false,
       children: [
         { label: 'Intégration', route: '/fichiers-excel/integration', icon: 'fa-file-import' },
-        { label: 'Liste', route: '/fichiers-excel', icon: 'fa-spinner', routerLinkActiveOptions: { exact: true } }
+        { label: 'Détails', route: '/fichiers-excel', icon: 'fa-spinner', routerLinkActiveOptions: { exact: true } }
       ]
     },
     {

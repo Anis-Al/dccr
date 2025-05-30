@@ -22,7 +22,7 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="action-group">
+        <div class="action-group" *ngIf="!fromCreditsList">
           <button class="btn btn-primary" (click)="onEdit()">
             <i class="fas fa-edit"></i>
             Modifier
@@ -519,6 +519,7 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
 })
 export class PretDetailsComponent {
   @Input() pret!: CreditDto;
+  @Input() fromCreditsList: boolean = false;
   @Output() close = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
 

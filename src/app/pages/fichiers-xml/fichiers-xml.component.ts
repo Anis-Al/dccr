@@ -50,7 +50,7 @@ import { XmlDto } from '../../core/dtos/DeclarationsBA/declarationsBA-dto';
                 <th>Excel Source</th>
                 <th>Date de géneration</th>
                 <th>Nombre des crédits</th>
-                <th>Intégrateur</th>
+                <th>Générateur</th>
                 <th class="actions-header">Actions</th>
               </tr>
             </thead>
@@ -419,7 +419,7 @@ import { XmlDto } from '../../core/dtos/DeclarationsBA/declarationsBA-dto';
 })
 export class FichiersXMLComponent implements OnInit {
   pageActuelle: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number = 5;
   totalPages: number = 1;
   
   searchTerm: string = '';
@@ -478,8 +478,11 @@ export class FichiersXMLComponent implements OnInit {
         fichier.nomFichierExcelSource.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         fichier.nomUtilisateurGenerateur.toLowerCase().includes(this.searchTerm.toLowerCase());
       
+      const dateMatch = (!this.dateDebut || !this.dateFin) ||
+        (new Date(fichier.dateHeureGenerationXml) >= new Date(this.dateDebut) &&
+         new Date(fichier.dateHeureGenerationXml) <= new Date(this.dateFin));
      
-      return searchMatch;
+      return searchMatch && dateMatch;
     });
     
     this.pageActuelle = 1;
