@@ -1,7 +1,15 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './components/layout/layout.component';
+import { inject } from '@angular/core';
+import { AuthService } from './core/services/auth&utilisateurs/auth.service';
+import { Router } from '@angular/router';
 
 export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
   {
     path: 'login',
     loadComponent: () =>
@@ -10,12 +18,18 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [() => {
+      const authService = inject(AuthService);
+      const router = inject(Router);
+      
+      if (!authService.isAuthenticated()) {
+        router.navigate(['/login']);
+        return false;
+      }
+      return true;
+    }],
     children: [
-      {
-        path: '',
-        redirectTo: 'tableau-de-bord',
-        pathMatch: 'full'
-      },
+
       {
         path: 'tableau-de-bord',
         loadComponent: () =>
@@ -52,7 +66,7 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./pages/fichiers-excel/fichiers-excel.component').then(m => m.FichiersExcelComponent)
+              import('./pages/fichiers-excel/consultation/fichiers-excel-consultation.component').then(m => m.FichiersExcelConsultationComponent)
           },
           {
             path: 'integration',

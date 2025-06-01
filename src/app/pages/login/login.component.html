@@ -10,36 +10,38 @@
       
       <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label for="username">Matricule</label>
+          <label for="matricule">Matricule</label>
           <div class="input-group">
             <input 
               type="text" 
-              id="username" 
-              formControlName="username"
+              id="matricule" 
+              formControlName="matricule"
               placeholder="Entrez votre matricule"
-              [ngClass]="{'error': loginForm.get('username')?.invalid && (loginForm.get('username')?.touched || loginForm.get('username')?.dirty)}">
+              [ngClass]="{'error': loginForm.get('matricule')?.invalid && (loginForm.get('matricule')?.touched || loginForm.get('matricule')?.dirty)}">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="password">Mot de passe</label>
+          <label for="mdp">Mot de passe</label>
           <div class="input-group">
             <input 
               type="password" 
-              id="password" 
-              formControlName="password"
+              id="mdp" 
+              formControlName="mdp"
               placeholder="Entrez votre mot de passe"
-              [ngClass]="{'error': loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginForm.get('password')?.dirty)}">
+              [ngClass]="{'error': loginForm.get('mdp')?.invalid && (loginForm.get('mdp')?.touched || loginForm.get('mdp')?.dirty)}">
           </div>
         </div>
 
         <button type="submit" class="login-button" [disabled]="loginForm.invalid || isSubmitting">
           <span *ngIf="!isSubmitting">Se connecter</span>
-          <span *ngIf="isSubmitting" class="loading-spinner"></span>
+          <div *ngIf="isSubmitting" class="loading-state">
+            <span class="loading-text">Connexion en cours...</span>
+          </div>
         </button>
 
-        <div class="error-message server-error" *ngIf="errorMessage">
-          {{ errorMessage }}
+        <div class="alert" *ngIf="errorMessage" [class.alert-error]="true">
+          <span class="alert-message">{{ errorMessage }}</span>
         </div>
       </form>
     </div>

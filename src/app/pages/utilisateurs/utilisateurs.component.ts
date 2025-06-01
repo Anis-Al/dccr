@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Utilisateur } from '../../core/dtos/Utilisateurs/utilisateur-dto';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
-import { UserService } from '../../core/services/user.service';
+import { UserService } from '../../core/services/auth&utilisateurs/user.service';
 
 @Component({
   selector: 'app-utilisateurs',
@@ -47,15 +47,14 @@ import { UserService } from '../../core/services/user.service';
                 <th>Matricule</th>
                 <th>Email</th>
                 <th>Rôle</th>
-                <th>Actions</th>
+                <th style="text-align: center;">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let user of utilisateursPagines" class="clickable-row">
                 <td class="sticky-column">
                   <div class="user-info">
-                    <img [src]="'/assets/default-avatar.svg'" alt="Avatar" class="avatar">
-                    <span>{{ user.fullName }}</span>
+                    <span>{{ user.nom_complet }}</span>
                   </div>
                 </td>
                 <td>{{ user.matricule }}</td>
@@ -381,7 +380,7 @@ export class UtilisateursComponent implements OnInit {
   updateFiltres() {
     this.utilisateursFiltres = this.utilisateurs.filter(user => {
       const matchSearch = !this.searchTerm || 
-        user.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        user.nom_complet.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         user.matricule.toString().includes(this.searchTerm);
       
@@ -414,7 +413,7 @@ export class UtilisateursComponent implements OnInit {
   }
 
   supprimerUtilisateur(user: Utilisateur) {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.fullName} ?`)) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.nom_complet} ?`)) {
       this.userService.deleteUser(user.matricule).subscribe({
         next: () => {
           this.loadUsers();

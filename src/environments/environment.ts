@@ -27,8 +27,7 @@ export const environment = {
       supprimerUtilisateur: 'utilisateurs/supprimer-utilisateur',
     },
     auth: {
-      login: '/api/Auth/login',
-      register: '/api/Auth/register'
+      login: 'auth',
     }  
   }
 };

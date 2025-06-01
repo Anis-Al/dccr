@@ -6,7 +6,7 @@ import { PretDetailsComponent } from '../pret-details/pret-details.component';
 import { CreditDto }  from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { catchError, Observable, of, Subscription, tap } from 'rxjs';
-import { ExcelSelectionService } from '../../../core/services/excel/excel-selection.service';
+import { ExcelSelectionService } from '../../../core/services/excel-selection.service';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
 
 

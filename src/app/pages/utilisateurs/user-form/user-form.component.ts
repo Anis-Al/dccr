@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Utilisateur } from '../../../core/dtos/Utilisateurs/utilisateur-dto';
-import { UserService } from '../../../core/services/user.service';
+import { UserService } from '../../../core/services/auth&utilisateurs/user.service';
 
 @Component({
   selector: 'app-user-form',
@@ -49,7 +49,7 @@ export class UserFormComponent implements OnInit {
 
     if (!this.isLdapMode) {
       Object.assign(baseControls, {
-        fullName: [this.user?.fullName || '', Validators.required],
+        fullName: [this.user?.nom_complet || '', Validators.required],
         email: [this.user?.email || '', [Validators.required, Validators.email]]
       });
     }

@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { JwtService } from '../../core/services/auth&utilisateurs/jwt.service';
+import { AuthService } from '../../core/services/auth&utilisateurs/auth.service';
+interface UserInfo {
+  name: string;
+  role: string;
+}
 
 interface NavItem {
   label: string;
@@ -91,8 +97,8 @@ interface NavItem {
           <div class="user-info" style="margin-bottom: 1rem;">
             <img src="assets/default-avatar.svg" alt="Avatar" class="avatar">
             <div class="user-details" *ngIf="!sidebarCollapsed">
-              <span class="user-name">Alim Anis</span>
-              <span class="user-role">Validateur</span>
+              <span class="user-name">{{ userInfo?.name || 'Utilisateur inconnu' }}</span>
+              <span class="user-role">{{ userInfo?.role || 'Aucun rôle' }}</span>
             </div>
           </div>
 
@@ -354,8 +360,14 @@ interface NavItem {
 })
 export class LayoutComponent {
   sidebarCollapsed = false;
+  userInfo: UserInfo | null = null;
 
-  constructor(private router:Router){}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {
+    this.userInfo = this.authService.getUserInfo();
+  }
 
   navItems: NavItem[] = [
     { label: 'Tableau de Bord', route: '/tableau-de-bord', icon: 'fa-chart-line' },

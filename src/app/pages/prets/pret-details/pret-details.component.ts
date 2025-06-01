@@ -384,11 +384,9 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
       border-radius: 12px;
       padding: 1.75rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .details-section:hover {
-      transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
@@ -419,7 +417,6 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
       padding: 0.75rem;
       background-color: #f8f9fa;
       border-radius: 8px;
-      transition: background-color 0.2s ease;
     }
 
     .detail-item:hover {
@@ -453,12 +450,10 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
       background: #f8f9fa;
       border-radius: 10px;
       padding: 1.25rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .intervenant-item:hover,
     .garantie-item:hover {
-      transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
 
