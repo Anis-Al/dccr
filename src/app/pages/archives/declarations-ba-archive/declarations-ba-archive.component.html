@@ -1,0 +1,57 @@
+<div class="fichiers-container">
+  <div class="fichiers-list">
+    <div class="header">
+      <h1>Déclarations BA Archivées</h1>
+    </div>
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher une déclaration..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="date-filters">
+        <div class="date-input">
+          <label>Du:</label>
+          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+        </div>
+        <div class="date-input">
+          <label>Au:</label>
+          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        </div>
+      </div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fichier Correction</th>
+            <th>Fichier Suppression</th>
+            <th>Source</th>
+            <th>Date Géneration</th>
+            <th>Nb Crédits</th>
+            <th>Générateur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fichier of fichiersPagines">
+            <td>{{fichier?.nomFichierCorrection || 'N/A'}}</td>
+            <td>{{fichier?.nomFichierSuppression || 'N/A'}}</td>
+            <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
+            <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td>0</td>
+            <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
+          </tr>
+          <tr *ngIf="fichiersPagines.length === 0">
+            <td colspan="6" class="no-data">Aucune déclaration trouvée</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="fichiersFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div> 

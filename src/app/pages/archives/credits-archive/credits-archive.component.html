@@ -1,0 +1,55 @@
+<div class="fichiers-container">
+  <div class="fichiers-list">
+    <div class="header">
+      <h1>Crédits Archivés</h1>
+    </div>
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="date-filters">
+        <div class="date-input">
+          <label>Du:</label>
+          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+        </div>
+        <div class="date-input">
+          <label>Au:</label>
+          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        </div>
+      </div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="collante">N° Contrat</th>
+            <th>Date Déclaration</th>
+            <th>Situation</th>
+            <th>Type</th>
+            <th>Activité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let credit of creditsPagines">
+            <td class="collante">{{credit?.numContrat || 'N/A'}}</td>
+            <td>{{credit?.dateArchivage | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td>{{credit?.situation || 'N/A'}}</td>
+            <td>{{credit?.type || 'N/A'}}</td>
+            <td>{{credit?.activite || 'N/A'}}</td>
+          </tr>
+          <tr *ngIf="creditsPagines.length === 0">
+            <td colspan="5" class="no-data">Aucun crédit trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="creditsFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div> 

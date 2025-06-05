@@ -1,0 +1,98 @@
+<div class="fichiers-container">
+    <div class="fichiers-list">
+      <div class="header">
+        <h1>Déclarations BA En Cours</h1>
+        <div class="header-actions">
+          <button class="btn btn-primary" (click)="naviguerVersGeneration()">
+            <i class="fas fa-plus"></i>
+            <span>Générer XML</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Rechercher un fichier..." [(ngModel)]="searchTerm" (input)="onSearch()">
+        </div>
+        <div class="date-filters">
+          <div class="date-input">
+            <label>Du:</label>
+            <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+          </div>
+          <div class="date-input">
+            <label>Au:</label>
+            <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fichier Correction</th>
+              <th>Fichier Suppression</th>
+              <th>Source</th>
+              <th>Date Géneration</th>
+              <th>Nb Crédits</th>
+              <th>Générateur</th>
+              <th class="actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fichier of fichiersPagines">
+              <td>{{fichier?.nomFichierCorrection || 'N/A'}}</td>
+              <td>{{fichier?.nomFichierSuppression || 'N/A'}}</td>
+              <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
+              <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+              <td>0</td>
+              <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
+              <td class="actions-cell">
+                <div class="tooltip-container button-group">
+                  <button 
+                    (click)="telechargerLesFichiersDeCetteInstance(fichier)" 
+                    class="btn-icon"
+                    (mouseenter)="montrerIndiceLol($event, 'download')"
+                    (mouseleave)="cacherIndice($event, 'download')"
+                  >
+                    <i class="fas fa-download"></i>
+                    <span class="tooltip-text">Télécharger les fichiers de cette déclaratio</span>
+                  </button>
+                  <button 
+                    (click)="marquerCommeSoumisALaBA(fichier)" 
+                    class="btn-icon"
+                    (mouseenter)="montrerIndiceLol($event, 'submit')"
+                    (mouseleave)="cacherIndice($event, 'submit')"
+                  >
+                    <i class="fas fa-check"></i>
+                    <span class="tooltip-text">Marquer comme soumis à la BA</span>
+                  </button>
+                  <button 
+                    (click)="supprimerFichier(fichier)" 
+                    class="btn-icon"
+                    (mouseenter)="montrerIndiceLol($event, 'delete')"
+                    (mouseleave)="cacherIndice($event, 'delete')"
+                  >
+                    <i class="fas fa-trash"></i>
+                    <span class="tooltip-text">Supprimer ce fichier</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="fichiersPagines.length === 0">
+              <td colspan="5" class="no-data">Aucun fichier trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-container">
+        <app-pagination
+          [lignesTotales]="fichiersFiltres.length"
+          [pageActuelle]="pageActuelle"
+          (changeurPage)="changerPage($event)">
+        </app-pagination>
+      </div>
+    </div>
+  </div>

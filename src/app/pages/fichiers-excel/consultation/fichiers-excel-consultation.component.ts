@@ -9,11 +9,12 @@ import { CreditDto } from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { Subscription } from 'rxjs';
 import { PretDetailsComponent } from '../../prets/pret-details/pret-details.component';
+import { CreditsListComponent } from './credits-list-par-source/credits-list.component';
 
 @Component({
   selector: 'app-fichiers-excel-consultation',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, DatePipe, PretDetailsComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, DatePipe, PretDetailsComponent, CreditsListComponent],
   templateUrl: './fichiers-excel-consultation.component.html',
   styleUrls: ['./fichiers-excel-consultation.component.scss']
 })
@@ -23,7 +24,7 @@ export class FichiersExcelConsultationComponent implements OnInit, OnDestroy {
   FichiersExcelPagines: ExcelMetadonneesDto[] = [];
   fichierSelectionne: ExcelMetadonneesDto | null = null;
   pageActuelle = 1;
-  lignesParPage = 10;
+  lignesParPage = 10;   
   totalPages = 1;
   searchTerm = '';
   dateDebut: string = '';

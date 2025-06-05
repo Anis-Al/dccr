@@ -13,6 +13,7 @@ export const environment = {
     credits: {
       tousLesCreditsEnCours: 'credits/get-tous-credits',
       tableDomaines: 'credits/get-tables-domaines',
+      ajouterCredit: 'credits/nouveau',
     },
     declarationsBA :{
      tousLesDeclarations:'declarationsBA',

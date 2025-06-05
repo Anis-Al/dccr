@@ -94,5 +94,12 @@ export class CreditsService {
     return this.creditsCache.asObservable();
   }
 
-  
+  ajouterCredit(credit: CreditDto): Observable<any> {
+    const url = `${this.baseUrl}${environment.endpoints.credits.ajouterCredit}`;
+    return this.http.post<any>(url, credit).pipe(
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
 }

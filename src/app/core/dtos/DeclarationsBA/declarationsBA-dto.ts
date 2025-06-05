@@ -1,6 +1,7 @@
 export interface XmlDto {
   idFichierXml: number;
-  nomFichierXml: string;
+  nomFichierCorrection: string;
+  nomFichierSuppression:string;
   dateHeureGenerationXml: Date;
   nomUtilisateurGenerateur: string;
   nomFichierExcelSource: string;

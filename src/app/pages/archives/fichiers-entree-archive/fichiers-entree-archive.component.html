@@ -1,0 +1,51 @@
+<div class="prets-container">
+  <div class="prets-list">
+    <div class="header">
+      <h1>Fichiers d'entrée Archivés</h1>
+    </div>
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher un fichier..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="date-filters">
+        <div class="date-input">
+          <label>Du:</label>
+          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
+        </div>
+        <div class="date-input">
+          <label>Au:</label>
+          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        </div>
+      </div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="collante">Nom du fichier</th>
+            <th>Date d'intégration</th>
+            <th>Intégrateur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fichier of fichiersPagines" class="clickable-row">
+            <td class="collante">{{fichier?.nomFichier || 'N/A'}}</td>
+            <td>{{fichier?.dateArchivage | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td>{{fichier?.utilisateur || 'N/A'}}</td>
+          </tr>
+          <tr *ngIf="fichiersPagines.length === 0">
+            <td colspan="3" class="no-data">Aucun fichier trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="fichiersFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div> 

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { JwtService } from '../../core/services/auth&utilisateurs/jwt.service';
 import { AuthService } from '../../core/services/auth&utilisateurs/auth.service';
+
+
 interface UserInfo {
   name: string;
   role: string;
 }
-
 interface NavItem {
   label: string;
   route?: string;
@@ -44,20 +45,24 @@ interface NavItem {
           <div class="nav-section">
             <div class="section-header" *ngIf="!sidebarCollapsed">
               <span class="section-title">En Cours</span>
+              <button class="collapse-section-btn" (click)="enCoursCollapsed = !enCoursCollapsed">
+                <i class="fas" [ngClass]="enCoursCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+              </button>
             </div>
-            <div class="section-content">
+            <div class="section-content" *ngIf="!enCoursCollapsed">
               <ng-container *ngFor="let item of [navItems[1], navItems[2], navItems[3]]">
                 <a
                   class="nav-item"
                   [routerLink]="item.route"
                   *ngIf="!item.children"
                   routerLinkActive="active"
+                  [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null"
                 >
                   <i [class]="'fas ' + item.icon"></i>
                   <span class="nav-label">{{ item.label }}</span>
                 </a>
 
-                <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)">
+                <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null">
                   <i [class]="'fas ' + item.icon"></i>
                   <span class="nav-label">{{ item.label }}</span>
                   <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
@@ -81,16 +86,67 @@ interface NavItem {
             </div>
           </div>
 
-          <ng-container *ngFor="let item of [navItems[4], navItems[5], navItems[6]]">
-            <a
-              class="nav-item"
-              [routerLink]="item.route"
-              routerLinkActive="active"
-            >
-              <i [class]="'fas ' + item.icon"></i>
-              <span class="nav-label">{{ item.label }}</span>
-            </a>
-          </ng-container>
+          <div class="nav-section">
+            <div class="section-header" *ngIf="!sidebarCollapsed">
+              <span class="section-title">Archives</span>
+              <button class="collapse-section-btn" (click)="archivesCollapsed = !archivesCollapsed">
+                <i class="fas" [ngClass]="archivesCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+              </button>
+            </div>
+            <div class="section-content" *ngIf="!archivesCollapsed">
+              <ng-container *ngFor="let item of [navItems[4], navItems[5], navItems[6]]">
+                <a
+                  class="nav-item"
+                  [routerLink]="item.route"
+                  *ngIf="!item.children"
+                  routerLinkActive="active"
+                  [attr.title]="sidebarCollapsed ? 'Archives - ' + item.label : null"
+                >
+                  <i [class]="'fas ' + item.icon"></i>
+                  <span class="nav-label">{{ item.label }}</span>
+                </a>
+                <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'Archives - ' + item.label : null">
+                  <i [class]="'fas ' + item.icon"></i>
+                  <span class="nav-label">{{ item.label }}</span>
+                  <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
+                </div>
+                <div
+                  class="sub-menu"
+                  *ngIf="item.children && item.expanded && !sidebarCollapsed"
+                >
+                  <a
+                    *ngFor="let child of item.children"
+                    [routerLink]="child.route"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="child.routerLinkActiveOptions || { exact: false }"
+                    class="nav-item sub-item"
+                  >
+                    <i [class]="'fas ' + child.icon"></i>
+                    <span class="nav-label">{{ child.label }}</span>
+                  </a>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <a
+            class="nav-item"
+            [routerLink]="navItems[7].route"
+            routerLinkActive="active"
+            [attr.title]="sidebarCollapsed ? navItems[7].label : null"
+          >
+            <i [class]="'fas ' + navItems[7].icon"></i>
+            <span class="nav-label">{{ navItems[7].label }}</span>
+          </a>
+          <a
+            class="nav-item"
+            [routerLink]="navItems[8].route"
+            routerLinkActive="active"
+            [attr.title]="sidebarCollapsed ? navItems[8].label : null"
+          >
+            <i [class]="'fas ' + navItems[8].icon"></i>
+            <span class="nav-label">{{ navItems[8].label }}</span>
+          </a>
         </nav>
 
         <div class="sidebar-footer" style="padding-bottom: 0.75rem; margin-bottom: 0;">
@@ -133,12 +189,17 @@ interface NavItem {
       border: 1px solid var(--border-color);
       border-radius: 4px;
       overflow: hidden;
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
     }
 
     .section-header {
       padding: 0.75rem 1rem;
       background-color: var(--background-color);
       border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .section-title {
@@ -356,11 +417,27 @@ interface NavItem {
         margin-left: 0;
       }
     }
+
+    .collapse-section-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      color: var(--text-color-light);
+      font-size: 1rem;
+      vertical-align: middle;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
   `]
 })
 export class LayoutComponent {
   sidebarCollapsed = false;
   userInfo: UserInfo | null = null;
+
+  enCoursCollapsed = false;
+  archivesCollapsed = false;
 
   constructor(
     private router: Router,
@@ -391,7 +468,9 @@ export class LayoutComponent {
       icon: 'fa-file',
       route: '/fichiers-xml'
     },
-    { label: 'Archives', route: '/archives', icon: 'fa-clock-rotate-left' },
+    { label: "Fichiers d'entrée", icon: 'fa-file-excel', route: '/archives/fichiers-entree' },
+    { label: 'Crédits', icon: 'fa-money-bill-transfer', route: '/archives/credits' },
+    { label: 'Déclarations BA', icon: 'fa-file', route: '/archives/declarations-ba' },
     { label: 'Journaux d\'audit', route: '/journaux-audit', icon: 'fa-eye' },
     { label: 'Utilisateurs', route: '/utilisateurs', icon: 'fa-users' }
   ];

@@ -41,22 +41,22 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./pages/prets/credits-list/credits-list.component').then(m => m.CreditsListComponent)
+              import('./pages/credits/credits-list/credits-list.component').then(m => m.CreditsListComponent)
           },
           {
             path: 'nouveau',
             loadComponent: () =>
-              import('./pages/prets/pret-form/pret-form.component').then(m => m.PretFormComponent)
+              import('./pages/credits/credit-form/credit-form.component').then(m => m.CreditFormComponent)
           },
           {
             path: 'modifier/:id',
             loadComponent: () =>
-              import('./pages/prets/pret-form/pret-form.component').then(m => m.PretFormComponent)
+              import('./pages/credits/credit-form/credit-form.component').then(m => m.CreditFormComponent)
           },
           {
             path: ':id',
             loadComponent: () =>
-              import('./pages/prets/pret-details/pret-details.component').then(m => m.PretDetailsComponent)
+              import('./pages/credits/credit-details/credit-details.component').then(m => m.CreditDetailsComponent)
           }
         ]
       },
@@ -86,7 +86,7 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./pages/fichiers-xml/fichiers-xml.component').then(m => m.FichiersXMLComponent)
+              import('./pages/fichiers-xml/consultation/fichiers-xml.component').then(m => m.FichiersXMLComponent)
           },
           {
             path: 'generation',
@@ -97,8 +97,28 @@ export const routes: Routes = [
       },
       {
         path: 'archives',
-        loadComponent: () =>
-          import('./pages/archives/archives.component').then(m => m.ArchivesComponent)
+        children: [
+          {
+            path: 'fichiers-entree',
+            loadComponent: () =>
+              import('./pages/archives/fichiers-entree-archive/fichiers-entree-archive.component').then(m => m.FichiersEntreeArchiveComponent)
+          },
+          {
+            path: 'credits',
+            loadComponent: () =>
+              import('./pages/archives/credits-archive/credits-archive.component').then(m => m.CreditsArchiveComponent)
+          },
+          {
+            path: 'declarations-ba',
+            loadComponent: () =>
+              import('./pages/archives/declarations-ba-archive/declarations-ba-archive.component').then(m => m.DeclarationsBaArchiveComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'fichiers-entree',
+            pathMatch: 'full'
+          }
+        ]
       },
       {
         path: 'journaux-audit',

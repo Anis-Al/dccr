@@ -1,0 +1,373 @@
+<div class="credit-form">
+    <div class="header">
+      <h1>
+        <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus'"></i>
+        {{isEditMode ? 'Modifier' : 'Nouveau'}} Crédit
+        <span class="contract-number" *ngIf="isEditMode">{{ credit.num_contrat_credit || 'Chargement...' }}</span>
+      </h1>
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+          <i class="fas fa-times"></i> Annuler
+        </button>
+        <button class="btn btn-primary" (click)="onSave()" [disabled]="isLoading">
+          <span *ngIf="!isLoading"><i class="fas fa-save"></i> Enregistrer</span>
+          <span *ngIf="isLoading">Enregistrement...</span>
+        </button>
+      </div>
+    </div>
+
+     <div *ngIf="isLoading && isEditMode" class="loading-indicator">Chargement des détails du crédit...</div>
+     <div *ngIf="errorMessage" class="alert alert-danger">Erreur: {{errorMessage}}</div>
+
+
+    <div class="form-container" *ngIf="!isLoading"> 
+
+        <div class="form-section">
+          <h2><i class="fas fa-info-circle"></i> Informations Générales</h2>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="numContrat">N° Contrat</label>
+              <input id="numContrat" type="text" [(ngModel)]="credit.num_contrat_credit" [disabled]="isEditMode" name="numContrat">
+            </div>
+            <div class="form-group"> 
+              <label for="dateDeclaration">Date de Déclaration</label>
+              <input id="dateDeclaration" type="date" [(ngModel)]="credit.date_declaration" name="dateDeclaration">
+            </div>
+          </div>
+          
+          <div class="form-grid">
+             <div class="form-group">
+                <label for="typeCredit">Type de Crédit</label>
+                <select id="typeCredit" [(ngModel)]="credit.type_credit" name="typeCredit">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option *ngFor="let type of lookupTypesCredit" [value]="type.code">
+                     {{type.libelle}}
+                   </option>
+                 </select>
+             </div>
+             <div class="form-group">
+                   <label for="situation">Situation</label>
+                   <select id="situation" [(ngModel)]="credit.situation" name="situation">
+                     <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                     <option *ngFor="let sit of lookupSituations" [value]="sit.code">
+                         {{sit.libelle}}
+                      </option>
+                   </select>
+              </div>
+               <div class="form-group">
+                 <label for="activite">Activité</label>
+                 <select id="activite" [(ngModel)]="credit.code_activite" name="codeActivite">
+                   <option [ngValue]="" >vide</option>
+                   <option *ngFor="let act of lookupActivites" [value]="act.code">
+                      {{act.libelle}}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                   <label for="motif">Motif</label>
+                   <input id="motif" type="text" [(ngModel)]="credit.motif" name="motif">
+                 </div>
+             <div class="form-group">
+                <label>Plafond Accordé</label>
+                <div class="radio-group">
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="credit.est_plafond_accorde" [value]="true"> Oui</label>
+                   <label><input type="radio" name="plafondAccorde" [(ngModel)]="credit.est_plafond_accorde" [value]="false"> Non</label>
+                 </div>
+             </div>
+             <div class="form-group" *ngIf="credit.est_plafond_accorde">
+                <label for="numPlafond">N° Plafond</label>
+                <input id="numPlafond" type="text" [(ngModel)]="credit.id_plafond" name="numPlafond">
+              </div>
+                
+                 
+                 
+             </div>
+        </div>
+
+
+       <div class="form-section">
+         <h2>
+           <i class="fas fa-users"></i> Débiteurs
+           <button type="button" class="btn btn-danger btn-add" (click)="addIntervenant()">
+             <i class="fas fa-plus"></i> Ajouter Débiteur
+           </button>
+         </h2>
+         <div class="intervenant-item" *ngFor="let intervenant of credit.intervenants; let i = index; trackBy: trackByIndex">
+           <h3>
+             Débiteur {{i + 1}}
+             <button type="button" class="btn btn-danger btn-delete" (click)="removeIntervenant(i)" *ngIf="credit.intervenants.length > 0">
+               <i class="fas fa-trash"></i> Supprimer
+             </button>
+           </h3>
+           <div class="form-grid">
+             <div class="form-group">
+               <label for="intervenantCle_{{i}}">Clé</label>
+               <input id="intervenantCle_{{i}}" type="text" [(ngModel)]="intervenant.cle" name="intervenantCle_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
+               <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
+                  <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                  <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
+                </select>
+             </div>
+             <div class="form-group">
+               <label for="intervenantNiveau_{{i}}">Niveau de Responsabilité</label>
+               <select id="intervenantNiveau_{{i}}" [(ngModel)]="intervenant.niveau_responsabilite" name="intervenantNiveau_{{i}}">
+                 <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                  <option *ngFor="let niv of lookupNiveauxResponsabilite" [value]="niv.code">{{niv.libelle}}</option>
+                </select>
+             </div>
+             <div class="form-group">
+               <label for="intervenantNif_{{i}}">NIF</label>
+               <input id="intervenantNif_{{i}}" type="text" [(ngModel)]="intervenant.nif" name="intervenantNif_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantRib_{{i}}">RIB</label>
+               <input id="intervenantRib_{{i}}" type="text" [(ngModel)]="intervenant.rib" name="intervenantRib_{{i}}">
+             </div>
+             <div class="form-group">
+               <label for="intervenantCli_{{i}}">CLI</label>
+               <input id="intervenantCli_{{i}}" type="text" [(ngModel)]="intervenant.cli" name="intervenantCli_{{i}}">
+             </div>
+           </div>
+           <hr *ngIf="i < credit.intervenants.length - 1">
+         </div>
+         <div *ngIf="credit.intervenants.length === 0">
+            Aucun débiteur ajouté.
+         </div>
+       </div>
+
+
+        <div class="form-section">
+          <h2><i class="fas fa-map-marker-alt"></i> Localisation</h2>
+          <div class="form-grid">
+
+           <div class="form-group">
+              <label for="pays">Pays</label>
+              <select id="pays" [(ngModel)]="credit.code_pays" name="pays" (change)="onPaysChange()">
+                <option [ngValue]="null" disabled>-- Sélectionner un pays --</option>
+                <option *ngFor="let pays of lookupPays" [value]="pays.code">
+                  {{ pays.libelle }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wilaya">Wilaya</label>
+              <select id="wilaya" [(ngModel)]="credit.code_wilaya" name="wilaya" (change)="onWilayaChange()">
+                <option [ngValue]="" >vide</option>
+                <option *ngFor="let wilaya of lookupWilayas" [value]="wilaya.code">
+                  {{ wilaya.libelle }}
+                </option>
+              </select>
+            </div>
+          <div class="form-group">
+              <label for="agence">Agence</label>
+              <select id="agence" [(ngModel)]="credit.code_agence" name="agence" (change)="onAgenceChange()">
+                <option [ngValue]="null" disabled>-- Sélectionner une agence --</option>
+                <option *ngFor="let agence of lookupAgences" [value]="agence.code">
+                  {{ agence.libelle }}
+                </option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+
+         <div class="form-section">
+            <h2><i class="fas fa-euro-sign"></i> Conditions Financières</h2>
+            <div class="form-grid">
+
+              <div class="form-group">
+                 <label for="creditsAccorde">Crédit Accordé</label>
+                  <input id="creditsAccorde" type="number" [(ngModel)]="credit.credit_accorde" name="creditsAccorde" step="any">
+              </div>
+
+              <div class="form-group">
+                 <label for="devise">Devise</label>
+                 <select id="devise" [(ngModel)]="credit.monnaie" name="devise">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                    <option *ngFor="let dev of lookupDevises" [value]="dev.code">{{dev.libelle}}</option>
+                  </select>
+               </div>
+
+               <div class="form-group">
+                  <label for="tauxInterets">Taux d'Intérêts (%)</label>
+                   <input id="tauxInterets" type="number" [(ngModel)]="credit.taux_interets" name="tauxInterets" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="coutCredits">Coût Total Crédit</label>
+                    <input id="coutCredits" type="number" [(ngModel)]="credit.cout_total_credit" name="coutCredits" step="any">
+                 </div>
+                 <div class="form-group">
+                    <label for="soldeRestant">Solde Restant Dû</label>
+                    <input id="soldeRestant" type="number" [(ngModel)]="credit.solde_restant" name="soldeRestant" step="any">
+                 </div>
+              </div>
+          </div>
+
+
+       <div class="form-section">
+         <h2><i class="fas fa-calendar-check"></i> Remboursement</h2>
+         <div class="form-grid">
+           
+         <div class="form-group">
+             <label for="mensualite">Mensualité</label>
+              <input id="mensualite" type="number" [(ngModel)]="credit.mensualite" name="mensualite" step="any">
+           </div>
+
+           <div class="form-group">
+             <label for="dureeInit">Durée Initiale</label>
+             <select id="dureeInit" [(ngModel)]="credit.duree_initiale" name="dureeInit" (change)="onDureeInitialeChange()">
+               <option [ngValue]="null" disabled>-- Sélectionner --</option>
+               <option *ngFor="let duree of lookupDureesCredit" [value]="duree.code"> {{duree.libelle}} </option>
+             </select>
+           </div>
+
+           <div class="form-group">
+             <label for="dureeRestante">Durée Restante</label>
+             <select id="dureeRestante" [(ngModel)]="credit.duree_restante" name="dureeRestante" (change)="onDureeRestanteChange()">
+               <option [ngValue]="null" disabled>-- Sélectionner --</option>
+               <option *ngFor="let duree of lookupDureesCredit" [value]="duree.code">{{duree.libelle}}</option>
+             </select>
+           </div>
+
+          </div>
+       </div>
+
+
+        <div class="form-section">
+          <h2><i class="fas fa-exclamation-triangle"></i> Retard</h2>
+          <div class="form-grid">
+             <div class="form-group">
+                <label for="classeRetard">Classe de Retard</label>
+               <select id="classeRetard" [(ngModel)]="credit.classe_retard" name="classeRetard" (change)="onClasseRetardChange()">
+                  <option [ngValue]="null">-- Sélectionner --</option> 
+                  <option *ngFor="let cl of lookupClassesRetard" [value]="cl.code">{{cl.libelle}}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                 <label for="nbEcheances">Nombre d'Échéances Impayées</label>
+                 <input id="nbEcheances" type="number" [(ngModel)]="credit.nombre_echeances_impayes" name="nbEcheances" step="1" min="0">
+              </div>
+              <div class="form-group">
+                 <label for="dateConstat">Date de Constatation</label>
+                 <input id="dateConstat" type="date" [(ngModel)]="credit.date_constatation_echeances_impayes" name="dateConstat">
+              </div>
+              <div class="form-group">
+                  <label for="montantCacreditard">Montant Capital en Retard</label>
+                  <input id="montantCacreditard" type="number" [(ngModel)]="credit.montant_capital_retard" name="montantCacreditard" step="any">
+              </div>
+              <div class="form-group">
+                  <label for="montantIntRetard">Montant Intérêts en Retard</label>
+                 <input id="montantIntRetard" type="number" [(ngModel)]="credit.montant_interets_retard" name="montantIntRetard" step="any">
+              </div>
+              <div class="form-group">
+                  <label for="montantIntCourus">Montant Intérêts Courus</label>
+                  <input id="montantIntCourus" type="number" [(ngModel)]="credit.montant_interets_courus" name="montantIntCourus" step="any">
+               </div>
+           </div>
+        </div>
+
+
+       <div class="form-section">
+          <h2><i class="fas fa-calendar-alt"></i> Dates</h2>
+          <div class="form-grid">
+             <div class="form-group">
+               <label for="dateOctroi">Date d'Octroi</label>
+               <input id="dateOctroi" type="date" [(ngModel)]="credit.date_octroi" name="dateOctroi">
+             </div>
+             <div class="form-group">
+               <label for="dateExpiration">Date d'Expiration</label>
+               <input id="dateExpiration" type="date" [(ngModel)]="credit.date_expiration" name="dateExpiration">
+             </div>
+             <div class="form-group">
+                 <label for="dateExecution">Date Exécution</label>
+                 <input id="dateExecution" type="date" [(ngModel)]="credit.date_execution" name="dateExecution">
+             </div>
+             <div class="form-group">
+                 <label for="dateRejet">Date de Rejet</label>
+                 <input id="dateRejet" type="date" [(ngModel)]="credit.date_rejet" name="dateRejet">
+             </div>
+           </div>
+       </div>
+
+
+        <div class="form-section">
+          <h2>
+            <i class="fas fa-shield-alt"></i> Garanties
+             <button type="button" class="btn btn-danger btn-add" (click)="addGarantie()">
+               <i class="fas fa-plus"></i> Ajouter Garantie
+             </button>
+          </h2>
+          <div class="intervenant-item" *ngFor="let garantie of credit.garanties; let i = index; trackBy: trackByIndex">
+             <h3>
+               Garantie {{i + 1}}
+               <button type="button" class="btn btn-danger btn-delete" (click)="removeGarantie(i)" *ngIf="credit.garanties.length > 0">
+                  <i class="fas fa-trash"></i> Supprimer
+                </button>
+             </h3>
+             <div class="form-grid">
+               <div class="form-group">
+                 <label for="garantieIntervenant_{{i}}">Clé Intervenant (Garant)</label>
+                  <select id="garantieIntervenant_{{i}}" [(ngModel)]="garantie.cle_intervenant" name="garantieIntervenant_{{i}}">
+                    <option [ngValue]="null">-- Sélectionner Intervenant --</option>
+                     <option *ngFor="let intervenant of credit.intervenants" [value]="intervenant.cle">
+                        {{intervenant.cle}} - {{intervenant.libelle_niveau_responsabilite || intervenant.niveau_responsabilite}}
+                      </option>
+                    </select>
+               </div>
+               <div class="form-group">
+                 <label for="garantieType_{{i}}">Type</label>
+                 <select id="garantieType_{{i}}" [(ngModel)]="garantie.type_garantie" name="garantieType_{{i}}">
+                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
+                   <option *ngFor="let type of lookupTypesGarantie" [value]="type.code">{{type.libelle}}</option>
+                 </select>
+               </div>
+               <div class="form-group">
+                 <label for="garantieMontant_{{i}}">Montant</label>
+                 <input id="garantieMontant_{{i}}" type="number" [(ngModel)]="garantie.montant_garantie" name="garantieMontant_{{i}}" step="any">
+               </div>
+             </div>
+              <hr *ngIf="i < credit.garanties.length - 1">
+          </div>
+            <div *ngIf="credit.garanties.length === 0">
+              Aucune garantie ajoutée.
+           </div>
+        </div>
+
+
+    </div> 
+</div>
+
+<div class="modal-backdrop" *ngIf="showModal"></div>
+  <div class="modal" [class.show]="showModal" *ngIf="showModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 >Crédit Erroné</h3>
+          <button type="button" class="close" (click)="closeModal()">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="successMessage; else errorList">
+            <div class="alert alert-success text-center">{{ successMessage }}</div>
+          </div>
+          <ng-template #errorList>
+            <ul class="error-list">
+              <li *ngFor="let error of pagedErrors">{{ error }}</li>
+            </ul>
+            <app-pagination
+              [lignesTotales]="errors.length"
+              [pageActuelle]="currentErrorPage"
+              (changeurPage)="onErrorPageChange($event)">
+            </app-pagination>
+          </ng-template>
+        </div>
+        
+      </div>
+  </div>
+</div>

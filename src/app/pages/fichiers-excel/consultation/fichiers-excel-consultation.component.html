@@ -1,4 +1,3 @@
-<!-- Excel Files View -->
 <div class="prets-container" [class.details-open]="creditSelectionne" *ngIf="!fichierSelectionne">
   <div class="prets-list">
     <div class="header">
@@ -61,83 +60,21 @@
     </div>
   </div>
 </div>
-<!-- Credits View (Full Screen) -->
-<div class="prets-container" [class.details-open]="creditSelectionne" *ngIf="fichierSelectionne">
-  <div class="prets-list">
-    <div class="header">
-      <div>
-        <div class="breadcrumb" *ngIf="fichierSelectionne">
-          <a (click)="fermerCredits()">Fichiers d'Entrée</a>
-          <i class="fas fa-chevron-right"></i>
-          <span>{{ fichierSelectionne.nom_fichier_excel }}</span>
-        </div>
-        <h1>Crédits En Cours<small style="font-size: 0.875rem; opacity: 0.8;">- {{ fichierSelectionne.nom_fichier_excel }}</small></h1>
-      </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" (click)="fermerCredits()">
-          <i class="fas fa-arrow-left"></i>
-          <span>Retour</span>
-        </button>
-        <button class="btn btn-primary" (click)="ajouterNouveauCredit()">
-          <i class="fas fa-plus"></i>
-          <span>Nouveau</span>
-        </button>
-      </div>
-    </div>
-    <div class="filters">
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="creditSearchTerm" (input)="onCreditSearch()">
-      </div>
-      <div class="date-filters">
-        <div class="date-select">
-          <label>Date de Déclaration:</label>
-          <select [(ngModel)]="selectedDate" (change)="filtrerCreditParDate()">
-            <option value="">Toutes les dates</option>
-            <option *ngFor="let date of datesDeclaration" [value]="date">{{date}}</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="collante">N° Contrat</th>
-            <th>Date Déclaration</th>
-            <th>Situation</th>
-            <th>Type</th>
-            <th>Activité</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let credit of creditsPagines"
-              (click)="selectionnerCredit(credit)"
-              [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit">
-            <td class="collante">{{credit.num_contrat_credit}}</td>
-            <td>{{credit.date_declaration |date:'dd/MM/yyyy'}}</td>
-            <td>{{credit.libelle_situation}}</td>
-            <td>{{credit.libelle_type_credit}}</td>
-            <td>{{credit.libelle_activite}}</td>
-          </tr>
-          <tr *ngIf="creditsPagines.length === 0">
-            <td colspan="5" class="no-data">Aucun crédit trouvé</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="pagination-container">
-      <app-pagination
-        [lignesTotales]="creditsFiltres.length"
-        [pageActuelle]="creditPageActuelle"
-        (changeurPage)="changerCreditPage($event)">
-      </app-pagination>
-    </div>
-  </div>
-  <div class="details-panel" *ngIf="creditSelectionne">
-    <app-pret-details 
-      [pret]="creditSelectionne" 
-      (close)="fermerDetails()">
-    </app-pret-details>
-  </div>
-</div>
+
+<app-credits-list
+  [fichierSelectionne]="fichierSelectionne"
+  [creditsPagines]="creditsPagines"
+  [creditSelectionne]="creditSelectionne"
+  [creditSearchTerm]="creditSearchTerm"
+  [selectedDate]="selectedDate"
+  [datesDeclaration]="datesDeclaration"
+  (fermerCredits)="fermerCredits()"
+  (ajouterNouveauCredit)="ajouterNouveauCredit()"
+  (creditSearch)="onCreditSearch()"
+  (filtrerCreditParDate)="filtrerCreditParDate()"
+  (selectionnerCredit)="selectionnerCredit($event)"
+  (fermerDetails)="fermerDetails()"
+  (changerCreditPage)="changerCreditPage($event)"
+  [creditsFiltres]="creditsFiltres"
+  [creditPageActuelle]="creditPageActuelle">
+</app-credits-list>
