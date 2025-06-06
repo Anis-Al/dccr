@@ -1,0 +1,159 @@
+<div class="layout" [class.sidebar-collapsed]="sidebarCollapsed">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="assets/sga-logo.png" alt="Logo" class="logo">
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <i [class]="sidebarCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+      </button>
+    </div>
+
+    <nav class="nav-menu">
+      <a
+        class="nav-item"
+        [routerLink]="'/tableau-de-bord'"
+        routerLinkActive="active"
+      >
+        <i class="fas fa-chart-line"></i>
+        <span class="nav-label">Tableau de Bord</span>
+      </a>
+
+      <div class="nav-section">
+        <div class="section-header" *ngIf="!sidebarCollapsed">
+          <span class="section-title">En Cours</span>
+          <button class="collapse-section-btn" (click)="enCoursCollapsed = !enCoursCollapsed">
+            <i class="fas" [ngClass]="enCoursCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+          </button>
+        </div>
+        <div class="section-content" *ngIf="!enCoursCollapsed">
+          <ng-container *ngFor="let item of [navItems[1], navItems[2], navItems[3]]">
+            <a
+              class="nav-item"
+              [routerLink]="item.route"
+              *ngIf="!item.children"
+              routerLinkActive="active"
+              [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null"
+            >
+              <i [class]="'fas ' + item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+
+            <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null">
+              <i [class]="'fas ' + item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+              <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
+            </div>
+            <div
+              class="sub-menu"
+              *ngIf="item.children && item.expanded && !sidebarCollapsed"
+            >
+              <a
+                *ngFor="let child of item.children"
+                [routerLink]="child.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="child.routerLinkActiveOptions || { exact: false }"
+                class="nav-item sub-item"
+              >
+                <i [class]="'fas ' + child.icon"></i>
+                <span class="nav-label">{{ child.label }}</span>
+              </a>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="section-header" *ngIf="!sidebarCollapsed">
+          <span class="section-title">Archives</span>
+          <button class="collapse-section-btn" (click)="archivesCollapsed = !archivesCollapsed">
+            <i class="fas" [ngClass]="archivesCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+          </button>
+        </div>
+        <div class="section-content" *ngIf="!archivesCollapsed">
+          <ng-container *ngFor="let item of [navItems[4], navItems[5], navItems[6]]">
+            <a
+              class="nav-item"
+              [routerLink]="item.route"
+              *ngIf="!item.children"
+              routerLinkActive="active"
+              [attr.title]="sidebarCollapsed ? 'Archives - ' + item.label : null"
+            >
+              <i [class]="'fas ' + item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+            </a>
+            <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'Archives - ' + item.label : null">
+              <i [class]="'fas ' + item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
+              <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
+            </div>
+            <div
+              class="sub-menu"
+              *ngIf="item.children && item.expanded && !sidebarCollapsed"
+            >
+              <a
+                *ngFor="let child of item.children"
+                [routerLink]="child.route"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="child.routerLinkActiveOptions || { exact: false }"
+                class="nav-item sub-item"
+              >
+                <i [class]="'fas ' + child.icon"></i>
+                <span class="nav-label">{{ child.label }}</span>
+              </a>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <a
+        class="nav-item"
+        [routerLink]="navItems[7].route"
+        routerLinkActive="active"
+        [attr.title]="sidebarCollapsed ? navItems[7].label : null"
+      >
+        <i [class]="'fas ' + navItems[7].icon"></i>
+        <span class="nav-label">{{ navItems[7].label }}</span>
+      </a>
+      <a
+        class="nav-item"
+        [routerLink]="navItems[8].route"
+        routerLinkActive="active"
+        [attr.title]="sidebarCollapsed ? navItems[8].label : null"
+      >
+        <i [class]="'fas ' + navItems[8].icon"></i>
+        <span class="nav-label">{{ navItems[8].label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer" style="padding-bottom: 0.75rem; margin-bottom: 0;">
+      <div class="user-info" style="margin-bottom: 1rem;">
+        <img src="assets/default-avatar.svg" alt="Avatar" class="avatar">
+        <div class="user-details" *ngIf="!sidebarCollapsed">
+          <span class="user-name">{{ userInfo?.name || 'Utilisateur inconnu' }}</span>
+          <span class="user-role">{{ userInfo?.role || 'Aucun rôle' }}</span>
+        </div>
+      </div>
+
+      <div class="footer-actions" style="padding-bottom: 0.25rem;">
+        <button class="btn btn-icon" (click)="toggleGuide()" *ngIf="!sidebarCollapsed">
+          <i class="fas fa-question-circle"></i>
+          <span>Guide d'utilisation</span>
+        </button>
+        <button class="btn btn-icon" (click)="toggleGuide()" *ngIf="sidebarCollapsed" title="Guide d'utilisation">
+          <i class="fas fa-question-circle"></i>
+        </button>
+
+        <button class="btn btn-icon" (click)="onLogout()" *ngIf="!sidebarCollapsed">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Déconnexion</span>
+        </button>
+        <button class="btn btn-icon" (click)="onLogout()" *ngIf="sidebarCollapsed" title="Déconnexion">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div> 

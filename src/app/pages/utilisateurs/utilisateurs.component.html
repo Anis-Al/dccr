@@ -1,0 +1,78 @@
+<div class="utilisateurs-container">
+  <div class="utilisateurs-list">
+    <div class="header">
+      <h1>Gestion des Utilisateurs</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="ajouterNouvelUtilisateur()">
+          <i class="fas fa-plus"></i>
+          <span>Nouvel Utilisateur</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher un utilisateur..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="role-filter">
+        <label>Rôle:</label>
+        <select [(ngModel)]="selectedRole" (change)="onSearch()">
+          <option value="">Tous les rôles</option>
+          <option *ngFor="let r of roles" [value]="r.value">{{ r.key }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="sticky-column">Nom Complet</th>
+            <th>Matricule</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of utilisateursPagines" class="clickable-row">
+            <td class="sticky-column">
+              <div class="user-info">
+                <span>{{ user.nom_complet }}</span>
+              </div>
+            </td>
+            <td>{{ user.matricule }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="role-badge" [class]="user.role.toLowerCase()">
+                {{ getRoleLabel(user.role) }}
+              </span>
+            </td>
+            <td>
+              <div class="actions">
+                <button class="btn-icon" title="Modifier">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon" title="Supprimer" (click)="supprimerUtilisateur(user)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="utilisateursPagines.length === 0">
+            <td colspan="5" class="no-data">Aucun utilisateur trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="utilisateursFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div> 

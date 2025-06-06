@@ -8,13 +8,13 @@ import { PaginationComponent } from '../../../components/pagination/pagination.c
 import { CreditDto } from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { Subscription } from 'rxjs';
-import { PretDetailsComponent } from '../../prets/pret-details/pret-details.component';
+import { CreditDetailsComponent } from '../../credits/credit-details/credit-details.component';
 import { CreditsListComponent } from './credits-list-par-source/credits-list.component';
 
 @Component({
   selector: 'app-fichiers-excel-consultation',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, DatePipe, PretDetailsComponent, CreditsListComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, DatePipe, CreditDetailsComponent, CreditsListComponent],
   templateUrl: './fichiers-excel-consultation.component.html',
   styleUrls: ['./fichiers-excel-consultation.component.scss']
 })

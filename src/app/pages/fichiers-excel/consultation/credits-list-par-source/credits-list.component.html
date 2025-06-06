@@ -1,35 +1,40 @@
-<div class="prets-container" [class.details-open]="creditSelectionne">
+<div class="prets-container" [class.details-open]="creditSelectionne" *ngIf="fichierSelectionne">
   <div class="prets-list">
     <div class="header">
-      <h1>Crédits En Cours</h1>
-      <div class="header-actions" *ngIf="selectedExcelFile">
-        <button class="btn btn-secondary" (click)="annulerSelection($event)">
-          <i class="fas fa-times"></i>
-          <span>Annuler le filtre</span>
+      <div>
+        <div class="breadcrumb" *ngIf="fichierSelectionne">
+          <a (click)="fermerCredits.emit()" style="cursor:pointer;">Fichiers d'Entrée</a>
+          <i class="fas fa-chevron-right"></i>
+          <span>{{ fichierSelectionne.nom_fichier_excel }}</span>
+        </div>
+        <h1>Crédits En Cours</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="fermerCredits.emit()">
+          <i class="fas fa-arrow-left"></i>
+          <span>Retour</span>
         </button>
-        <button class="btn btn-primary" (click)="nouveauCredit()">
+        <button class="btn btn-primary" (click)="ajouterNouveauCredit.emit()">
           <i class="fas fa-plus"></i>
           <span>Nouveau</span>
         </button>
       </div>
     </div>
-
     <div class="filters">
       <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
+        <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="creditSearchTerm" (input)="creditSearch.emit()">
       </div>
       <div class="date-filters">
         <div class="date-select">
           <label>Date de Déclaration:</label>
-          <select [(ngModel)]="selectedDate" (change)="filtrerParDate()">
+          <select [(ngModel)]="selectedDate" (change)="filtrerCreditParDate.emit()">
             <option value="">Toutes les dates</option>
             <option *ngFor="let date of datesDeclaration" [value]="date">{{date}}</option>
           </select>
         </div>
       </div>
     </div>
-
     <div class="table-container">
       <table>
         <thead>
@@ -42,37 +47,33 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let credit of CreditsPagines"
-              (click)="selectionnerCredit(credit)"
-              [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit"
-              [class.highlight-excel]="selectedExcelFile && credit.id_excel === selectedExcelFile.id_fichier_excel">
+          <tr *ngFor="let credit of creditsPagines"
+              (click)="selectionnerCredit.emit(credit)"
+              [class.selected]="creditSelectionne?.num_contrat_credit === credit.num_contrat_credit">
             <td class="collante">{{credit.num_contrat_credit}}</td>
-            <td>{{credit.date_declaration|date:'dd/MM/yyyy'}}</td>
+            <td>{{credit.date_declaration |date:'dd/MM/yyyy'}}</td>
             <td>{{credit.libelle_situation}}</td>
             <td>{{credit.libelle_type_credit}}</td>
             <td>{{credit.libelle_activite}}</td>
           </tr>
-          <tr *ngIf="CreditsPagines.length === 0">
+          <tr *ngIf="creditsPagines.length === 0">
             <td colspan="5" class="no-data">Aucun crédit trouvé</td>
           </tr>
         </tbody>
       </table>
     </div>
-
     <div class="pagination-container">
       <app-pagination
-        [lignesTotales]="CreditsFiltres.length"
-        [pageActuelle]="pageActuelle"
-        (changeurPage)="changerPage($event)">
+        [lignesTotales]="creditsFiltres.length"
+        [pageActuelle]="creditPageActuelle"
+        (changeurPage)="changerCreditPage.emit($event)">
       </app-pagination>
     </div>
   </div>
-
   <div class="details-panel" *ngIf="creditSelectionne">
     <app-pret-details 
-      [pret]="creditSelectionne"
-      [fromCreditsList]="true"
-      (close)="fermerDetails()">
+      [pret]="creditSelectionne" 
+      (close)="fermerDetails.emit()">
     </app-pret-details>
   </div>
-</div>
+</div> 
