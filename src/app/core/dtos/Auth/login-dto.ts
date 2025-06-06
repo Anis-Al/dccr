@@ -9,3 +9,8 @@ export interface LoginReponseDto {
     role: string;
     message:string;
   }
+export interface changerMotDePasseDto {
+  matricule: string;
+  ancienMotDePasse: string;
+  nouveauMotDePasse: string;
+}

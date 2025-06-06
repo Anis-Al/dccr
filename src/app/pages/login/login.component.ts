@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router } from '@angular/router';
 import { loginDto } from '../../core/dtos/Auth/login-dto';
 import { AuthService } from '../../core/services/auth&utilisateurs/auth.service';
+import { changerMotDePasseDto } from '../../core/dtos/Auth/login-dto';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,10 @@ export class LoginComponent {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
+  showChangePassword = false;
+  changePasswordForm: FormGroup;
+  successChangePasswordMessage = '';
+  errorChangePasswordMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -25,6 +30,11 @@ export class LoginComponent {
     this.loginForm = this.formBuilder.group({
       matricule: ['', [Validators.required]],
       mdp: ['', [Validators.required]]
+    });
+    this.changePasswordForm = this.formBuilder.group({
+      matricule: ['', [Validators.required]],
+      ancienMotDePasse: ['', [Validators.required]],
+      nouveauMotDePasse: ['', [Validators.required]]
     });
   }
 
@@ -64,6 +74,31 @@ export class LoginComponent {
     } else {
       Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
+      });
+    }
+  }
+
+  toggleChangePassword() {
+    this.showChangePassword = !this.showChangePassword;
+  }
+
+  onChangePasswordSubmit() {
+    if (this.changePasswordForm.valid) {
+      const dto: changerMotDePasseDto = this.changePasswordForm.value;
+      this.successChangePasswordMessage = '';
+      this.errorChangePasswordMessage = '';
+      this.authService.changerMotDePasse(dto).subscribe({
+        next: (res) => {
+          this.successChangePasswordMessage = res.message;
+          this.changePasswordForm.reset();
+        },
+        error: (err) => {
+          this.errorChangePasswordMessage = err.error?.message || 'Erreur lors du changement de mot de passe.';
+        }
+      });
+    } else {
+      Object.keys(this.changePasswordForm.controls).forEach(key => {
+        this.changePasswordForm.get(key)?.markAsTouched();
       });
     }
   }

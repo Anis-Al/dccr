@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { loginDto } from '../../dtos/Auth/login-dto';
 import { LoginReponseDto } from '../../dtos/Auth/login-dto';
+import { changerMotDePasseDto } from '../../dtos/Auth/login-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -51,5 +52,9 @@ export class AuthService {
   logout(): void {
     this.removeToken();
     this.removeUserInfo();
+  }
+
+  changerMotDePasse(dto: changerMotDePasseDto): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}${environment.endpoints.auth.changerMotDePasse}`, dto);
   }
 }

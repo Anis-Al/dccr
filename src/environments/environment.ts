@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://localhost:44307/api/',
+  apiBaseUrl: 'https://localhost:5001/api/',
   endpoints: {
     excel: {
       integrationPart1: 'Excel/importer',
@@ -29,6 +29,7 @@ export const environment = {
     },
     auth: {
       login: 'auth',
+      changerMotDePasse: 'auth/changer-mdp',
     }  
   }
 };
