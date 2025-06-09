@@ -61,14 +61,12 @@ export class UserFormComponent implements OnInit {
     if (this.isLdapMode) {
       if (this.ldapForm.valid) {
         const ldapData = this.ldapForm.value;
-        this.userService.addLdapUser(ldapData).subscribe({
+        this.userService.ajouterUtilisateurLdap(ldapData).subscribe({
           next: (res) => {
             this.addUserMessage = res.message;
-            this.addUserSuccess = /succ[èe]s/i.test(res.message);
           },
           error: (error) => {
             this.addUserMessage = 'Erreur lors de l\'ajout LDAP.';
-            this.addUserSuccess = false;
             console.error('Erreur lors de l\'ajout LDAP:', error);
           }
         });
@@ -77,7 +75,7 @@ export class UserFormComponent implements OnInit {
       if (this.userForm.valid) {
         const utilisateur: Utilisateur = this.userForm.value;
         if (this.isEditMode) {
-          this.userService.updateUser(utilisateur).subscribe({
+          this.userService.majUtilisateur(utilisateur).subscribe({
             next: (user) => {
               this.formSubmit.emit(user);
               this.router.navigate(['/utilisateurs']);

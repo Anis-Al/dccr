@@ -16,16 +16,13 @@ export class UtilisateurService {
   ajouterUtilisateur(utilisateur: Utilisateur): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}${environment.endpoints.utilisateurs.ajouterUtilisateur}`, utilisateur);
   }
-
-  addLdapUser(userData: Pick<Utilisateur, 'matricule' | 'role'>): Observable<{ message: string }> {
+  ajouterUtilisateurLdap(userData: Pick<Utilisateur, 'matricule' | 'role'>): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/ldap`, userData);
   }
-
-  updateUser(user: Utilisateur): Observable<Utilisateur> {
+  majUtilisateur(user: Utilisateur): Observable<Utilisateur> {
     return this.http.put<Utilisateur>(`${this.apiUrl}/${user.matricule}`, user);
   }
-
-  deleteUser(matricule: number): Observable<{ message: string }> {
+  suppUtilisateur(matricule: number): Observable<{ message: string }> {
     return (this.http.delete(
       `${this.apiUrl}${environment.endpoints.utilisateurs.supprimerUtilisateur}/${matricule}`,
       { responseType: 'text' as 'json' }
@@ -33,7 +30,6 @@ export class UtilisateurService {
       map((text: string) => ({ message: text }))
     );
   }
-
   getUsers(): Observable<Utilisateur[]> {
     return this.http.get<Utilisateur[]>(this.apiUrl+environment.endpoints.utilisateurs.tousLesUtilisateurs);
   }

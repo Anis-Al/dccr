@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ExcelMetadonneesDto } from '../dtos/Excel/excel-metadonnees-dto';
+import { ExcelMetadonneesDto } from '../../dtos/Excel/excel-metadonnees-dto';
 
 @Injectable({
   providedIn: 'root'

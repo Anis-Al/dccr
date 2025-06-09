@@ -4,9 +4,6 @@ export interface loginDto {
 }
 export interface LoginReponseDto {
     token: string;
-    matricule: string;
-    nom_complet: string;
-    role: string;
     message:string;
   }
 export interface changerMotDePasseDto {

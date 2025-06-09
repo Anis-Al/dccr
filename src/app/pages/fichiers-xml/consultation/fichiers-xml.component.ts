@@ -120,15 +120,19 @@ export class FichiersXMLComponent implements OnInit {
   }
 
   supprimerFichier(fichier: XmlDto): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
-      // this.declarationsBAService.supprimerDeclaration(fichier.idFichierXml).subscribe({
-      //   next: () => {
-      //     this.chargerDeclarations();
-      //   },
-      //   error: (error) => {
-      //     console.error('Erreur lors de la suppression du fichier:', error);
-      //   }
-      // });
+    if (confirm('Sûr de vouloir supprimer ce fichier ?')) {
+      this.declarationsBAService.supprimerDeclaration(fichier.idFichierXml).subscribe({
+        next: () => {
+          this.fichiers = this.fichiers.filter(f => f.idFichierXml !== fichier.idFichierXml);
+          this.fichiersFiltres = this.fichiersFiltres.filter(f => f.idFichierXml !== fichier.idFichierXml);
+          this.updatePaginatedData();
+          alert('Fichier supprimé avec succès.');
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression du fichier:', error);
+          alert('Erreur lors de la suppression du fichier.');
+        }
+      });
     }
   }
   

@@ -77,7 +77,7 @@ export class UtilisateursComponent implements OnInit {
 
   supprimerUtilisateur(user: Utilisateur) {
     if (confirm(`Sûr de vouloir supprimer l'utilisateur ${user.nom_complet} ?`)) {
-      this.userService.deleteUser(user.matricule).subscribe({
+      this.userService.suppUtilisateur(user.matricule).subscribe({
         next: () => {
           this.loadUsers();
         },

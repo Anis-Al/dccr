@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../../components/pagination/pagination.component';
 import { CreditDetailsComponent } from '../../../credits/credit-details/credit-details.component';
+import { SiRoleDirective } from '../../../../core/directives/si-role.directive';
 
 @Component({
   selector: 'app-credits-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, CreditDetailsComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, CreditDetailsComponent,SiRoleDirective],
   templateUrl: './credits-list.component.html',
   styleUrls: ['./credits-list.component.css']
 })

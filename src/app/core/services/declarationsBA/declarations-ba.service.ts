@@ -24,6 +24,9 @@ private apiUrl = environment.apiBaseUrl;
   getTousLesDeclarations(): Observable<XmlDto[]> {
     return this.http.get<XmlDto[]>(`${this.apiUrl}${environment.endpoints.declarationsBA.tousLesDeclarations}`);
   }
+  supprimerDeclaration(idXml: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${environment.endpoints.declarationsBA.supprimerDeclaration}/${idXml}`);
+  }
 
 
 }

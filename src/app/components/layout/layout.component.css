@@ -93,6 +93,13 @@
   font-size: 1.25rem;
   width: 24px;
   text-align: center;
+  flex-shrink: 0;
+}
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
 }
 .layout.sidebar-collapsed .nav-label {
   display: none;
@@ -100,9 +107,26 @@
 .submenu-toggle {
   cursor: pointer;
   user-select: none;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 .submenu-arrow {
   margin-left: auto;
+  transition: transform 0.2s ease;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+.submenu-toggle .fa-chevron-down,
+.submenu-toggle .fa-chevron-up {
+  transition: transform 0.2s ease;
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+.submenu-toggle:hover .fa-chevron-down,
+.submenu-toggle:hover .fa-chevron-up {
+  opacity: 1;
 }
 .sub-menu {
   padding-left: 1rem;

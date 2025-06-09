@@ -1,0 +1,122 @@
+<div class="journaux-container">
+  <div class="journaux-list">
+    <div class="header">
+      <h1>Journaux d'Audit</h1>
+      <div class="header-actions">
+        <span>
+        </span>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher un journal..." [(ngModel)]="searchTerm" (input)="onSearch()">
+      </div>
+      <div class="date-filters">
+        <div class="date-select">
+          <label>Période:</label>
+          <select [(ngModel)]="selectedPeriode" (change)="filtrerParPeriode()">
+            <option value="">Toutes les périodes</option>
+            <option value="today">Aujourd'hui</option>
+            <option value="week">Cette semaine</option>
+            <option value="month">Ce mois</option>
+          </select>
+        </div>
+        <div class="date-select">
+          <label>Action:</label>
+          <select [(ngModel)]="selectedAction" (change)="filtrerParAction()">
+            <option value="">Toutes les actions</option>
+            <option value="create">Création</option>
+            <option value="update">Modification</option>
+            <option value="delete">Suppression</option>
+            <option value="export">Export</option>
+            <option value="import">Import</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="collante">Date</th>
+            <th>Utilisateur</th>
+            <th>Action</th>
+            <th>Ressource</th>
+            <th>Niveau</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of journauxPagines; trackBy: trackByJournal"
+              (click)="selectionnerJournal(log)"
+              [class.selected]="journalSelectionne?.id === log.id">
+            <td class="collante">{{ log.date | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>{{ log.utilisateur }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.ressource }}</td>
+            <td>
+              <span class="niveau-badge" [ngClass]="log.niveau.toLowerCase()">
+                {{ log.niveau }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="journauxPagines.length === 0">
+            <td colspan="5" class="no-data">Aucun journal trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-container">
+      <app-pagination
+        [lignesTotales]="journauxFiltres.length"
+        [pageActuelle]="pageActuelle"
+        (changeurPage)="changerPage($event)">
+      </app-pagination>
+    </div>
+  </div>
+  
+  <div class="details-panel" *ngIf="journalSelectionne">
+    <div class="header">
+      <h2>Détails du Journal</h2>
+      <button class="btn-icon close-btn" (click)="fermerDetails()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="details-content">
+      <div class="detail-item">
+        <span class="label">ID:</span>
+        <span class="value">{{ journalSelectionne.id }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Date:</span>
+        <span class="value">{{ journalSelectionne.date | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Utilisateur:</span>
+        <span class="value">{{ journalSelectionne.utilisateur }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Action:</span>
+        <span class="value">{{ journalSelectionne.action }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Ressource:</span>
+        <span class="value">{{ journalSelectionne.ressource }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Niveau:</span>
+        <span class="niveau-badge" [ngClass]="journalSelectionne.niveau.toLowerCase()">
+          {{ journalSelectionne.niveau }}
+        </span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Détails:</span>
+        <span class="value details-text">{{ journalSelectionne.details }}</span>
+      </div>
+    </div>
+  </div>
+</div>

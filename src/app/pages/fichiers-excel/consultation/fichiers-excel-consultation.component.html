@@ -26,7 +26,7 @@
             <th class="collante">Nom du fichier</th>
             <th>Date d'intégration</th>
             <th>Intégrateur</th>
-            <th>Actions</th>
+            <th *siRole="'integrateurExcel'">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -37,7 +37,7 @@
             <td class="collante">{{ fichier.nom_fichier_excel }}</td>  
             <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ fichier.integrateur }}</td>
-            <td>
+            <td *siRole="'integrateurExcel'">
               <div class="actions" (click)="$event.stopPropagation()">
                 <button class="btn-icon" (click)="supprimerFichier(fichier)">
                   <i class="fas fa-trash"></i>

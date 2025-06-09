@@ -52,10 +52,9 @@ export class LoginComponent {
         next: (response) => {
           if (response && response.token) {
             this.authService.setToken(response.token);
-            this.authService.setUserInfo({
-              name: response.nom_complet,
-              role: response.role
-            });
+            console.log('Token:', response.token);
+            console.log('Decoded Token:', this.authService.decodeToken(response.token));
+            console.log(this.authService.getUserInfo()); 
             this.router.navigate(['/tableau-de-bord']);
           } else if (response && response.message) {
             this.errorMessage = response.message;

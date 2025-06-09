@@ -1,0 +1,41 @@
+<div class="tableau-de-bord">
+    <div class="header">
+        <h1>Tableau de Bord</h1>
+    </div>
+    <div class="charts-grid">
+
+        <div class="chart-card card" *ngIf="excelChartData">
+        <h2>Fichiers intégrés par Mois</h2>
+            <div class="chart-container">
+                <canvas baseChart
+                [data]="excelChartData"
+                [type]="excelChartType"
+                [options]="excelChartOptions">
+                </canvas>
+            </div>
+        </div>
+
+        <div class="chart-card card" *ngIf="guaranteeChartData">
+        <h2>Top 5 des garanties les plus communes</h2>
+        <div class="chart-container">
+            <canvas baseChart
+            [data]="guaranteeChartData"
+            [type]="guaranteeChartType"
+            [options]="guaranteeChartOptions">
+            </canvas>
+        </div>
+        </div>
+
+        <div class="chart-card card" *ngIf="agencyDebtChartData">
+        <h2>Somme des échéances impayées par Agence</h2>
+            <div class="chart-container">
+                <canvas baseChart
+                [data]="agencyDebtChartData"
+                [type]="agencyDebtChartType"
+                [options]="agencyDebtChartOptions">
+                </canvas>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -22,12 +22,12 @@ import { CreditStateService } from '../../../core/services/credits/credit-state.
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div class="action-group" *ngIf="!fromCreditsList">
-          <button class="btn btn-primary" (click)="onEdit()">
+        <div class="action-group"  *ngIf="!fromCreditsList">
+          <button class="btn btn-primary" *siRole="'modificateurCredits'" (click)="onEdit()">
             <i class="fas fa-edit"></i>
             Modifier
           </button>
-          <button class="btn btn-danger" (click)="onDelete()">
+          <button class="btn btn-danger" *siRole="'modificateurCredits'" (click)="onDelete()">
             <i class="fas fa-trash-alt"></i>
             Supprimer
           </button>

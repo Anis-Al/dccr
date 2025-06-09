@@ -165,6 +165,7 @@
 }
 .table-container tbody tr {
   background-color: white !important;
+  cursor: pointer;
 }
 .table-container th,
 .table-container td {

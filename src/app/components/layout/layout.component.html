@@ -40,7 +40,7 @@
             <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null">
               <i [class]="'fas ' + item.icon"></i>
               <span class="nav-label">{{ item.label }}</span>
-              <i class="fas fa-caret-down submenu-arrow" *ngIf="!sidebarCollapsed"></i>
+              <i class="fas ml-auto" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'" *ngIf="!sidebarCollapsed"></i>
             </div>
             <div
               class="sub-menu"
@@ -106,6 +106,7 @@
 
       <a
         class="nav-item"
+        *ngIf="navItems[7] && hasRequiredRole(navItems[7])"
         [routerLink]="navItems[7].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[7].label : null"
@@ -113,8 +114,10 @@
         <i [class]="'fas ' + navItems[7].icon"></i>
         <span class="nav-label">{{ navItems[7].label }}</span>
       </a>
+      
       <a
         class="nav-item"
+        *ngIf="navItems[8] && hasRequiredRole(navItems[8])"
         [routerLink]="navItems[8].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[8].label : null"
@@ -128,17 +131,17 @@
       <div class="user-info" style="margin-bottom: 1rem;">
         <img src="assets/default-avatar.svg" alt="Avatar" class="avatar">
         <div class="user-details" *ngIf="!sidebarCollapsed">
-          <span class="user-name">{{ userInfo?.name || 'Utilisateur inconnu' }}</span>
-          <span class="user-role">{{ userInfo?.role || 'Aucun rôle' }}</span>
+          <span class="user-name">{{ userInfo?.nom_complet || 'Utilisateur inconnu' }}</span>
+          <span class="user-role">{{ roleClaire(userInfo?.role) }}</span>
         </div>
       </div>
 
       <div class="footer-actions" style="padding-bottom: 0.25rem;">
-        <button class="btn btn-icon" (click)="toggleGuide()" *ngIf="!sidebarCollapsed">
+        <button class="btn btn-icon"  *ngIf="!sidebarCollapsed">
           <i class="fas fa-question-circle"></i>
           <span>Guide d'utilisation</span>
         </button>
-        <button class="btn btn-icon" (click)="toggleGuide()" *ngIf="sidebarCollapsed" title="Guide d'utilisation">
+        <button class="btn btn-icon"  *ngIf="sidebarCollapsed" title="Guide d'utilisation">
           <i class="fas fa-question-circle"></i>
         </button>
 

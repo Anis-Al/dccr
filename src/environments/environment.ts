@@ -2,6 +2,9 @@ export const environment = {
   production: false,
   apiBaseUrl: 'https://localhost:5001/api/',
   endpoints: {
+    tableauDeBord:{
+      kpis:'kpis'
+    },
     excel: {
       integrationPart1: 'Excel/importer',
       integrationPart2:'Excel/confirmer-integration',
@@ -19,6 +22,7 @@ export const environment = {
      tousLesDeclarations:'declarationsBA',
      genererDeclarationsParExcel :'declarationsBA/generer-declarations',
      telechargerDeclarations:'declarationsBA/telecharger-declarations',
+     supprimerDeclaration:'declarationsBA/supprimer',
      archiverDonnees:'declarationsBA/archiver-donnees',
     },
     utilisateurs: {
