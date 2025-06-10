@@ -345,6 +345,19 @@
       width: 100%;
     }
 
+    .actions-column {
+      width: 80px;
+      text-align: center;
+      
+      &:not(:has(.actions[style*='display: none'])) {
+        display: table-cell;
+      }
+      
+      @media (max-width: 768px) {
+        width: 60px;
+      }
+    }
+
     .clickable-row {
       cursor: pointer;
       

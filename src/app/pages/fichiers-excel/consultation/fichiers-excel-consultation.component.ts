@@ -5,7 +5,7 @@ import { ExcelCrudService } from '../../../core/services/excel/excel-crud.servic
 import { ExcelMetadonneesDto } from '../../../core/dtos/Excel/excel-metadonnees-dto';
 import { Router } from '@angular/router';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
-import { CreditDto } from '../../../core/dtos/Credits/credits';
+import { CreditDto, CreditsListeDto } from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { Subscription } from 'rxjs';
 import { CreditsListComponent } from './credits-list-par-source/credits-list.component';
@@ -30,10 +30,10 @@ export class FichiersExcelConsultationComponent implements OnInit, OnDestroy {
   dateDebut: string = '';
   dateFin: string = '';
   today: string = new Date().toISOString().split('T')[0];
-  creditsPagines: CreditDto[] = [];
-  creditsFiltres: CreditDto[] = [];
-  tousLesCredits: CreditDto[] = [];
-  creditSelectionne: CreditDto | null = null;
+  creditsPagines: CreditsListeDto[] = [];
+  creditsFiltres: CreditsListeDto[] = [];
+  tousLesCredits: CreditsListeDto[] = [];
+  creditSelectionne: CreditsListeDto | null = null;
   creditSearchTerm = '';
   selectedDate = '';
   datesDeclaration: string[] = [];

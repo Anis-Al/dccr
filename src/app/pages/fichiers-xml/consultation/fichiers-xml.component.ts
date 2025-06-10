@@ -5,11 +5,11 @@ import { PaginationComponent } from '../../../components/pagination/pagination.c
 import { Router } from '@angular/router';
 import { DeclarationsBAService } from '../../../core/services/declarationsBA/declarations-ba.service';
 import { XmlDto } from '../../../core/dtos/DeclarationsBA/declarationsBA-dto';
-
+import { SiRoleDirective } from '../../../core/directives/si-role.directive';
 @Component({
   selector: 'app-fichiers-xml',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent,],
+  imports: [CommonModule, FormsModule, PaginationComponent,SiRoleDirective],
   providers:[DatePipe],
   templateUrl: './fichiers-xml.component.html',
   styleUrl: './fichiers-xml.component.scss'

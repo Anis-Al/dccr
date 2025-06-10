@@ -137,6 +137,11 @@ export const routes: Routes = [
             path: 'nouveau',
             loadComponent: () =>
               import('./pages/utilisateurs/user-form/user-form.component').then(m => m.UserFormComponent)
+          },
+          {
+            path: ':matricule',
+            loadComponent: () =>
+              import('./pages/utilisateurs/user-form/user-form.component').then(m => m.UserFormComponent)
           }
         ]
       }

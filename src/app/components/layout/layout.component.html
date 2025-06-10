@@ -37,10 +37,10 @@
               <span class="nav-label">{{ item.label }}</span>
             </a>
 
-            <div *ngIf="item.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed ? 'En Cours - ' + item.label : null">
-              <i [class]="'fas ' + item.icon"></i>
-              <span class="nav-label">{{ item.label }}</span>
-              <i class="fas ml-auto" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'" *ngIf="!sidebarCollapsed"></i>
+            <div *ngIf="item?.children" class="nav-item submenu-toggle" (click)="toggleSubMenu(item)" [attr.title]="sidebarCollapsed && item?.label ? 'En Cours - ' + item.label : null">
+              <i [class]="'fas ' + (item?.icon || '')"></i>
+              <span class="nav-label">{{ item?.label || '' }}</span>
+              <i class="fas ml-auto" [ngClass]="item?.expanded ? 'fa-chevron-up' : 'fa-chevron-down'" *ngIf="!sidebarCollapsed"></i>
             </div>
             <div
               class="sub-menu"
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <div class="nav-section">
+      <div class="nav-section" *siRole="'admin'">
         <div class="section-header" *ngIf="!sidebarCollapsed">
           <span class="section-title">Archives</span>
           <button class="collapse-section-btn" (click)="archivesCollapsed = !archivesCollapsed">
@@ -106,7 +106,7 @@
 
       <a
         class="nav-item"
-        *ngIf="navItems[7] && hasRequiredRole(navItems[7])"
+        *siRole="'admin'"
         [routerLink]="navItems[7].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[7].label : null"
@@ -117,7 +117,7 @@
       
       <a
         class="nav-item"
-        *ngIf="navItems[8] && hasRequiredRole(navItems[8])"
+        *siRole="'admin'"
         [routerLink]="navItems[8].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[8].label : null"

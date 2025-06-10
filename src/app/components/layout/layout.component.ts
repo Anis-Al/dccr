@@ -6,6 +6,7 @@ import { InfosUtilisateur } from '../../core/models/infos-utilisateur.model';
 import { ROLES, RoleValue, Utilisateur } from '../../core/dtos/Utilisateurs/utilisateur-dto';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { SiRoleDirective } from '../../core/directives/si-role.directive';
 
 interface NavItem {
   label: string;
@@ -14,13 +15,13 @@ interface NavItem {
   children?: NavItem[];
   expanded?: boolean;
   routerLinkActiveOptions?: { exact: boolean };
-  roles?: string[]; // Roles that can see this menu item
+  roles?: string[]; 
 }
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule,SiRoleDirective],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']
 })
@@ -31,7 +32,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   userInfo: InfosUtilisateur | null = null;
   currentRoute = '';
   enCoursCollapsed = false;
-  archivesCollapsed = false;
+  archivesCollapsed = true;
   navItems: NavItem[] = [];
 
   constructor(
@@ -63,26 +64,22 @@ export class LayoutComponent implements OnInit, OnDestroy {
         label: 'Tableau de Bord', 
         route: '/tableau-de-bord', 
         icon: 'fa-chart-line',
-        roles: ['admin', 'integrateurExcel', 'modificateurCredits', 'generateurDeclarations']
       },
       {
         label: 'Fichiers d\'Entrée',
         icon: 'fa-file-excel',
         expanded: false,
-        roles: ['admin', 'integrateurExcel'],
         children: [
           { 
             label: 'Intégration', 
             route: '/fichiers-excel/integration', 
             icon: 'fa-file-import',
-            roles: ['admin', 'integrateurExcel']
           },
           { 
             label: 'Détails', 
             route: '/fichiers-excel', 
             icon: 'fa-spinner', 
             routerLinkActiveOptions: { exact: true },
-            roles: ['admin', 'integrateurExcel']
           }
         ]
       },
@@ -91,50 +88,41 @@ export class LayoutComponent implements OnInit, OnDestroy {
         icon: 'fa-money-bill-transfer',
         route: '/credits',
         expanded: false,
-        roles: ['admin', 'modificateurCredits']
       },
       {
         label: 'Déclarations BA',
         icon: 'fa-file',
         route: '/fichiers-xml',
-        roles: ['admin', 'generateurDeclarations']
       },
       { 
         label: 'Fichiers d\'entrée', 
         route: '/archives/fichiers-entree', 
         icon: 'fa-file-excel',
-        roles: ['admin']
       },
       { 
         label: 'Crédits', 
         route: '/archives/credits', 
         icon: 'fa-money-bill-transfer',
-        roles: ['admin']
       },
       { 
         label: 'Déclarations BA', 
         route: '/archives/declarations-ba', 
         icon: 'fa-file',
-        roles: ['admin']
       },
       { 
         label: 'Journaux d\'audit', 
         route: '/journaux-audit', 
         icon: 'fa-eye',
-        roles: ['admin']
       },
       { 
         label: 'Utilisateurs', 
         route: '/utilisateurs', 
         icon: 'fa-users',
-        roles: ['admin']
       }
     ];
 
-    // Filter navigation items based on user role
     this.navItems = allNavItems.filter(item => this.hasRequiredRole(item));
     
-    // Filter children for items that have them
     this.navItems = this.navItems.map(item => {
       if (item.children) {
         return {

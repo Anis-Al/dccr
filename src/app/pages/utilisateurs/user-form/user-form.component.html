@@ -2,11 +2,19 @@
   <h2>{{ isEditMode ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur' }}</h2>
 
   <form [formGroup]="isLdapMode ? ldapForm : userForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="form-group mode-selection" *ngIf="!isEditMode">
-      <label class="checkbox-container">
+    <div class="form-group mode-selection d-flex align-items-center" style="display: flex; align-items: center; gap: 1rem;" *ngIf="!isEditMode">
+      <label class="checkbox-container" style="margin-bottom: 0;">
         <input type="checkbox" [(ngModel)]="isLdapMode" [ngModelOptions]="{standalone: true}" (change)="onModeChange()">
         <span class="checkbox-text">Mode LDAP</span>
       </label>
+      <div
+        class="alert"
+        [ngClass]="addUserSuccess ? 'alert-success' : 'alert-error'"
+        [style.visibility]="addUserMessage ? 'visible' : 'hidden'"
+        style="margin-bottom: 0; padding: 0.25rem 0.75rem; min-width: 200px; min-height: 32px; display: flex; align-items: center;"
+      >
+        <span class="alert-message">{{ addUserMessage }}</span>
+      </div>
     </div>
 
     <ng-container *ngIf="isLdapMode; else standardFormFields">
@@ -63,9 +71,7 @@
     </ng-template>
 
     <div class="form-actions">
-      <div *ngIf="addUserMessage" class="alert form-actions-alert" [ngClass]="addUserSuccess ? 'alert-success' : 'alert-error'">
-        <span class="alert-message">{{ addUserMessage }}</span>
-      </div>
+      
       <button type="submit" class="btn btn-primary" [disabled]="(isLdapMode ? ldapForm.invalid : userForm.invalid)">
         {{ isEditMode ? 'Mettre à jour' : 'Confirmer' }}
       </button>

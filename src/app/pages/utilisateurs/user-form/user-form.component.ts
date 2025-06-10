@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Utilisateur, ROLES } from '../../../core/dtos/Utilisateurs/utilisateur-dto';
 import { UtilisateurService } from '../../../core/services/auth&utilisateurs/utilisateur.service';
 
@@ -28,6 +28,7 @@ export class UserFormComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private fb: FormBuilder,
     private userService: UtilisateurService
   ) {}
@@ -36,12 +37,25 @@ export class UserFormComponent implements OnInit {
     this.initForm();
   }
   ngOnInit(): void {
-    this.isEditMode = !!this.user;
-    this.initForm();
-
-    if (this.isEditMode && this.user) {
-      this.userForm.patchValue(this.user);
-    }
+    this.route.paramMap.subscribe(params => {
+      const matricule = params.get('matricule');
+      if (matricule) {
+        this.isEditMode = true;
+        this.userService.getUserByMatricule(matricule).subscribe({
+          next: user => {
+            this.user = user;
+            this.initForm();
+            this.userForm.patchValue(user);
+          },
+          error: () => {
+            this.router.navigate(['/utilisateurs']);
+          }
+        });
+      } else {
+        this.isEditMode = false;
+        this.initForm();
+      }
+    });
   }
 
   private initForm(): void {
@@ -85,8 +99,7 @@ export class UserFormComponent implements OnInit {
         } else {
           this.userService.ajouterUtilisateur(utilisateur).subscribe({
             next: (res) => {
-              this.addUserMessage = res.message;
-              this.addUserSuccess = /succ[èe]s/i.test(res.message);
+              this.addUserMessage = res;
             },
             error: (error) => {
               this.addUserSuccess = false;

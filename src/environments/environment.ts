@@ -14,9 +14,10 @@ export const environment = {
       supprimerFichierExcel:'Excel/supprimer-fichier-excel',
     },
     credits: {
-      tousLesCreditsEnCours: 'credits/get-tous-credits',
+      tousLesCreditsEnCours: 'credits',
       tableDomaines: 'credits/get-tables-domaines',
       ajouterCredit: 'credits/nouveau',
+      creditDetails: 'credits/infos',
     },
     declarationsBA :{
      tousLesDeclarations:'declarationsBA',
@@ -30,6 +31,8 @@ export const environment = {
       ajouterUtilisateur: 'utilisateurs/ajouter',
       majUtilisateur: 'utilisateurs/modifier-utilisateur',
       supprimerUtilisateur: 'utilisateurs/supprimer',
+      unUtilisateur: 'utilisateurs/utilisateur', 
+
     },
     auth: {
       login: 'auth',

@@ -43,6 +43,15 @@ export interface CreditDto {
   garanties: GarantieDto[];
 }
 
+export interface CreditsListeDto {
+  num_contrat_credit: string | null;
+  date_declaration: string | null;
+  libelle_type_credit: string | null;
+  libelle_activite: string | null;
+  libelle_situation: string | null;
+  id_excel: number | null;
+}
+
 export interface IntervenantDto {
   cle: string | null;
   type_cle: string | null;

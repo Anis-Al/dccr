@@ -88,6 +88,10 @@ export class UtilisateursComponent implements OnInit {
     }
   }
 
+  editerUtilisateur(user: Utilisateur) {
+    this.router.navigate(['/utilisateurs', user.matricule]);
+  }
+
   getRoleLabel(role: string): string {
     const found = this.roles.find(r => r.value === role);
     return found ? found.key : role;

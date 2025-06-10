@@ -10,7 +10,7 @@ export interface CreditState {
   error: string | null;
 }
 
-const initialState: CreditState = {
+const etatInitial: CreditState = {
   selectedCredit: null,
   isEditMode: false,
   isLoading: false,
@@ -22,7 +22,7 @@ const initialState: CreditState = {
 })
 export class CreditStateService implements OnDestroy {
   private destroy$ = new Subject<void>();
-  private state = new BehaviorSubject<CreditState>(initialState);
+  private state = new BehaviorSubject<CreditState>(etatInitial);
   state$ = this.state.asObservable();
 
   selectedCredit$ = new BehaviorSubject<CreditDto | null>(null);
@@ -66,7 +66,7 @@ export class CreditStateService implements OnDestroy {
   }
 
   resetState(): void {
-    this.state.next(initialState);
+    this.state.next(etatInitial);
   }
 
   private updateState(partialState: Partial<CreditState>): void {

@@ -1,33 +1,33 @@
 import { Injectable } from '@angular/core';
-import { CreditDto } from '../../dtos/Credits/credits';
+import { CreditDto, CreditsListeDto } from '../../dtos/Credits/credits';
 import { TablesDomainesDto, ValeursTableDomaines } from '../../dtos/Credits/tables_domaines';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, catchError, Observable, of, tap, throwError } from 'rxjs';
+import { formatDate } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CreditsService {
   private readonly baseUrl = environment.apiBaseUrl;
-  private creditsCache = new BehaviorSubject<CreditDto[]>([]);
+  private creditsCache = new BehaviorSubject<CreditsListeDto[]>([]);
   private domainesCache = new BehaviorSubject<TablesDomainesDto[] | null>(null);
   private tempsDerniereRequete: number = 0;
   private readonly timeout = 60 * 60 * 1000; 
 
   constructor(private http:HttpClient) { }
 
-  getTousLesCredits(): Observable<CreditDto[]> {
+  getTousLesCredits(): Observable<CreditsListeDto[]> {
     const now = Date.now();
     const cacheAge = now - this.tempsDerniereRequete;
 
     if (cacheAge < this.timeout && this.creditsCache.value.length > 0) {
       return of(this.creditsCache.value);
     }
-
     const url = `${this.baseUrl}${environment.endpoints.credits.tousLesCreditsEnCours}`;
-    return this.http.get<CreditDto[]>(url).pipe(
+    return this.http.get<CreditsListeDto[]>(url).pipe(
       tap(credits => {
         this.creditsCache.next(credits);
         this.tempsDerniereRequete = now;
@@ -37,14 +37,38 @@ export class CreditsService {
       })
     );
   }
-
-  actualiserCredits(): Observable<CreditDto[]> {
+  actualiserCredits(): Observable<CreditsListeDto[]> {
     const url = `${this.baseUrl}${environment.endpoints.credits.tousLesCreditsEnCours}`;
-    return this.http.get<CreditDto[]>(url).pipe(
+    return this.http.get<CreditsListeDto[]>(url).pipe(
       tap(credits => {
         this.creditsCache.next(credits);
         this.tempsDerniereRequete = Date.now();
       }),
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
+
+  getCreditDetails(numContratCredit: string, dateDeclaration: Date): Observable<CreditDto[]> {
+    const formattedDate = formatDate(dateDeclaration, 'yyyy-MM-dd', 'en-US');
+    const url = `${this.baseUrl}${environment.endpoints.credits.creditDetails}?numContratCredit=${encodeURIComponent(numContratCredit)}&dateDeclaration=${formattedDate}`;
+    
+    return this.http.get<CreditDto[]>(url).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error fetching credit details:', error);
+        return throwError(() => new Error('Une erreur est survenue lors de la récupération des détails du crédit.'));
+      })
+    );
+  }
+
+ 
+  getCreditsActuelles(): Observable<CreditsListeDto[]> {
+    return this.creditsCache.asObservable();
+  }
+  ajouterCredit(credit: CreditDto): Observable<any> {
+    const url = `${this.baseUrl}${environment.endpoints.credits.ajouterCredit}`;
+    return this.http.post<any>(url, credit).pipe(
       catchError((error: HttpErrorResponse): Observable<never> => {
         return throwError(() => new Error(error.message));
       })
@@ -67,7 +91,6 @@ export class CreditsService {
       })
     );
   }
-
   getDomaineByNomTable(nomTable: string): Observable<ValeursTableDomaines[]> 
   {
     if (this.domainesCache.value) {
@@ -86,19 +109,6 @@ export class CreditsService {
       }),
       catchError((error: Error) => {
         return throwError(() => new Error(`Erreur lors de la récupération du domaine ${nomTable}: ${error.message}`));
-      })
-    );
-  }
-
-  getCreditsActuelles(): Observable<CreditDto[]> {
-    return this.creditsCache.asObservable();
-  }
-
-  ajouterCredit(credit: CreditDto): Observable<any> {
-    const url = `${this.baseUrl}${environment.endpoints.credits.ajouterCredit}`;
-    return this.http.post<any>(url, credit).pipe(
-      catchError((error: HttpErrorResponse): Observable<never> => {
-        return throwError(() => new Error(error.message));
       })
     );
   }

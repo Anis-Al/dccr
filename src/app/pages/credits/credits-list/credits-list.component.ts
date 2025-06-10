@@ -3,7 +3,7 @@ import { CommonModule,DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreditDetailsComponent } from '../credit-details/credit-details.component';
-import { CreditDto }  from '../../../core/dtos/Credits/credits';
+import { CreditDto, CreditsListeDto }  from '../../../core/dtos/Credits/credits';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { catchError, Observable, of, Subscription, tap } from 'rxjs';
 import { ExcelSelectionService } from '../../../core/services/excel/excel-selection.service';
@@ -18,8 +18,8 @@ import { PaginationComponent } from '../../../components/pagination/pagination.c
   styleUrls: ['./credits-list.component.scss']
 })
 export class CreditsListComponent implements OnInit {
-  credits$: Observable<CreditDto[]> | undefined;
-  private TousLesCredits: CreditDto[] = []; 
+  credits$: Observable<CreditsListeDto[]> | undefined;
+  private TousLesCredits: CreditsListeDto[] = []; 
   private loadCreditsSubscription: Subscription | undefined;
   isLoading: boolean = false; 
   selectedExcelFile: any = null;
@@ -27,13 +27,13 @@ export class CreditsListComponent implements OnInit {
   searchTerm: string = '';
   selectedDate: string = '';
   datesDeclaration: string[] = [];
-  creditSelectionne: CreditDto | null = null;
+  creditSelectionne: CreditsListeDto | null = null;
 
   pageActuelle: number = 1;
   lignesParPage: number = 5;
   PagesTotales: number = 1;
-  CreditsPagines: CreditDto[] = [];
-  CreditsFiltres: CreditDto[] = []; 
+  CreditsPagines: CreditsListeDto[] = [];
+  CreditsFiltres: CreditsListeDto[] = []; 
 
   errorMessage: string | null = null;
   excelSelectionSubscription: Subscription;
@@ -171,7 +171,7 @@ export class CreditsListComponent implements OnInit {
     }
   }
 
-  selectionnerCredit(credit: CreditDto): void {
+  selectionnerCredit(credit: CreditsListeDto): void {
     if (this.creditSelectionne?.num_contrat_credit === credit.num_contrat_credit) {
         this.fermerDetails(); 
     } else {
@@ -188,7 +188,6 @@ export class CreditsListComponent implements OnInit {
   formatDate(dateString: string | null | undefined): string {
     if (!dateString) return '';
     
-    // Handle already formatted dates (prevent double formatting)
     if (dateString.includes('/')) return dateString;
     
     const date = new Date(dateString);
@@ -204,7 +203,7 @@ export class CreditsListComponent implements OnInit {
   annulerSelection(event: Event) {
     event.stopPropagation();
     this.selectedExcelFile = null;
-    this.selectedDate = ''; // Reset date filter
+    this.selectedDate = ''; 
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { id_excel: null },
@@ -222,17 +221,14 @@ export class CreditsListComponent implements OnInit {
     this.loadCreditsSubscription = this.creditService.getTousLesCredits()
       .subscribe({ 
         next: (credits) => {
-          // Format dates in the credits array to dd/MM/yyyy format
-          this.TousLesCredits = credits.map((credit: CreditDto) => ({
+          this.TousLesCredits = credits.map((credit: CreditsListeDto) => ({
             ...credit,
           }));
           
-          // Extract unique dates after formatting
           this.extractUniqueDates();
           this.updatePagination();
         },
         error: (err) => {
-          console.error(err);
           this.errorMessage = err?.message;
           this.isLoading = false; 
         },

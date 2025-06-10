@@ -13,8 +13,8 @@ export class UtilisateurService {
 
   constructor(private http: HttpClient) {}
 
-  ajouterUtilisateur(utilisateur: Utilisateur): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}${environment.endpoints.utilisateurs.ajouterUtilisateur}`, utilisateur);
+  ajouterUtilisateur(utilisateur: Utilisateur): Observable<string > {
+    return this.http.post<string>(`${this.apiUrl}${environment.endpoints.utilisateurs.ajouterUtilisateur}`, utilisateur,{ responseType: 'text' as 'json' });
   }
   ajouterUtilisateurLdap(userData: Pick<Utilisateur, 'matricule' | 'role'>): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/ldap`, userData);
@@ -32,5 +32,9 @@ export class UtilisateurService {
   }
   getUsers(): Observable<Utilisateur[]> {
     return this.http.get<Utilisateur[]>(this.apiUrl+environment.endpoints.utilisateurs.tousLesUtilisateurs);
+  }
+
+  getUserByMatricule(matricule: string | number): Observable<Utilisateur> {
+    return this.http.get<Utilisateur>(`${this.apiUrl}${environment.endpoints.utilisateurs.unUtilisateur}/${matricule}`);
   }
 }

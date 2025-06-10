@@ -1,0 +1,293 @@
+<div class="pret-details">
+    <div class="header">
+      <div class="header-main">
+        <h1>
+          <i class="fas fa-file-invoice-dollar"></i>
+          Détails du Crédit
+        </h1>
+        <button class="btn btn-icon" (click)="onClose()" title="Fermer">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="action-group" *ngIf="!fromCreditsList && creditDetails">
+        <button class="btn btn-primary" *siRole="'modificateurCredits'" (click)="onEdit()">
+          <i class="fas fa-edit"></i>
+          Modifier
+        </button>
+        <button class="btn btn-danger" *siRole="'modificateurCredits'" (click)="onDelete()">
+          <i class="fas fa-trash-alt"></i>
+          Supprimer
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Chargement des détails...
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+
+    <div *ngIf="!isLoading && !error && creditDetails" class="details-container">
+      <div class="details-grid">
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-info-circle"></i>
+            Informations Générales
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">N° Contrat</span>
+              <span class="value">{{creditDetails.num_contrat_credit || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Type de Crédit</span>
+              <span class="value">{{creditDetails.libelle_type_credit || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Plafond Accordé</span>
+              <span class="value">{{creditDetails.est_plafond_accorde !== null ? (creditDetails.est_plafond_accorde ? 'Oui' : 'Non') : 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">N° Plafond</span>
+              <span class="value">{{creditDetails.id_plafond || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Code Activité</span>
+              <span class="value">{{creditDetails.libelle_activite || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Situation</span>
+              <span class="value">{{creditDetails.libelle_situation || 'N/A'}}</span>
+            </div>
+            <div class="detail-item" *ngIf="creditDetails.motif">
+              <span class="label">Motif</span>
+              <span class="value">{{creditDetails.motif}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-users"></i>
+            Intervenants
+          </h2>
+          <div class="details-content">
+            <div *ngIf="!creditDetails.intervenants?.length" class="no-data">
+              Aucun intervenant trouvé
+            </div>
+            <div class="intervenant-list" *ngIf="creditDetails.intervenants?.length">
+              <div *ngFor="let intervenant of creditDetails.intervenants" class="intervenant-item card">
+                <div class="intervenant-header">
+                  <h3>{{intervenant.libelle_niveau_responsabilite || 'Intervenant'}}</h3>
+                </div>
+                <div class="intervenant-details">
+                  <div class="detail-item">
+                    <span class="label">Client</span>
+                    <span class="value">{{intervenant.cli || 'N/A'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Clé</span>
+                    <span class="value">{{intervenant.cle || 'N/A'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Type</span>
+                    <span class="value">{{intervenant.type_cle || 'N/A'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">NIF</span>
+                    <span class="value">{{intervenant.nif || 'N/A'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">RIB</span>
+                    <span class="value">{{intervenant.rib || 'N/A'}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-map-marker-alt"></i>
+            Lieu
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">Agence</span>
+              <span class="value">
+                <span *ngIf="creditDetails.libelle_agence || creditDetails.code_agence; else noAgency">
+                  {{creditDetails.libelle_agence || ''}} 
+                  {{creditDetails.code_agence ? '(' + creditDetails.code_agence + ')' : ''}}
+                </span>
+                <ng-template #noAgency>N/A</ng-template>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Wilaya</span>
+              <span class="value">
+                <span *ngIf="creditDetails.libelle_wilaya || creditDetails.code_wilaya; else noWilaya">
+                  {{creditDetails.libelle_wilaya || ''}}
+                  {{creditDetails.code_wilaya ? '(' + creditDetails.code_wilaya + ')' : ''}}
+                </span>
+                <ng-template #noWilaya>N/A</ng-template>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Pays</span>
+              <span class="value">
+                <span *ngIf="creditDetails.libelle_pays || creditDetails.code_pays; else noCountry">
+                  {{creditDetails.libelle_pays || ''}}
+                  {{creditDetails.code_pays ? '(' + creditDetails.code_pays + ')' : ''}}
+                </span>
+                <ng-template #noCountry>N/A</ng-template>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-euro-sign"></i>
+            Conditions Financières
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">Crédit Accordé</span>
+              <span class="value">{{ creditDetails.credit_accorde | devise:creditDetails.monnaie }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Devise</span>
+              <span class="value">{{creditDetails.libelle_monnaie || 'N/A'}} ({{creditDetails.monnaie || 'N/A'}})</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Taux d'Intérêt</span>
+              <span class="value">{{creditDetails.taux_interets !== null ? creditDetails.taux_interets + '%' : 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Coût Total</span>
+              <span class="value">{{creditDetails.cout_total_credit | devise:creditDetails.monnaie}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Solde restant</span>
+              <span class="value">{{creditDetails.solde_restant | devise:creditDetails.monnaie}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-calendar-check"></i>
+            Remboursement
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">Mensualité</span>
+              <span class="value">{{creditDetails.mensualite | devise:creditDetails.monnaie}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Durée Initiale</span>
+              <span class="value">{{creditDetails.libelle_duree_initiale || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Durée Restante</span>
+              <span class="value">{{creditDetails.libelle_duree_restante || 'N/A'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-exclamation-triangle"></i>
+            Retard
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">Classe de Retard</span>
+              <span class="value">{{creditDetails.libelle_classe_retard || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Échéances Impayées</span>
+              <span class="value">{{creditDetails.nombre_echeances_impayes !== null ? creditDetails.nombre_echeances_impayes : 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date de Constatation</span>
+              <span class="value">{{creditDetails.date_constatation_echeances_impayes || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Capital en Retard</span>
+              <span class="value">{{creditDetails.montant_capital_retard | devise:creditDetails.monnaie}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Intérêts En Retard</span>
+              <span class="value">{{creditDetails.montant_interets_retard | devise:creditDetails.monnaie}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Intérêts Courus</span>
+              <span class="value">{{creditDetails.montant_interets_courus | devise:creditDetails.monnaie}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-calendar-alt"></i>
+            Dates
+          </h2>
+          <div class="details-content">
+            <div class="detail-item">
+              <span class="label">Date de Déclaration</span>
+              <span class="value">{{creditDetails.date_declaration || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date d'Octroi</span>
+              <span class="value">{{creditDetails.date_octroi || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date de Rejet</span>
+              <span class="value">{{creditDetails.date_rejet || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date d'Expiration</span>
+              <span class="value">{{creditDetails.date_expiration || 'N/A'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Date d'execution</span>
+              <span class="value">{{creditDetails.date_execution || 'N/A'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section card">
+          <h2>
+            <i class="fas fa-shield-alt"></i>
+            Garanties
+          </h2>
+          <div class="details-content">
+            <div *ngIf="!creditDetails.garanties?.length" class="no-data">
+              Aucune garantie trouvée
+            </div>
+            <div class="garantie-list" *ngIf="creditDetails.garanties?.length">
+              <div *ngFor="let garantie of creditDetails.garanties" class="garantie-item card">
+                <div class="garantie-header">
+                  <h3>{{garantie.libelle_type_garantie || 'Garantie'}} ({{garantie.type_garantie || 'N/A'}})</h3>
+                </div>
+                <div class="garantie-details">
+                  <div class="detail-item">
+                    <span class="label">Intervenant</span>
+                    <span class="value">{{garantie.cle_intervenant || 'N/A'}}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Montant</span>
+                    <span class="value">{{garantie.montant_garantie !== null && creditDetails.monnaie ? (garantie.montant_garantie | currency:creditDetails.monnaie) : 'N/A'}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
