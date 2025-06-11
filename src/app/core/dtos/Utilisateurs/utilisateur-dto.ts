@@ -6,10 +6,10 @@ export interface Utilisateur {
 }
 
 export const ROLES = [
-  { key: 'Intégrateur Excel', value: 'integrateurExcel' },
-  { key: 'Modificateur Crédits', value: 'modificateurCredits' },
-  { key: 'Générateur Déclarations', value: 'generateurDeclarations' },
-  { key: 'Administrateur', value: 'admin' }
-];
+  { key: 'Intégrateur Excel', value: 'integrateurExcel' as const },
+  { key: 'Modificateur Crédits', value: 'modificateurCredits' as const },
+  { key: 'Générateur Déclarations', value: 'generateurDeclarations' as const },
+  { key: 'Administrateur', value: 'admin' as const }
+] as const;
 
-export type RoleValue = 'integrateurExcel' | 'modificateurCredits' | 'generateurDeclarations' | 'admin';
+export type RoleValue = typeof ROLES[number]['value'];

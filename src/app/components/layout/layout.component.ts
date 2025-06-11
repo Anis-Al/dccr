@@ -43,7 +43,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadUserInfo();
     this.initializeNavItems();
-    this.setupRouteTracking();
+    this.configurerSuiviNavigation();
   }
 
   ngOnDestroy() {
@@ -134,17 +134,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }).filter(item => !item.children || item.children.length > 0); // Remove parent items with no visible children
   }
 
-  private setupRouteTracking() {
+  private configurerSuiviNavigation() {
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       takeUntil(this.destroy$)
     ).subscribe((event: NavigationEnd) => {
       this.currentRoute = event.url;
-      this.updateNavItemsExpansion();
+      this.mettreAJourExpansionMenu();
     });
   }
 
-  private updateNavItemsExpansion() {
+  private mettreAJourExpansionMenu() {
     this.navItems.forEach(item => {
       if (item.children) {
         item.expanded = this.currentRoute.startsWith(item.route || '');
