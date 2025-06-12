@@ -1,0 +1,87 @@
+<div class="generation-container">
+    <div class="header">
+      <h1>Génération de Déclarations BA</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="retourListe()">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="selection-fichier">
+        <h2>Sélection du fichier Excel source</h2>
+        <div class="fichier-input-container">
+          <div class="search-actions">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Rechercher un fichier Excel..." [(ngModel)]="searchTerm">
+            </div>
+            <button class="btn-refresh" title="Rafraîchir la liste" (click)="chargerFichiersExcel()" [disabled]="isChargementFichiers">
+              <i class="fas fa-sync-alt" [class.fa-spin]="isChargementFichiers"></i>
+            </button>
+          </div>
+          
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nom du fichier</th>
+                  <th>Date d'intégration</th>
+                  <th>Intégrateur</th>
+                  <th>Sélection</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="isChargementFichiers">
+                  <td colspan="4" class="loading-data">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Chargement des fichiers...</span>
+                  </td>
+                </tr>
+                <tr *ngFor="let fichier of fichiersExcelFiltres">
+                  <td>{{fichier.nom_fichier_excel || 'N/A'}}</td>
+                  <td>{{fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+                  <td>{{fichier.integrateur || 'N/A'}}</td>
+                  <td class="actions-cell">
+                    <button 
+                      class="btn-icon" 
+                      [class.selected]="fichierSelectionne?.id_fichier_excel === fichier.id_fichier_excel"
+                      (click)="selectionnerFichier(fichier)"
+                    >
+                      <i class="fas" [class.fa-check-circle]="fichierSelectionne?.id_fichier_excel === fichier.id_fichier_excel" [class.fa-circle]="fichierSelectionne?.id_fichier_excel !== fichier.id_fichier_excel"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="!isChargementFichiers && fichiersExcelFiltres.length === 0">
+                  <td colspan="4" class="no-data">Aucun fichier Excel trouvé</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="message-container" *ngIf="messageSucces || messageErreur">
+        <div class="alert alert-success" *ngIf="messageSucces">
+          <i class="fas fa-check-circle"></i>
+          <span>{{ messageSucces }}</span>
+        </div>
+        <div class="alert alert-danger" *ngIf="messageErreur">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ messageErreur }}</span>
+        </div>
+      </div>
+
+      <div class="actions-container">
+        <button class="btn btn-secondary" (click)="annuler()">
+          <i class="fas fa-times"></i>
+          <span>Annuler</span>
+        </button>
+        <button class="btn btn-primary" [disabled]="!fichierSelectionne || isLoading" (click)="genererXML()">
+          <i class="fas" [class.fa-file-code]="!isLoading" [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i>
+          <span>{{ isLoading ? 'Génération en cours...' : 'Générer le fichier XML' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>

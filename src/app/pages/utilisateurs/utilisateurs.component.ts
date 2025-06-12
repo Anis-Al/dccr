@@ -28,7 +28,15 @@ export class UtilisateursComponent implements OnInit {
   utilisateurs: Utilisateur[] = [];
 
   ngOnInit() {
-    this.loadUsers();
+    const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const isPageReload = navigation.type === 'reload';
+    
+    if (isPageReload) {
+      this.userService.viderCacheUtilisateurs();
+      this.rafraichirDonnees();
+    } else {
+      this.loadUsers();
+    }
   }
 
   loadUsers() {
@@ -39,6 +47,18 @@ export class UtilisateursComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors du chargement des utilisateurs:', error);
+      }
+    });
+  }
+
+  rafraichirDonnees() {
+    this.userService.rafraichirUtilisateurs().subscribe({
+      next: (users) => {
+        this.utilisateurs = users;
+        this.updateFiltres();
+      },
+      error: (error) => {
+        console.error('Erreur lors du rafraîchissement des utilisateurs:', error);
       }
     });
   }

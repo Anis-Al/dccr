@@ -1,0 +1,193 @@
+<div class="validation-result-container">
+    <div class="header-actions">
+      <button class="back-btn" (click)="goBack()" title="Retour à l'intégration">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h1>Résultats pour : <span class="file-name">{{ result.NomFichierExcel || fileName }}</span></h1>
+    </div>
+
+  <ng-container *ngIf="result?.contientErreurs; else noErrorCase">
+   <div class="error-modal-overlay" *ngIf="showErrorPopup">
+     <div class="error-modal">
+       <div class="modal-content">
+         <i class="fas fa-exclamation-triangle"></i>
+         <h3>Erreurs détectées</h3>
+         <p>Ce fichier contient des erreurs.</p>
+         <p>Veuillez les corriger, puis rechargez le fichier.</p>
+         <button class="close-btn" (click)="closePopup()">
+           Fermer
+         </button>
+       </div>
+     </div>
+   </div>
+   
+   <div class="error-table-header">
+     <h2 class="section-title rouge">Tableau des erreurs</h2>
+     <button class="export-btn" (click)="telechargerFichierErreurs()">
+       <i class="fas fa-file-export"></i> Exporter
+     </button>
+   </div>
+   <div class="styled-table-container">
+     <table class="error-table">
+       <thead>
+         <tr>
+           <th>Ligne</th>
+           <th>Erreurs</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr *ngFor="let row of paginatedErreurs">
+           <td>{{ row.ligne }}</td>
+           <td>
+             <ol>
+               <li *ngFor="let err of row.messages">{{ err }}</li>
+             </ol>
+           </td>
+         </tr>
+       </tbody>
+     </table>
+     
+     <app-pagination
+       [lignesTotales]="erreurs.length"
+       [pageActuelle]="currentInvalidPage"
+       (changeurPage)="changeInvalidPage($event)">
+     </app-pagination>
+   </div>
+ </ng-container>
+
+ <ng-template #noErrorCase>
+   <div class="valid-credits-container">
+     <h2 class="section-title vert">Contenu de ce fichier</h2>
+
+     <div class="error-modal-overlay" *ngIf="showErrorPopup">
+       <div class="error-modal">
+         <div class="modal-content">
+           <i class="fas fa-check-circle"></i>
+           <h3 style="color: #28a745;">Fichier Correct</h3>
+           <button class="close-btn" (click)="closePopup()" style="background-color: #28a745;"s>
+             Fermer
+           </button>
+       </div>
+     </div>
+    </div>
+     
+     <div class="styled-table-container">
+       <table class="table-valid">
+         <thead>
+           <tr>
+             <th></th>
+             <th>#</th>
+             <th>Contrat</th>
+           </tr>
+         </thead>
+         <tbody>
+           <ng-container *ngFor="let credit of apercuDonnees; let i = index">
+             <tr (click)="toggleRow(i)">
+               <td>
+                 <i class="fas" [class.fa-chevron-right]="!expandedRows[i]" [class.fa-chevron-down]="expandedRows[i]"></i>
+               </td>
+               <td>{{ i + 1 }}</td>
+               <td>{{ credit.numeroContrat || 'vide' }}</td>
+             </tr>
+     
+             <tr *ngIf="expandedRows[i]" class="expanded-row">
+               <td colspan="3">
+                 <div class="details-container">
+                   <div class="detail-section">
+                     <h4>Détails du crédit #{{i + 1}} - {{credit.numeroContrat}}</h4>
+                     <div class="detail-grid">
+                       <div><strong>Date déclaration:</strong> {{ credit.dateDeclaration || 'vide' }}</div>
+                       <div><strong>Type:</strong> {{ credit.typeCredit || 'vide' }}</div>
+                       <div><strong>Statut:</strong> {{ credit.situationCredit || 'vide' }}</div>
+                       <div><strong>Montant accordé:</strong> {{ credit.creditAccorde || 'vide' }}</div>
+                       <div><strong>Solde restant:</strong> {{ credit.soldeRestant || 'vide' }}</div>
+                       <div><strong>Taux:</strong> {{ credit.taux || 'vide' }}</div>
+                       <div><strong>Classe retard:</strong> {{ credit.classeRetard || 'vide' }}</div>
+                       <div><strong>Nombre échéances impayées:</strong> {{ credit.nombreEcheancesImpayes || 'vide' }}</div>
+                       <div><strong>Durée initiale:</strong> {{ credit.dureeInitiale || 'vide' }}</div>
+                       <div><strong>Durée restante:</strong> {{ credit.dureeRestante || 'vide' }}</div>
+                       <div><strong>Monnaie:</strong> {{ credit.monnaie || 'vide' }}</div>
+                       <div><strong>Montant intérêts courus:</strong> {{ credit.montantInteretsCourus || 'vide' }}</div>
+                       <div><strong>Montant intérêts retard:</strong> {{ credit.montantInteretsRetard || 'vide' }}</div>
+                       <div><strong>Montant capital retard:</strong> {{ credit.montantCapitalRetard || 'vide' }}</div>
+                       <div><strong>Mensualité:</strong> {{ credit.mensualite || 'vide' }}</div>
+                       <div><strong>Motif:</strong> {{ credit.motif || 'vide' }}</div>
+                       <div><strong>Date exécution:</strong> {{ credit.dateExecution || 'vide' }}</div>
+                       <div><strong>Date constatation:</strong> {{ credit.dateConstatation || 'vide' }}</div>
+                       <div><strong>Date rejet:</strong> {{ credit.dateRejet || 'vide' }}</div>
+                       <div><strong>ID plafond:</strong> {{ credit.idPlafond || 'vide' }}</div>
+                       <div><strong>Coût total crédit:</strong> {{ credit.coutTotalCredit || 'vide' }}</div>
+                       <div><strong>Activité crédit:</strong> {{ credit.activiteCredit || 'vide' }}</div>
+                     </div>
+                   </div>
+                   <div class="detail-section">
+                     <h4>Lieu</h4>
+                     <div class="detail-grid">
+                       <div><strong>Agence:</strong> {{ credit.codeAgence || 'vide' }}</div>
+                       <div><strong>Code pays:</strong> {{ credit.codePays || 'vide' }}</div>
+                       <div><strong>Code wilaya:</strong> {{ credit.codeWilaya || 'vide' }}</div>
+                     </div>
+                   </div>
+                   <div class="detail-section">
+                     <h4>Participants</h4>
+                     <table class="sub-table">
+                       <thead>
+                         <tr>
+                           <th>Clé</th>
+                           <th>CLI</th>
+                           <th>NIF</th>
+                           <th>RIB</th>
+                           <th>Type</th>
+                           <th>Rôle</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         <tr *ngFor="let participant of credit.participants">
+                           <td>{{ participant.participantCle || 'vide' }}</td>
+                           <td>{{ participant.participantCli || 'vide' }}</td>
+                           <td>{{ participant.participantNif || 'vide' }}</td>
+                           <td>{{ participant.participantRib || 'vide' }}</td>
+                           <td>{{ participant.participantType || 'vide' }}</td>
+                           <td>{{ participant.roleNiveauResponsabilite || 'vide' }}</td>
+                         </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                   <div class="detail-section">
+                     <h4>Garanties</h4>
+                     <table class="sub-table">
+                       <thead>
+                         <tr>
+                           <th>Type</th>
+                           <th>Montant</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         <tr *ngFor="let garantie of credit.garanties">
+                           <td>{{ garantie.typeGarantie || 'vide' }}</td>
+                           <td>{{ garantie.montantGarantie || 'vide' }}</td>
+                         </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </td>
+             </tr>
+           </ng-container>
+         </tbody>
+       </table>
+     </div>
+     
+     <div class="credit-count">
+       Total : {{ apercuDonnees.length }}
+     </div>
+     
+     <div class="confirmation-actions">
+       <button class="confirm-btn" (click)="confirmInsertion()">
+         Confirmer l'intégration
+       </button>
+     </div>
+   </div>
+  
+ </ng-template>
+</div>

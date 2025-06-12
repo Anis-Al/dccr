@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { Utilisateur } from '../../dtos/Utilisateurs/utilisateur-dto';
 import { environment } from '../../../../environments/environment';
-import { map } from 'rxjs/operators';
+import { map, catchError, tap, filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +30,60 @@ export class UtilisateurService {
       map((text: string) => ({ message: text }))
     );
   }
+
+  private utilisateursCache = new BehaviorSubject<Utilisateur[] | null>(null);
+  private enCoursDeChargement = false;
+
   getUsers(): Observable<Utilisateur[]> {
-    return this.http.get<Utilisateur[]>(this.apiUrl+environment.endpoints.utilisateurs.tousLesUtilisateurs);
+    const donneesCachees = this.utilisateursCache.value;
+    if (donneesCachees) {
+      return of(donneesCachees);
+    }
+    
+    if (this.enCoursDeChargement) {
+      return this.utilisateursCache.pipe(
+        filter((utilisateurs): utilisateurs is Utilisateur[] => utilisateurs !== null),
+        catchError(() => of([]))
+      );
+    }
+
+    this.enCoursDeChargement = true;
+    
+    return this.http.get<Utilisateur[]>(
+      `${this.apiUrl}${environment.endpoints.utilisateurs.tousLesUtilisateurs}`
+    ).pipe(
+      tap(utilisateurs => {
+        this.utilisateursCache.next(utilisateurs);
+        this.enCoursDeChargement = false;
+      }),
+      catchError(erreur => {
+        this.enCoursDeChargement = false;
+        console.error('Erreur lors de la récupération des utilisateurs:', erreur);
+        return throwError(() => new Error('Erreur lors de la récupération des utilisateurs'));
+      })
+    );
+  }
+
+  rafraichirUtilisateurs(): Observable<Utilisateur[]> {
+    this.enCoursDeChargement = true;
+    
+    return this.http.get<Utilisateur[]>(
+      `${this.apiUrl}${environment.endpoints.utilisateurs.tousLesUtilisateurs}`
+    ).pipe(
+      tap(utilisateurs => {
+        this.utilisateursCache.next(utilisateurs);
+        this.enCoursDeChargement = false;
+      }),
+      catchError(erreur => {
+        this.enCoursDeChargement = false;
+        console.error('Erreur lors du rafraîchissement des utilisateurs:', erreur);
+        return throwError(() => new Error('Erreur lors du rafraîchissement des utilisateurs'));
+      })
+    );
+  }
+
+  viderCacheUtilisateurs(): void {
+    this.utilisateursCache.next(null);
   }
 
   getUserByMatricule(matricule: string | number): Observable<Utilisateur> {

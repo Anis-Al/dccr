@@ -242,8 +242,8 @@
   }
 
   .no-data {
-    text-align: left;
-    padding: 1rem;
+    text-align: left !important;
+    padding-left: 1rem !important;
     color: var(--text-color-light);
     font-style: italic;
   }

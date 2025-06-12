@@ -312,8 +312,8 @@
     }
 
     .no-data {
-      text-align: center;
-      padding: 2rem;
+      text-align: left !important;
+      padding: 1rem !important;
       color: var(--text-color-light);
       font-style: italic;
     }
