@@ -76,9 +76,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
             icon: 'fa-file-import',
           },
           { 
-            label: 'Détails', 
+            label: 'Liste des Fichiers', 
             route: '/fichiers-excel', 
-            icon: 'fa-spinner', 
+            icon: 'fa-list', 
             routerLinkActiveOptions: { exact: true },
           }
         ]

@@ -44,6 +44,7 @@ export class FichiersXMLComponent implements OnInit {
         this.fichiers = declarations;
         this.fichiersFiltres = [...this.fichiers];
         this.updatePaginatedData();
+        console.log(this.fichiers);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des déclarations:', error);
@@ -115,8 +116,23 @@ export class FichiersXMLComponent implements OnInit {
     });
   }
   
-  marquerCommeSoumisALaBA(fichier: any): void {
-    console.log('Marking as submitted:', fichier.nom_fichier);
+  marquerCommeSoumisALaBA(fichier: XmlDto): void {
+    if (confirm('Voulez-vous vraiment archiver cette déclaration ? Cette action est irréversible.')) {
+      this.declarationsBAService.archiverDeclaration(fichier.idFichierExcelSource).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.chargerDeclarations();
+            alert('Déclaration archivée avec succès');
+          } else {
+            alert('Erreur lors de l\'archivage : ' + response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Erreur lors de l\'archivage :', error);
+          alert('Une erreur est survenue lors de l\'archivage');
+        }
+      });
+    }
   }
 
   supprimerFichier(fichier: XmlDto): void {

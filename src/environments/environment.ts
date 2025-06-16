@@ -24,7 +24,7 @@ export const environment = {
      genererDeclarationsParExcel :'declarationsBA/generer-declarations',
      telechargerDeclarations:'declarationsBA/telecharger-declarations',
      supprimerDeclaration:'declarationsBA/supprimer',
-     archiverDonnees:'declarationsBA/archiver-donnees',
+     archiverDeclaration: 'declarationsBA/archiver',
     },
     utilisateurs: {
       tousLesUtilisateurs: 'utilisateurs',
@@ -37,6 +37,11 @@ export const environment = {
     auth: {
       login: 'auth',
       changerMotDePasse: 'auth/changer-mdp',
+    },
+    archives: {
+      fichiersExcel: 'archives/fichiers-excel',
+      fichiersXml: 'archives/fichiers-xml',
+      credits: 'archives/credits'
     }  
   }
 };

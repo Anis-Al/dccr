@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
+import { ArchiveService } from '../../../core/services/archive.service';
+import { ArchiveCreditsListeDto } from '../../../core/dtos/archive-dtos';
 
 @Component({
   selector: 'app-credits-archive',
@@ -19,20 +21,39 @@ export class CreditsArchiveComponent implements OnInit {
   searchTerm: string = '';
   dateDebut: string = '';
   dateFin: string = '';
-  credits: any[] = [];
-  creditsFiltres: any[] = [];
-  creditsPagines: any[] = [];
+  credits: ArchiveCreditsListeDto[] = [];
+  creditsFiltres: ArchiveCreditsListeDto[] = [];
+  creditsPagines: ArchiveCreditsListeDto[] = [];
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
-  constructor(private dp: DatePipe) {}
+  constructor(
+    private dp: DatePipe,
+    private archiveService: ArchiveService
+  ) {}
 
   ngOnInit(): void {
     this.chargerCreditsArchives();
   }
 
   private chargerCreditsArchives(): void {
-    // TODO: Replace with real service call
-    this.credits = [];
-    this.creditsFiltres = [...this.credits];
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.archiveService.getCreditsArchives().subscribe({
+      next: (data) => {
+        this.credits = data;
+        this.creditsFiltres = [...this.credits];
+        this.updatePaginatedData();
+        this.isLoading = false;
+        console.log(this.credits);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des crédits archivés:', error);
+        this.errorMessage = 'Une erreur est survenue lors du chargement des crédits archivés.';
+        this.isLoading = false;
+      }
+    });
     this.updatePaginatedData();
   }
 
@@ -58,10 +79,15 @@ export class CreditsArchiveComponent implements OnInit {
   applyFilters(): void {
     this.creditsFiltres = this.credits.filter(credit => {
       const searchMatch = !this.searchTerm ||
-        (credit.numContrat && credit.numContrat.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        (credit.num_contrat_credit && credit.num_contrat_credit.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (credit.libelle_type_credit && credit.libelle_type_credit.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      
+      // Since we don't have a direct date_archivage field, we'll use date_declaration if needed
+      const dateToCheck = credit.date_declaration || '';
       const dateMatch = (!this.dateDebut || !this.dateFin) ||
-        (new Date(credit.dateArchivage) >= new Date(this.dateDebut) &&
-         new Date(credit.dateArchivage) <= new Date(this.dateFin));
+        (new Date(dateToCheck) >= new Date(this.dateDebut) &&
+         new Date(dateToCheck) <= new Date(this.dateFin));
+         
       return searchMatch && dateMatch;
     });
     this.pageActuelle = 1;

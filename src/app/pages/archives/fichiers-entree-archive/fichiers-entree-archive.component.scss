@@ -10,13 +10,13 @@
   margin-top: 1.5rem;
 }
 
-.prets-container {
+.fichiers-container {
   display: flex;
   height: 100%;
   transition: all 0.3s ease;
 
   &.details-open {
-    .prets-list {
+    .fichiers-list {
       width: 40%;
       min-width: 600px;
     }
@@ -27,7 +27,7 @@
   }
 }
 
-.prets-list {
+.fichiers-list {
   width: 100%;
   transition: width 0.3s ease;
   overflow: auto;
@@ -423,6 +423,7 @@
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
 
   i {
     font-size: 16px;

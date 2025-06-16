@@ -2,7 +2,14 @@
     <div class="header">
         <h1>Tableau de Bord</h1>
     </div>
-    <div class="charts-grid">
+    
+    <div *ngIf="!hasChartData" class="no-data-message">
+        <p class="fun-message">
+          On dirait que nos données sont parties en week-end 
+        </p>
+    </div>
+
+    <div class="charts-grid" *ngIf="hasChartData">
 
         <div class="chart-card card" *ngIf="excelChartData">
         <h2>Fichiers intégrés par Mois</h2>

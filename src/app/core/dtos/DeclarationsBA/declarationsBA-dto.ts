@@ -4,5 +4,6 @@ export interface XmlDto {
   nomFichierSuppression:string;
   dateHeureGenerationXml: Date;
   nomUtilisateurGenerateur: string;
+  idFichierExcelSource: number;
   nomFichierExcelSource: string;
 }

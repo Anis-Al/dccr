@@ -28,5 +28,12 @@ private apiUrl = environment.apiBaseUrl;
     return this.http.delete<void>(`${this.apiUrl}${environment.endpoints.declarationsBA.supprimerDeclaration}/${idXml}`);
   }
 
+  archiverDeclaration(idExcel: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.apiUrl}${environment.endpoints.declarationsBA.archiverDeclaration}/${idExcel}`, 
+      {}
+    );
+  }
+
 
 }

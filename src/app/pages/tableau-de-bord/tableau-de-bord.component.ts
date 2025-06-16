@@ -129,6 +129,10 @@ export class TableauDeBordComponent {
     this.ks.viderCacheKPIs();
   }
 
+  get hasChartData(): boolean {
+    return !!(this.excelChartData || this.guaranteeChartData || this.agencyDebtChartData);
+  }
+
   private traiterKpis(kpis: kpi<any>[]): void {
     for (const kpi of kpis) {
       if (!kpi.resultats || kpi.resultats.length === 0) continue;

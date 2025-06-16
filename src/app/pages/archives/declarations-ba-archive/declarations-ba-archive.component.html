@@ -22,28 +22,39 @@
         </div>
       </div>
     </div>
-    <div class="table-container">
-      <table>
+    <div class="table-responsive">
+      <div *ngIf="isLoading" class="text-center p-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-2">Chargement des déclarations archivées...</p>
+      </div>
+      
+      <div *ngIf="!isLoading && errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+      
+      <table *ngIf="!isLoading" class="table table-striped table-hover">
         <thead>
           <tr>
-            <th>Fichier Correction</th>
-            <th>Fichier Suppression</th>
-            <th>Source</th>
-            <th>Date Géneration</th>
-            <th>Nb Crédits</th>
-            <th>Générateur</th>
+            <th>ID Fichier XML</th>
+            <th>Fichier de correction</th>
+            <th>Fichier de suppression</th>
+            <th>Date de génération</th>
+            <th>Généré par</th>
+            <th>Fichier Excel source</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let fichier of fichiersPagines">
-            <td>{{fichier?.nomFichierCorrection || 'N/A'}}</td>
-            <td>{{fichier?.nomFichierSuppression || 'N/A'}}</td>
-            <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
+          <tr *ngFor="let fichier of fichiersPagines" class="clickable-row">
+            <td>{{fichier?.idFichierXml || 'N/A'}}</td>
+            <td class="collante">{{fichier?.nomFichierCorrection || 'N/A'}}</td>
+            <td class="collante">{{fichier?.nomFichierSuppression || 'N/A'}}</td>
             <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
-            <td>0</td>
             <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
+            <td class="collante">{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
           </tr>
-          <tr *ngIf="fichiersPagines.length === 0">
+          <tr *ngIf="fichiersPagines.length === 0 && !errorMessage">
             <td colspan="6" class="no-data">Aucune déclaration trouvée</td>
           </tr>
         </tbody>

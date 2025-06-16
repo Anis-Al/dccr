@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
+import { ArchiveService } from '../../../core/services/archive.service';
+import { ArchiveExcelMetadonneesDto } from '../../../core/dtos/archive-dtos';
 
 @Component({
   selector: 'app-fichiers-entree-archive',
@@ -19,20 +21,39 @@ export class FichiersEntreeArchiveComponent implements OnInit {
   searchTerm: string = '';
   dateDebut: string = '';
   dateFin: string = '';
-  fichiers: any[] = [];
-  fichiersFiltres: any[] = [];
-  fichiersPagines: any[] = [];
+  fichiers: ArchiveExcelMetadonneesDto[] = [];
+  fichiersFiltres: ArchiveExcelMetadonneesDto[] = [];
+  fichiersPagines: ArchiveExcelMetadonneesDto[] = [];
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
-  constructor(private dp: DatePipe) {}
+  constructor(
+    private dp: DatePipe,
+    private archiveService: ArchiveService
+  ) {}
 
   ngOnInit(): void {
     this.chargerFichiersArchives();
   }
 
   private chargerFichiersArchives(): void {
-    // TODO: Replace with real service call
-    this.fichiers = [];
-    this.fichiersFiltres = [...this.fichiers];
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.archiveService.getFichiersExcelArchives().subscribe({
+      next: (data) => {
+        this.fichiers = data;
+        this.fichiersFiltres = [...this.fichiers];
+        this.updatePaginatedData();
+        this.isLoading = false;
+        console.log(this.fichiers);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des fichiers archivés:', error);
+        this.errorMessage = 'Une erreur est survenue lors du chargement des fichiers archivés.';
+        this.isLoading = false;
+      }
+    });
     this.updatePaginatedData();
   }
 
@@ -58,10 +79,12 @@ export class FichiersEntreeArchiveComponent implements OnInit {
   applyFilters(): void {
     this.fichiersFiltres = this.fichiers.filter(fichier => {
       const searchMatch = !this.searchTerm ||
-        (fichier.nomFichier && fichier.nomFichier.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        (fichier.nomFichierExcel && fichier.nomFichierExcel.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      
       const dateMatch = (!this.dateDebut || !this.dateFin) ||
-        (new Date(fichier.dateArchivage) >= new Date(this.dateDebut) &&
-         new Date(fichier.dateArchivage) <= new Date(this.dateFin));
+        (new Date(fichier.dateHeureIntegrationExcel) >= new Date(this.dateDebut) &&
+         new Date(fichier.dateHeureIntegrationExcel) <= new Date(this.dateFin));
+         
       return searchMatch && dateMatch;
     });
     this.pageActuelle = 1;
@@ -69,10 +92,8 @@ export class FichiersEntreeArchiveComponent implements OnInit {
   }
 
   telechargerFichier(fichier: any): void {
-    // TODO: Implement download logic
   }
 
   supprimerFichier(fichier: any): void {
-    // TODO: Implement delete logic
   }
 } 

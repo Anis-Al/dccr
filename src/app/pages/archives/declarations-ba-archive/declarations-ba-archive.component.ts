@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
+import { ArchiveService } from '../../../core/services/archive.service';
+import { ArchiveXmlDto } from '../../../core/dtos/archive-dtos';
 
 @Component({
   selector: 'app-declarations-ba-archive',
@@ -19,20 +21,39 @@ export class DeclarationsBaArchiveComponent implements OnInit {
   searchTerm: string = '';
   dateDebut: string = '';
   dateFin: string = '';
-  fichiers: any[] = [];
-  fichiersFiltres: any[] = [];
-  fichiersPagines: any[] = [];
+  fichiers: ArchiveXmlDto[] = [];
+  fichiersFiltres: ArchiveXmlDto[] = [];
+  fichiersPagines: ArchiveXmlDto[] = [];
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
-  constructor(private dp: DatePipe) {}
+  constructor(
+    private dp: DatePipe,
+    private archiveService: ArchiveService
+  ) {}
 
   ngOnInit(): void {
     this.chargerDeclarationsArchives();
   }
 
   private chargerDeclarationsArchives(): void {
-    // TODO: Replace with real service call
-    this.fichiers = [];
-    this.fichiersFiltres = [...this.fichiers];
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.archiveService.getFichiersXmlArchives().subscribe({
+      next: (data) => {
+        this.fichiers = data;
+        this.fichiersFiltres = [...this.fichiers];
+        this.updatePaginatedData();
+        this.isLoading = false;
+        console.log(this.fichiers);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des déclarations archivées:', error);
+        this.errorMessage = 'Une erreur est survenue lors du chargement des déclarations archivées.';
+        this.isLoading = false;
+      }
+    });
     this.updatePaginatedData();
   }
 
@@ -58,10 +79,13 @@ export class DeclarationsBaArchiveComponent implements OnInit {
   applyFilters(): void {
     this.fichiersFiltres = this.fichiers.filter(fichier => {
       const searchMatch = !this.searchTerm ||
-        (fichier.nomFichier && fichier.nomFichier.toLowerCase().includes(this.searchTerm.toLowerCase()));
+        (fichier.nomFichierCorrection && fichier.nomFichierCorrection.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (fichier.nomFichierSuppression && fichier.nomFichierSuppression.toLowerCase().includes(this.searchTerm.toLowerCase()));
+      
       const dateMatch = (!this.dateDebut || !this.dateFin) ||
-        (new Date(fichier.dateArchivage) >= new Date(this.dateDebut) &&
-         new Date(fichier.dateArchivage) <= new Date(this.dateFin));
+        (new Date(fichier.dateHeureGenerationXml) >= new Date(this.dateDebut) &&
+         new Date(fichier.dateHeureGenerationXml) <= new Date(this.dateFin));
+         
       return searchMatch && dateMatch;
     });
     this.pageActuelle = 1;

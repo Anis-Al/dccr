@@ -1,5 +1,5 @@
-<div class="prets-container">
-  <div class="prets-list">
+<div class="fichiers-container">
+  <div class="fichiers-list">
     <div class="header">
       <h1>Fichiers d'entrée Archivés</h1>
       <button class="export-excel-btn">
@@ -22,22 +22,33 @@
         </div>
       </div>
     </div>
-    <div class="table-container">
-      <table>
+    <div class="table-responsive">
+      <div *ngIf="isLoading" class="text-center p-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-2">Chargement des fichiers archivés...</p>
+      </div>
+      
+      <div *ngIf="!isLoading && errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+      
+      <table *ngIf="!isLoading" class="table table-striped table-hover">
         <thead>
           <tr>
-            <th class="collante">Nom du fichier</th>
+            <th>Nom du fichier</th>
             <th>Date d'intégration</th>
             <th>Intégrateur</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let fichier of fichiersPagines" class="clickable-row">
-            <td class="collante">{{fichier?.nomFichier || 'N/A'}}</td>
-            <td>{{fichier?.dateArchivage | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
-            <td>{{fichier?.utilisateur || 'N/A'}}</td>
+            <td class="collante">{{fichier?.nomFichierExcel || 'N/A'}}</td>
+            <td>{{fichier?.dateHeureIntegrationExcel | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td>{{fichier?.integrateur || 'N/A'}}</td>
           </tr>
-          <tr *ngIf="fichiersPagines.length === 0">
+          <tr *ngIf="fichiersPagines.length === 0 && !errorMessage">
             <td colspan="3" class="no-data">Aucun fichier trouvé</td>
           </tr>
         </tbody>
