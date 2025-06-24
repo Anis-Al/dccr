@@ -22,7 +22,7 @@ export class ResultatComponent implements OnInit {
   showErrorCase = true;
   apercuDonnees: any[] = [];
   idExcel: number | undefined;
-  Math = Math; // Make Math available in the template
+  Math = Math; 
   
   constructor(
     private route: ActivatedRoute,
@@ -37,7 +37,7 @@ export class ResultatComponent implements OnInit {
   }
   currentValidPage = 1;
   currentInvalidPage = 1;
-  itemsPerPage = 5; // Show 5 items per page
+  itemsPerPage = 5; 
   showErrorPopup = true;
   showSuccess = false;
   successMessage = '';
@@ -69,6 +69,12 @@ export class ResultatComponent implements OnInit {
     return this.erreurs.slice(startIndex, endIndex);
   }
 
+  get paginatedValidData() {
+    const startIndex = (this.currentValidPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.apercuDonnees.slice(startIndex, endIndex);
+  }
+
   changeInvalidPage(page: number) {
     if (page >= 1 && page <= Math.ceil(this.erreurs.length / this.itemsPerPage)) {
       this.currentInvalidPage = page;
@@ -83,27 +89,22 @@ export class ResultatComponent implements OnInit {
     this.router.navigate(['/fichiers-excel/integration']);
   }
 
-  exportErrors() {
-    // TO DO: implement export errors functionality
-  }
+  
 
   confirmInsertion() {
-    console.log('Result before API call:', this.result); // Debugging log
-    console.log('idExcel before API call:', this.idExcel); // Debugging log
+    
+    
 
     if (!this.result || !this.idExcel) {
-      console.error('Result or idExcel is undefined. Cannot confirm integration.');
-      alert('Une erreur est survenue : Les données nécessaires sont manquantes.');
+      alert('des données nécessaires sont manquantes.');
       return;
     }
 
     this.aps.confirmerIntegration(this.idExcel).subscribe({
       next: (response) => {
-        this.showSuccessPopup('Les crédits ont été insérés avec succès!');
         this.router.navigate(['/credits']);
       },
       error: (err) => {
-        console.error('Erreur lors de la confirmation de l\'intégration:', err);
         alert('Une erreur est survenue lors de la confirmation de l\'intégration.');
       }
     });
@@ -124,7 +125,6 @@ export class ResultatComponent implements OnInit {
     if (!this.idExcel) {
       return;
     }
-    window.alert('Téléchargement du fichier en cours...');
     
     this.aps.telechargerFichierErreursExcel(this.idExcel).subscribe({
       next: (response: HttpResponse<Blob>) => {

@@ -32,7 +32,7 @@
             </div>
             <div class="form-group"> 
               <label for="dateDeclaration">Date de Déclaration</label>
-              <input id="dateDeclaration" type="date" [(ngModel)]="credit.date_declaration" name="dateDeclaration">
+              <input id="dateDeclaration" type="date" [(ngModel)]="credit.date_declaration" [disabled]="isEditMode" name="dateDeclaration">
             </div>
           </div>
           
@@ -109,7 +109,7 @@
                <label for="intervenantTypeCle_{{i}}">Type de Clé</label>
                <select id="intervenantTypeCle_{{i}}" [(ngModel)]="intervenant.type_cle" name="intervenantTypeCle_{{i}}">
                   <option [ngValue]="null" disabled>-- Sélectionner --</option>
-                  <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.libelle}}</option>
+                  <option *ngFor="let type of lookupTypesCle" [value]="type.code">{{type.domaine}}</option>
                 </select>
              </div>
              <div class="form-group">
@@ -202,7 +202,7 @@
                     <input id="coutCredits" type="number" [(ngModel)]="credit.cout_total_credit" name="coutCredits" step="any">
                  </div>
                  <div class="form-group">
-                    <label for="soldeRestant">Solde Restant Dû</label>
+                    <label for="soldeRestant">Solde Restant</label>
                     <input id="soldeRestant" type="number" [(ngModel)]="credit.solde_restant" name="soldeRestant" step="any">
                  </div>
               </div>

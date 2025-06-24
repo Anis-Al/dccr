@@ -75,6 +75,19 @@ export class CreditsService {
     );
   }
 
+  modifierCredit(credit: CreditDto): Observable<any> {
+    const url = `${this.baseUrl}${environment.endpoints.credits.modifierCredit}`;
+    return this.http.put<any>(url, credit).pipe(
+      tap(() => {
+        // Invalidate the cache to force a refresh on next get
+        this.tempsDerniereRequete = 0;
+      }),
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
+
   getTablesDomaines(reactualiser = false): Observable<TablesDomainesDto[]> 
   {
     if (this.domainesCache.value && !reactualiser) {

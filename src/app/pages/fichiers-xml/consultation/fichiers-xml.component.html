@@ -3,8 +3,9 @@
       <div class="header">
         <h1>Déclarations BA En Cours</h1>
         <div class="header-actions">
-          <!-- *siRole="'generateurDeclarations'" -->
-          <button class="btn btn-primary"  (click)="naviguerVersGeneration()">
+          <button class="btn btn-primary"         
+            *siRole="['generateurDeclarations','demo']"
+            (click)="naviguerVersGeneration()">
             <i class="fas fa-plus"></i>
             <span>Générer une déclaration</span>
           </button>
@@ -38,7 +39,7 @@
               <th>Date Géneration</th>
               <th>Nb Crédits</th>
               <th>Générateur</th>
-              <th class="actions-header" *siRole="'generateurDeclarations'">Actions</th>
+              <th class="actions-header"  *siRole="['generateurDeclarations','demo']">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -46,10 +47,10 @@
               <td>{{fichier?.nomFichierCorrection || 'N/A'}}</td>
               <td>{{fichier?.nomFichierSuppression || 'N/A'}}</td>
               <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
-              <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+              <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>0</td>
               <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
-              <td class="actions-cell" *siRole="'generateurDeclarations'">
+              <td class="actions-cell"  *siRole="['generateurDeclarations','demo']">
                 <div class="tooltip-container button-group">
                   <button 
                     (click)="telechargerLesFichiersDeCetteInstance(fichier)" 

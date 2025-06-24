@@ -81,7 +81,7 @@
            </tr>
          </thead>
          <tbody>
-           <ng-container *ngFor="let credit of apercuDonnees; let i = index">
+           <ng-container *ngFor="let credit of paginatedValidData; let i = index">
              <tr (click)="toggleRow(i)">
                <td>
                  <i class="fas" [class.fa-chevron-right]="!expandedRows[i]" [class.fa-chevron-down]="expandedRows[i]"></i>
@@ -187,6 +187,12 @@
          Confirmer l'intégration
        </button>
      </div>
+     
+    <app-pagination
+       [lignesTotales]="apercuDonnees.length"
+       [pageActuelle]="currentValidPage"
+       (changeurPage)="changeValidPage($event)">
+     </app-pagination>
    </div>
   
  </ng-template>

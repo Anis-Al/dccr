@@ -120,8 +120,8 @@ export class CreditsListComponent implements OnInit {
     if (this.selectedDate) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) => {
         if (!credit.date_declaration) return false;
-        const formattedCreditDate = this.formatDate(credit.date_declaration);
-        return formattedCreditDate === this.selectedDate;
+        const formattedCreditDate = credit.date_declaration;
+        return formattedCreditDate 
       });
     }
 

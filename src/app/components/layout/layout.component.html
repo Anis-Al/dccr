@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <div class="nav-section" *siRole="'admin'">
+      <div class="nav-section" *siRole="['admin','demo']">
         <div class="section-header" *ngIf="!sidebarCollapsed">
           <span class="section-title">Archives</span>
           <button class="collapse-section-btn" (click)="archivesCollapsed = !archivesCollapsed">
@@ -106,7 +106,7 @@
 
       <a
         class="nav-item"
-        *siRole="'admin'"
+        *siRole="['admin','demo']"
         [routerLink]="navItems[7].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[7].label : null"
@@ -117,7 +117,7 @@
       
       <a
         class="nav-item"
-        *siRole="'admin'"
+        *siRole="['admin','demo']"
         [routerLink]="navItems[8].route"
         routerLinkActive="active"
         [attr.title]="sidebarCollapsed ? navItems[8].label : null"

@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, forkJoin, of } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { CreditDto, GarantieDto, IntervenantDto } from '../../../core/dtos/Credits/credits';
+import { TYPE_CLE_OPTIONS } from '../../../core/dtos/Credits/tables_domaines';
 import { CreditStateService } from '../../../core/services/credits/credit-state.service';
 import { CreditsService } from '../../../core/services/credits/credits.service';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
@@ -25,23 +26,8 @@ export class CreditFormComponent implements OnInit, OnDestroy {
   ){} 
   
   credit: CreditDto = {
-    intervenants: [{
-      cle: null,
-      type_cle: null,
-      niveau_responsabilite: null,
-      libelle_niveau_responsabilite: null,
-      nif: null,
-      rib: null,
-      cli: null
-    }],
-    garanties: [{
-      cle_intervenant: null,
-      type_garantie: null,
-      libelle_type_garantie: null,
-      montant_garantie: null
-    }],
     num_contrat_credit: '',
-    date_declaration: new Date().toISOString().split('T')[0],
+    date_declaration: '',
     type_credit: '',
     libelle_type_credit: '',
     est_plafond_accorde: false,
@@ -51,7 +37,6 @@ export class CreditFormComponent implements OnInit, OnDestroy {
     situation: '',
     libelle_situation: '',
     motif: '',
-    id_excel: 0,
     code_agence: '',
     libelle_agence: '',
     code_wilaya: '',
@@ -79,7 +64,23 @@ export class CreditFormComponent implements OnInit, OnDestroy {
     date_octroi: '',
     date_expiration: '',
     date_execution: '',
-    date_rejet: ''
+    date_rejet: '',
+    id_excel: 0,
+    intervenants: [{
+      cle: '',
+      type_cle: '',
+      niveau_responsabilite: '',
+      libelle_niveau_responsabilite: '',
+      nif: '',
+      rib: '',
+      cli: ''
+    }],
+    garanties: [{
+      cle_intervenant: '',
+      type_garantie: '',
+      libelle_type_garantie: '',
+      montant_garantie: 0
+    }]
   };
 
   isLoading = false;
@@ -92,7 +93,7 @@ export class CreditFormComponent implements OnInit, OnDestroy {
   lookupTypesCredit: any[] = [];
   lookupActivites: any[] = [];
   lookupSituations: any[] = [];
-  lookupTypesCle: any[] = [];
+  lookupTypesCle = TYPE_CLE_OPTIONS;
   lookupNiveauxResponsabilite: any[] = [];
   lookupDevises: any[] = [];
   lookupTypesGarantie: any[] = [];
@@ -276,39 +277,75 @@ export class CreditFormComponent implements OnInit, OnDestroy {
     this.errors = [];
   }
 
+  private formatDateForApi(date: any): string | null {
+    if (!date) return null;
+    
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) return null;
+    
+    return dateObj.toISOString().split('T')[0];
+  }
+
+  private prepareCreditData(credit: CreditDto): CreditDto {
+    const preparedCredit = JSON.parse(JSON.stringify(credit));
+    
+    const dateFields: (keyof CreditDto)[] = [
+      'date_constatation_echeances_impayes',
+      'date_octroi',
+      'date_expiration',
+      'date_execution',
+      'date_rejet',
+      'date_declaration'
+    ];
+    
+    dateFields.forEach(field => {
+      if (preparedCredit[field] !== null && preparedCredit[field] !== undefined) {
+        preparedCredit[field] = this.formatDateForApi(preparedCredit[field]);
+      }
+    });
+    
+    return preparedCredit;
+  }
+
   onSave() {
     console.log('Saving credit:', this.credit);
     this.isLoading = true;
     this.errorMessage = '';
 
-    if (!this.isEditMode) {
-      this.creditsService.ajouterCredit(this.credit)
-        .pipe(
-          takeUntil(this.destroy$)
-        )
-        .subscribe({
-          next: (response) => {
-            if (Array.isArray(response) && response.length > 0) {
-              this.errors = response;
-              this.showModal = true;
-              this.isLoading = false;
-            } else if (Array.isArray(response) && response.length === 0) {
-              this.successMessage = 'Crédit créé avec succès!';
-              this.showModal = true;
-              this.isLoading = false;
-              setTimeout(() => {
-                this.showModal = false;
-                this.successMessage = null;
-                this.router.navigate(['/credits']);
-              }, 3000);
-            } 
-          },
-          error: (error) => {
-            this.errorMessage = error.message || 'Une erreur est survenue lors de la création du crédit';
-            this.isLoading = false;
-          }
-        });
-    }
+    // Prepare the credit data with properly formatted dates
+    const creditToSend = this.prepareCreditData(this.credit);
+    
+    const saveOperation = this.isEditMode 
+      ? this.creditsService.modifierCredit(creditToSend)
+      : this.creditsService.ajouterCredit(creditToSend);
+
+    saveOperation.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        if (Array.isArray(response) && response.length > 0) {
+          this.errors = response;
+          this.showModal = true;
+          this.isLoading = false;
+        } else if (Array.isArray(response) && response.length === 0) {
+          this.successMessage = `Crédit ${this.isEditMode ? 'mis à jour' : 'créé'} avec succès!`;
+          this.showModal = true;
+          this.isLoading = false;
+          setTimeout(() => {
+            this.showModal = false;
+            this.successMessage = null;
+            this.router.navigate(['/credits']);
+          }, 3000);
+        } 
+      },
+      error: (error) => {
+        this.errorMessage = error.message || `Une erreur est survenue lors de ${this.isEditMode ? 'la mise à jour' : 'la création'} du crédit`;
+        this.isLoading = false;
+      }
+    });
   }
 
   addIntervenant() {

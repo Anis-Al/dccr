@@ -38,7 +38,7 @@
             <td>{{ fichier.date_heure_integration_excel | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ fichier.integrateur }}</td>
             <td class="actions-column">
-              <div class="actions" (click)="$event.stopPropagation()" *siRole="'integrateurExcel'">
+              <div class="actions" (click)="$event.stopPropagation()" *siRole="['integrateurExcel','demo']">
                 <button class="btn-icon" (click)="supprimerFichier(fichier)">
                   <i class="fas fa-trash"></i>
                 </button>

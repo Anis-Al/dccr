@@ -93,16 +93,13 @@ export class TableauDeBordComponent {
   constructor(private ks: KpisService) {}
 
   ngOnInit(): void {
-    // Check if page was just reloaded
     const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     const isPageReload = navigation.type === 'reload';
     
     if (isPageReload) {
-      // Clear cache and force refresh on page reload
       this.ks.viderCacheKPIs();
       this.rafraichirDonnees();
     } else {
-      // Normal load - use cached data if available
       this.ks.obtenirKPIs().subscribe({
         next: (resultats) => {
           this.traiterKpis(resultats);

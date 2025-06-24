@@ -55,6 +55,7 @@ export class KpisService {
     ).pipe(
       tap(donnees => {
         this.donneesKpiCachees.next(donnees);
+        console.log('KPIs rafraîchis:', donnees);
         this.enCoursDeChargement = false;
       }),
       catchError(erreur => {

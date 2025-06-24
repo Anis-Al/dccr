@@ -37,22 +37,20 @@
       <table *ngIf="!isLoading" class="table table-striped table-hover">
         <thead>
           <tr>
-            <th>ID Fichier XML</th>
             <th>Fichier de correction</th>
             <th>Fichier de suppression</th>
-            <th>Date de génération</th>
-            <th>Généré par</th>
-            <th>Fichier Excel source</th>
+            <th>Source</th>
+            <th>Date Génération</th>
+            <th>Générateur</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let fichier of fichiersPagines" class="clickable-row">
-            <td>{{fichier?.idFichierXml || 'N/A'}}</td>
-            <td class="collante">{{fichier?.nomFichierCorrection || 'N/A'}}</td>
-            <td class="collante">{{fichier?.nomFichierSuppression || 'N/A'}}</td>
-            <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td >{{fichier?.nomFichierCorrection || 'N/A'}}</td>
+            <td >{{fichier?.nomFichierSuppression || 'N/A'}}</td>
+            <td >{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
+            <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
-            <td class="collante">{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
           </tr>
           <tr *ngIf="fichiersPagines.length === 0 && !errorMessage">
             <td colspan="6" class="no-data">Aucune déclaration trouvée</td>

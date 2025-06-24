@@ -10,11 +10,11 @@
         </button>
       </div>
       <div class="action-group" *ngIf="!fromCreditsList && creditDetails">
-        <button class="btn btn-primary" *siRole="'modificateurCredits'" (click)="onEdit()">
+        <button class="btn btn-primary" *siRole="['modificateurCredits','demo']" (click)="onEdit()">
           <i class="fas fa-edit"></i>
           Modifier
         </button>
-        <button class="btn btn-danger" *siRole="'modificateurCredits'" (click)="onDelete()">
+        <button class="btn btn-danger" *siRole="['modificateurCredits','demo']" (click)="onDelete()">
           <i class="fas fa-trash-alt"></i>
           Supprimer
         </button>
@@ -46,15 +46,11 @@
               <span class="value">{{creditDetails.libelle_type_credit || 'N/A'}}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Plafond Accordé</span>
-              <span class="value">{{creditDetails.est_plafond_accorde !== null ? (creditDetails.est_plafond_accorde ? 'Oui' : 'Non') : 'N/A'}}</span>
-            </div>
-            <div class="detail-item">
               <span class="label">N° Plafond</span>
               <span class="value">{{creditDetails.id_plafond || 'N/A'}}</span>
             </div>
             <div class="detail-item">
-              <span class="label">Code Activité</span>
+              <span class="label">Activité Secondaire</span>
               <span class="value">{{creditDetails.libelle_activite || 'N/A'}}</span>
             </div>
             <div class="detail-item">

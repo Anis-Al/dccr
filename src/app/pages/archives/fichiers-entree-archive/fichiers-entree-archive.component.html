@@ -45,7 +45,7 @@
         <tbody>
           <tr *ngFor="let fichier of fichiersPagines" class="clickable-row">
             <td class="collante">{{fichier?.nomFichierExcel || 'N/A'}}</td>
-            <td>{{fichier?.dateHeureIntegrationExcel | date:'dd/MM/yyyy HH:mm' || 'N/A'}}</td>
+            <td>{{fichier?.dateHeureIntegrationExcel | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{fichier?.integrateur || 'N/A'}}</td>
           </tr>
           <tr *ngIf="fichiersPagines.length === 0 && !errorMessage">

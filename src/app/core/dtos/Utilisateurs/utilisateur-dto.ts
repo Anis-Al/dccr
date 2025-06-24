@@ -9,7 +9,9 @@ export const ROLES = [
   { key: 'Intégrateur Excel', value: 'integrateurExcel' as const },
   { key: 'Modificateur Crédits', value: 'modificateurCredits' as const },
   { key: 'Générateur Déclarations', value: 'generateurDeclarations' as const },
-  { key: 'Administrateur', value: 'admin' as const }
+  { key: 'Administrateur', value: 'admin' as const },
+  { key: 'Demo pfe', value: 'demo' as const }
+ 
 ] as const;
 
 export type RoleValue = typeof ROLES[number]['value'];
