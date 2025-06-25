@@ -10,6 +10,17 @@
     </div>
 
     <div class="charts-grid" *ngIf="hasChartData">
+        
+        <div class="chart-card card" *ngIf="creditsVsRestePayerChartData">
+            <h2>Crédits utilisés vs Reste à payer</h2>
+            <div class="chart-container">
+                <canvas baseChart
+                    [data]="creditsVsRestePayerChartData"
+                    type="pie"
+                    [options]="creditsVsRestePayerChartOptions">
+                </canvas>
+            </div>
+        </div>
 
         <div class="chart-card card" *ngIf="excelChartData">
         <h2>Fichiers intégrés par Mois</h2>

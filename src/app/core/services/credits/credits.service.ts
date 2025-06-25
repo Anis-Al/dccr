@@ -125,4 +125,21 @@ export class CreditsService {
       })
     );
   }
+
+  supprimerCredit(numeroContratCredit: string, dateDeclaration: Date): Observable<string[]> {
+    const url = `${this.baseUrl}${environment.endpoints.credits.supprimerCredit}/${encodeURIComponent(numeroContratCredit)}`;
+    const params = { dateDeclaration: formatDate(dateDeclaration, 'yyyy-MM-dd', 'en-US') };
+    
+    return this.http.delete<string[]>(url, { params }).pipe(
+      tap(() => {
+        this.actualiserCredits().subscribe();
+      }),
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 400) {
+          return of(error.error);
+        }
+        return throwError(() => new Error('Une erreur est survenue lors de la suppression du crédit.'));
+      })
+    );
+  }
 }

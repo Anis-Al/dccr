@@ -18,6 +18,7 @@ export const environment = {
       tableDomaines: 'credits/get-tables-domaines',
       ajouterCredit: 'credits/nouveau',
       modifierCredit: 'credits/modifier',
+      supprimerCredit: 'credits/supprimer',
       creditDetails: 'credits/infos',
     },
     declarationsBA :{

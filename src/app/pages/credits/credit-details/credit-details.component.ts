@@ -90,8 +90,37 @@ export class CreditDetailsComponent implements OnInit {
   }
 
   onDelete() {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce crédit ?')) {
-      this.delete.emit();
+    if (!this.creditDetails?.num_contrat_credit || !this.creditDetails.date_declaration) {
+      console.error('Cannot delete: Missing credit information');
+      return;
+    }
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce crédit ? Cette action est irréversible.')) {
+      this.isLoading = true;
+      const dateDeclaration = new Date(this.creditDetails.date_declaration);
+      
+      this.creditsService.supprimerCredit(this.creditDetails.num_contrat_credit, dateDeclaration)
+        .subscribe({
+          next: (errors) => {
+            if (errors && errors.length > 0) {
+              this.error = `Erreur lors de la suppression : ${errors.join(', ')}`;
+            } else {
+              // Emit the delete event to parent component if needed
+              this.delete.emit();
+              
+              // If not in a list context, navigate back
+              if (!this.fromCreditsList) {
+                this.router.navigate(['/credits']).catch(console.error);
+              }
+            }
+            this.isLoading = false;
+          },
+          error: (error) => {
+            this.error = 'Une erreur est survenue lors de la suppression du crédit';
+            console.error('Error deleting credit:', error);
+            this.isLoading = false;
+          }
+        });
     }
   }
 }

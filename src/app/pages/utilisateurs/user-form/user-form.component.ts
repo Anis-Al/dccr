@@ -92,9 +92,13 @@ export class UserFormComponent implements OnInit {
           this.userService.majUtilisateur(utilisateur).subscribe({
             next: (user) => {
               this.formSubmit.emit(user);
+              alert('Utilisateur modifié avec succès!');
               this.router.navigate(['/utilisateurs']);
             },
-            error: (error) => console.error('Erreur lors de la mise à jour:', error)
+            error: (error) => {
+              console.error('Erreur :', error);
+              alert('Erreur');
+            }
           });
         } else {
           this.userService.ajouterUtilisateur(utilisateur).subscribe({

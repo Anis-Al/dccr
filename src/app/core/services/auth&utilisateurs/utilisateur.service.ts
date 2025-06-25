@@ -20,7 +20,15 @@ export class UtilisateurService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/ldap`, userData);
   }
   majUtilisateur(user: Utilisateur): Observable<Utilisateur> {
-    return this.http.put<Utilisateur>(`${this.apiUrl}/${user.matricule}`, user);
+    return this.http.put<Utilisateur>(
+      `${this.apiUrl}${environment.endpoints.utilisateurs.majUtilisateur}/${user.matricule}`, 
+      user
+    ).pipe(
+      catchError(error => {
+        console.error('Error updating user:', error);
+        return throwError(() => error);
+      })
+    );
   }
   suppUtilisateur(matricule: number): Observable<{ message: string }> {
     return (this.http.delete(

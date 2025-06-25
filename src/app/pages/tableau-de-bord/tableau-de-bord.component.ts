@@ -20,6 +20,27 @@ export class TableauDeBordComponent {
   public situationChartData?: ChartData<'doughnut'>;
   public guaranteeChartData?: ChartData<'bar'>;
   public agencyDebtChartData?: ChartData<'bar'>;
+  public creditsVsRestePayerChartData?: ChartData<'pie'>;
+  public creditsVsRestePayerChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const label = context.label || '';
+            const value = Number(context.raw) || 0;
+            const dataPoints = context.dataset.data.map(item => Number(item) || 0);
+            const total = dataPoints.reduce((sum, current) => sum + current, 0);
+            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  };
 
   private readonly couleurs: string[] = [
     '#3b82f6', 
@@ -135,21 +156,7 @@ export class TableauDeBordComponent {
       if (!kpi.resultats || kpi.resultats.length === 0) continue;
 
       switch (kpi.id_kpi) {
-        // case 1:
-        //   const timeSeriesData = kpi.resultats as kpi_time_series[];
-        //   this.excelChartData = {
-        //     labels: timeSeriesData.map(item => item.periode),
-        //     datasets: [
-        //     {
-        //       data: timeSeriesData.map(item => item['VolumeCredits']), 
-        //       label: 'Volume de Crédits',
-        //       borderColor: '#4CAF50',
-        //       yAxisID: 'y' 
-        //     },
-            
-        //   ]
-        //   };
-        //   break;
+       
         case 9: 
           const mappedGuaranteeData: kpi_nom_valeur[] = kpi.resultats.map(item => ({
             nom: item.TypeDeGarantie,
@@ -179,6 +186,19 @@ export class TableauDeBordComponent {
               backgroundColor: mappedAgencyData.map(() => 
                 this.couleurs[Math.floor(Math.random() * this.couleurs.length)]
               )
+            }]
+          };
+          break;
+        case 11:
+          this.creditsVsRestePayerChartData = {
+            labels: kpi.resultats.map(item => item.Libellé),
+            datasets: [{
+              data: kpi.resultats.map(item => item.Montant),
+              label: 'Crédits utilisés vs Reste à payer',
+              backgroundColor: kpi.resultats.map(() => 
+                this.couleurs[Math.floor(Math.random() * this.couleurs.length)]
+              ),
+              hoverOffset: 4
             }]
           };
           break;
