@@ -77,7 +77,7 @@ export class CreditDetailsComponent implements OnInit {
   onEdit() {
     const creditToEdit = this.creditDetails;
     if (!creditToEdit?.num_contrat_credit) {
-      console.error('Cannot edit: Missing credit information');
+      console.error('erreur');
       return;
     }
     
@@ -91,11 +91,11 @@ export class CreditDetailsComponent implements OnInit {
 
   onDelete() {
     if (!this.creditDetails?.num_contrat_credit || !this.creditDetails.date_declaration) {
-      console.error('Cannot delete: Missing credit information');
+      console.error('erreur');
       return;
     }
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce crédit ? Cette action est irréversible.')) {
+    if (confirm('Sûr de vouloir supprimer ce crédit ?')) {
       this.isLoading = true;
       const dateDeclaration = new Date(this.creditDetails.date_declaration);
       
@@ -105,10 +105,8 @@ export class CreditDetailsComponent implements OnInit {
             if (errors && errors.length > 0) {
               this.error = `Erreur lors de la suppression : ${errors.join(', ')}`;
             } else {
-              // Emit the delete event to parent component if needed
               this.delete.emit();
               
-              // If not in a list context, navigate back
               if (!this.fromCreditsList) {
                 this.router.navigate(['/credits']).catch(console.error);
               }

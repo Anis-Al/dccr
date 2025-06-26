@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { DeclarationsBAService } from '../../../core/services/declarationsBA/declarations-ba.service';
 import { ExcelCrudService } from '../../../core/services/excel/excel-crud.service';
 import { ExcelMetadonneesDto } from '../../../core/dtos/Excel/excel-metadonnees-dto';
+import { AuthService } from '../../../core/services/auth&utilisateurs/auth.service';
 
 @Component({
   selector: 'app-fichiers-xml-generation',
@@ -26,7 +27,8 @@ export class FichiersXmlGenerationComponent implements OnInit {
   constructor(
     private router: Router, 
     private declarationsService: DeclarationsBAService,
-    private excelService: ExcelCrudService
+    private excelService: ExcelCrudService,
+    private authService: AuthService
   ) {}
   
   ngOnInit(): void {
@@ -74,7 +76,10 @@ export class FichiersXmlGenerationComponent implements OnInit {
     this.messageErreur = '';
     this.messageSucces = '';
     
-    this.declarationsService.genererDeclarations(this.fichierSelectionne.id_fichier_excel)
+    const userInfo = this.authService.getUserInfo();
+    const matricule = userInfo ? userInfo.matricule : '';
+    
+    this.declarationsService.genererDeclarations(this.fichierSelectionne.id_fichier_excel, matricule)
       .subscribe({
         next: () => {
           this.isLoading = false;

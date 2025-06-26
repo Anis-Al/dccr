@@ -2,8 +2,9 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/excel/api.service';
-import { ReponseIntegrationDto } from '../../../../core/dtos/Excel/integration-response.dto';
 import { DemandeIntegrationDto } from '../../../../core/dtos/Excel/demande-integration.dto';
+import { ReponseIntegrationDto } from '../../../../core/dtos/Excel/integration-response.dto';
+import { AuthService } from '../../../../core/services/auth&utilisateurs/auth.service';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -136,7 +137,11 @@ export class ChargementComponent {
   resultatIntegration?: ReponseIntegrationDto;
   erreurApi?: string;
 
-  constructor(private router: Router, private apiService: ApiService) {}
+  constructor(
+    private router: Router, 
+    private apiService: ApiService,
+    private authService: AuthService
+  ) {}
 
   triggerFileBrowse() {
     this.fileInputRef.nativeElement.click();
@@ -146,7 +151,9 @@ export class ChargementComponent {
     this.isLoading = true;
     this.resultatIntegration = undefined;
     this.erreurApi = undefined;
-    const demande: DemandeIntegrationDto = { file, userId: 'anis2002' };
+    const userInfo = this.authService.getUserInfo();
+    const matricule = userInfo ? userInfo.matricule : '';
+    const demande: DemandeIntegrationDto = { file, userId: matricule };
     this.apiService.processFile(demande)
       .pipe(
         finalize(() => { this.isLoading = false; })

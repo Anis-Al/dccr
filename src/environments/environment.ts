@@ -31,7 +31,7 @@ export const environment = {
     utilisateurs: {
       tousLesUtilisateurs: 'utilisateurs',
       ajouterUtilisateur: 'utilisateurs/ajouter',
-      majUtilisateur: 'utilisateurs/modifier-utilisateur',
+      majUtilisateur: 'utilisateurs/modifier',
       supprimerUtilisateur: 'utilisateurs/supprimer',
       unUtilisateur: 'utilisateurs/utilisateur', 
 

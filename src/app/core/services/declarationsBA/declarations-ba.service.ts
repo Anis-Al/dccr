@@ -11,8 +11,11 @@ export class DeclarationsBAService {
 private apiUrl = environment.apiBaseUrl;
   constructor(private http: HttpClient) { }
 
-  genererDeclarations(idExcel: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}${environment.endpoints.declarationsBA.genererDeclarationsParExcel}/${idExcel}`, {});
+  genererDeclarations(idExcel: number, matricule_utilisateur: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}${environment.endpoints.declarationsBA.genererDeclarationsParExcel}/${idExcel}&${matricule_utilisateur}`,
+      {}
+    );
   }
   
   telechargerDeclarations(idXml: number): Observable<Blob> {
