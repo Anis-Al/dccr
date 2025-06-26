@@ -6,4 +6,5 @@ export interface XmlDto {
   nomUtilisateurGenerateur: string;
   idFichierExcelSource: number;
   nomFichierExcelSource: string;
+  nbCredits:number;
 }

@@ -48,7 +48,7 @@
               <td>{{fichier?.nomFichierSuppression || 'N/A'}}</td>
               <td>{{fichier?.nomFichierExcelSource || 'N/A'}}</td>
               <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>0</td>
+              <td>{{fichier?.nbCredits || 'N/A'}}</td>
               <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
               <td class="actions-cell"  *siRole="['generateurDeclarations','demo']">
                 <div class="tooltip-container button-group">
@@ -59,7 +59,7 @@
                     (mouseleave)="cacherIndice($event, 'download')"
                   >
                     <i class="fas fa-download"></i>
-                    <span class="tooltip-text">Télécharger les fichiers de cette déclaratio</span>
+                    <span class="tooltip-text">Télécharger les fichiers de cette déclaration</span>
                   </button>
                   <button 
                     (click)="marquerCommeSoumisALaBA(fichier)" 

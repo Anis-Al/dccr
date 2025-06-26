@@ -117,7 +117,7 @@ export class FichiersXMLComponent implements OnInit {
   }
   
   marquerCommeSoumisALaBA(fichier: XmlDto): void {
-    if (confirm('Voulez-vous vraiment archiver cette déclaration ? Cette action est irréversible.')) {
+    if (confirm('Sûr de vouloir archiver cette déclaration ?')) {
       this.declarationsBAService.archiverDeclaration(fichier.idFichierExcelSource).subscribe({
         next: (response) => {
           if (response.success) {
