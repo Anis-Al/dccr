@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Utilisateur, ROLES } from '../../core/dtos/Utilisateurs/utilisateur-dto';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { UtilisateurService } from '../../core/services/auth&utilisateurs/utilisateur.service';
+import { AuthService } from '../../core/services/auth&utilisateurs/auth.service';
 
 @Component({
   selector: 'app-utilisateurs',
@@ -23,7 +24,16 @@ export class UtilisateursComponent implements OnInit {
   utilisateursPagines: Utilisateur[] = [];
   roles = ROLES;
 
-  constructor(private router: Router, private userService: UtilisateurService) {}
+  currentUserMatricule: string | null = null;
+
+  constructor(
+    private router: Router, 
+    private userService: UtilisateurService,
+    private authService: AuthService
+  ) {
+    const userInfo = this.authService.getUserInfo();
+    this.currentUserMatricule = userInfo?.matricule?.toString() || null;
+  }
 
   utilisateurs: Utilisateur[] = [];
 
@@ -113,7 +123,11 @@ export class UtilisateursComponent implements OnInit {
   }
 
   getRoleLabel(role: string): string {
-    const found = this.roles.find(r => r.value === role);
-    return found ? found.key : role;
+    const roleObj = this.roles.find(r => r.value === role);
+    return roleObj ? roleObj.key : role;
+  }
+
+  isCurrentUser(user: Utilisateur): boolean {
+    return this.currentUserMatricule === user.matricule.toString();
   }
 }

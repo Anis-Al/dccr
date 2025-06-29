@@ -97,6 +97,16 @@
   background: var(--background-color);
   border-radius: 4px;
 }
+/* Hide actions for the current user's row */
+tr.no-actions td:last-child .actions {
+  visibility: hidden;
+}
+
+/* Optionally, you can style the current user's row differently */
+tr.no-actions {
+  opacity: 0.8;
+}
+
 .table-container::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 4px;

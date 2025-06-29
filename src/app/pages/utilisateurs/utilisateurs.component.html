@@ -47,7 +47,7 @@
             <td>
                 {{ getRoleLabel(user.role) }}
             </td>
-            <td>
+            <td *ngIf="!isCurrentUser(user)">
               <div class="actions">
                 <button class="btn-icon" title="Modifier" (click)="editerUtilisateur(user)">
                   <i class="fas fa-edit"></i>
