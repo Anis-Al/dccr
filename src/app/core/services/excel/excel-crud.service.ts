@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap, catchError, throwError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ExcelMetadonneesDto } from '../../dtos/Excel/excel-metadonnees-dto';
+import { ExportDonneesDto } from '../../dtos/Excel/export-donnees-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -48,6 +49,15 @@ export class ExcelCrudService {
     );
   }
 
+  getMetadonneesPourGenerationDeclarations(): Observable<ExcelMetadonneesDto[]> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.getMetadonneesPourGenerationDeclarations}`;
+    return this.http.get<ExcelMetadonneesDto[]>(url).pipe(
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message));
+      })
+    );
+  }
+
   getMetadonneesActuelles(): Observable<ExcelMetadonneesDto[]> {
     return this.excelCache.asObservable();
   }
@@ -65,5 +75,29 @@ export class ExcelCrudService {
     );
   }
 
-  
+  /**
+   * Exporte des données vers un fichier Excel
+   * @param data Les données à exporter
+   * @param nomFeuille Le nom de la feuille Excel (optionnel)
+   * @returns Un Observable contenant le fichier Excel sous forme de Blob
+   */
+  exporterVersExcel<T>(data: T[], nomFeuille: string = 'export'): Observable<Blob> {
+    const url = `${this.baseUrl}${environment.endpoints.excel.exporterDonnees}`;
+    const exportDto: ExportDonneesDto<T> = {
+      donnees: data,
+      nomFeuille: nomFeuille
+    };
+
+    return this.http.post(url, exportDto, {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      }
+    }).pipe(
+      catchError((error: HttpErrorResponse): Observable<never> => {
+        return throwError(() => new Error(error.message || 'Une erreur est survenue lors de l\'export'));
+      })
+    );
+  }
 }

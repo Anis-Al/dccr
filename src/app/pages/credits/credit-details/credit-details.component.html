@@ -10,11 +10,11 @@
         </button>
       </div>
       <div class="action-group" *ngIf="!fromCreditsList && creditDetails">
-        <button class="btn btn-primary" *siRole="['modificateurCredits','demo']" (click)="onEdit()">
+        <button class="btn btn-primary" *siRole="['modificateurCredits']" (click)="onEdit()">
           <i class="fas fa-edit"></i>
           Modifier
         </button>
-        <button class="btn btn-danger" *siRole="['modificateurCredits','demo']" (click)="onDelete()">
+        <button class="btn btn-danger" *siRole="['modificateurCredits']" (click)="onDelete()">
           <i class="fas fa-trash-alt"></i>
           Supprimer
         </button>

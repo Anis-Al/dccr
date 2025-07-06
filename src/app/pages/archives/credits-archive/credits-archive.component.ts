@@ -3,12 +3,13 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../../components/pagination/pagination.component';
 import { ArchiveService } from '../../../core/services/archive.service';
-import { ArchiveCreditsListeDto } from '../../../core/dtos/archive-dtos';
+import { ArchiveCreditsListeDto, ArchiveCreditDetailResponse } from '../../../core/dtos/archive-dtos';
+import { CreditDetailsComponent } from '../../credits/credit-details/credit-details.component';
 
 @Component({
   selector: 'app-credits-archive',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, CreditDetailsComponent],
   providers: [DatePipe],
   templateUrl: './credits-archive.component.html',
   styleUrls: ['./credits-archive.component.scss']
@@ -19,18 +20,64 @@ export class CreditsArchiveComponent implements OnInit {
   totalPages: number = 1;
 
   searchTerm: string = '';
-  dateDebut: string = '';
-  dateFin: string = '';
+  selectedDate: string = '';
+  datesDeclaration: string[] = [];
   credits: ArchiveCreditsListeDto[] = [];
   creditsFiltres: ArchiveCreditsListeDto[] = [];
   creditsPagines: ArchiveCreditsListeDto[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
+  selectedCredit: ArchiveCreditDetailResponse = null;
+  showDetails: boolean = false;
 
   constructor(
     private dp: DatePipe,
     private archiveService: ArchiveService
   ) {}
+
+  private isDetailsLoading = false;
+
+  onCreditSelect(credit: ArchiveCreditsListeDto): void {
+    if (this.isDetailsLoading || !credit.num_contrat_credit || !credit.date_declaration) {
+      return;
+    }
+
+    this.isDetailsLoading = true;
+    this.errorMessage = '';
+    this.isLoading = true;
+
+    // Add a small delay to prevent UI flickering for fast responses
+    const startTime = Date.now();
+    const minLoadingTime = 300; // 300ms minimum loading time
+
+    this.archiveService.getDetailsCreditArchive(
+      credit.num_contrat_credit,
+      new Date(credit.date_declaration)
+    ).subscribe({
+      next: (response) => {
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsed);
+        
+        setTimeout(() => {
+          this.selectedCredit = response;
+          this.showDetails = true;
+          this.isLoading = false;
+          this.isDetailsLoading = false;
+        }, remainingTime);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des détails du crédit:', error);
+        this.errorMessage = 'Impossible de charger les détails du crédit. Veuillez réessayer.';
+        this.isLoading = false;
+        this.isDetailsLoading = false;
+      }
+    });
+  }
+
+  onCloseDetails(): void {
+    this.showDetails = false;
+    this.selectedCredit = null;
+  }
 
   ngOnInit(): void {
     this.chargerCreditsArchives();
@@ -44,9 +91,9 @@ export class CreditsArchiveComponent implements OnInit {
       next: (data) => {
         this.credits = data;
         this.creditsFiltres = [...this.credits];
+        this.extraireDatesDeclaration();
         this.updatePaginatedData();
         this.isLoading = false;
-        console.log(this.credits);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des crédits archivés:', error);
@@ -57,48 +104,63 @@ export class CreditsArchiveComponent implements OnInit {
     this.updatePaginatedData();
   }
 
-  changerPage(page: number): void {
+  onPageChange(page: number): void {
     this.pageActuelle = page;
     this.updatePaginatedData();
   }
 
   updatePaginatedData(): void {
     const startIndex = (this.pageActuelle - 1) * this.itemsPerPage;
-    this.creditsPagines = this.creditsFiltres.slice(startIndex, startIndex + this.itemsPerPage);
+    const endIndex = startIndex + this.itemsPerPage;
+    this.creditsPagines = this.creditsFiltres.slice(startIndex, endIndex);
     this.totalPages = Math.ceil(this.creditsFiltres.length / this.itemsPerPage);
   }
 
+  private extraireDatesDeclaration(): void {
+    // Extract unique dates for the filter
+    const datesUniques = new Set<string>();
+    this.credits.forEach(credit => {
+      if (credit.date_declaration) {
+        const dateStr = new Date(credit.date_declaration).toISOString().split('T')[0];
+        datesUniques.add(dateStr);
+      }
+    });
+    this.datesDeclaration = Array.from(datesUniques).sort((a, b) => 
+      new Date(b).getTime() - new Date(a).getTime()
+    );
+  }
+
   onSearch(): void {
-    this.applyFilters();
+    const searchLower = this.searchTerm.toLowerCase();
+    
+    if (searchLower) {
+      this.creditsFiltres = this.credits.filter(credit => 
+        (credit.num_contrat_credit && credit.num_contrat_credit.toLowerCase().includes(searchLower)) ||
+        (credit.libelle_type_credit && credit.libelle_type_credit.toLowerCase().includes(searchLower)) ||
+        (credit.libelle_situation && credit.libelle_situation.toLowerCase().includes(searchLower)) ||
+        (credit.libelle_activite && credit.libelle_activite.toLowerCase().includes(searchLower))
+      );
+    } else {
+      this.creditsFiltres = [...this.credits];
+    }
+    
+    this.filtrerParDate();
   }
 
   filtrerParDate(): void {
-    this.applyFilters();
-  }
+    if (!this.selectedDate) {
+      // If no date is selected, keep the current filtered results
+      return;
+    }
 
-  applyFilters(): void {
-    this.creditsFiltres = this.credits.filter(credit => {
-      const searchMatch = !this.searchTerm ||
-        (credit.num_contrat_credit && credit.num_contrat_credit.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-        (credit.libelle_type_credit && credit.libelle_type_credit.toLowerCase().includes(this.searchTerm.toLowerCase()));
-      
-      // Since we don't have a direct date_archivage field, we'll use date_declaration if needed
-      const dateToCheck = credit.date_declaration || '';
-      const dateMatch = (!this.dateDebut || !this.dateFin) ||
-        (new Date(dateToCheck) >= new Date(this.dateDebut) &&
-         new Date(dateToCheck) <= new Date(this.dateFin));
-         
-      return searchMatch && dateMatch;
+    this.creditsFiltres = this.creditsFiltres.filter(credit => {
+      if (!credit.date_declaration) return false;
+      const creditDate = new Date(credit.date_declaration).toISOString().split('T')[0];
+      return creditDate === this.selectedDate;
     });
+    
     this.pageActuelle = 1;
     this.updatePaginatedData();
   }
 
-  telechargerCredit(credit: any): void {
-    // TODO: Implement download logic
-  }
-
-  supprimerCredit(credit: any): void {
-    // TODO: Implement delete logic
-  }
 } 

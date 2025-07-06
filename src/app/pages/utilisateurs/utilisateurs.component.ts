@@ -24,7 +24,7 @@ export class UtilisateursComponent implements OnInit {
   utilisateursPagines: Utilisateur[] = [];
   roles = ROLES;
 
-  currentUserMatricule: string | null = null;
+  utilisateurActuel: string | null = null;
 
   constructor(
     private router: Router, 
@@ -32,7 +32,7 @@ export class UtilisateursComponent implements OnInit {
     private authService: AuthService
   ) {
     const userInfo = this.authService.getUserInfo();
-    this.currentUserMatricule = userInfo?.matricule?.toString() || null;
+    this.utilisateurActuel = userInfo?.matricule?.toString() || null;
   }
 
   utilisateurs: Utilisateur[] = [];
@@ -127,7 +127,7 @@ export class UtilisateursComponent implements OnInit {
     return roleObj ? roleObj.key : role;
   }
 
-  isCurrentUser(user: Utilisateur): boolean {
-    return this.currentUserMatricule === user.matricule.toString();
+  estUtilisateurActuel(utilisateur: Utilisateur): boolean {
+    return this.utilisateurActuel === utilisateur.matricule.toString();
   }
 }

@@ -1,40 +1,41 @@
-<div class="fichiers-container">
+<div class="fichiers-container" [class.details-visible]="showDetails">
   <div class="fichiers-list">
     <div class="header">
       <h1>Crédits Archivés</h1>
     </div>
+    
     <div class="filters">
       <div class="search-box">
         <i class="fas fa-search"></i>
         <input type="text" placeholder="Rechercher un crédit..." [(ngModel)]="searchTerm" (input)="onSearch()">
       </div>
       <div class="date-filters">
-        <div class="date-input">
-          <label>Du:</label>
-          <input type="date" [(ngModel)]="dateDebut" (change)="filtrerParDate()">
-        </div>
-        <div class="date-input">
-          <label>Au:</label>
-          <input type="date" [(ngModel)]="dateFin" (change)="filtrerParDate()">
+        <div class="date-select">
+          <label>Date de Déclaration:</label>
+          <select [(ngModel)]="selectedDate" (change)="filtrerParDate()">
+            <option value="">Toutes les dates</option>
+            <option *ngFor="let date of datesDeclaration" [value]="date">{{date | date:'dd/MM/yyyy'}}</option>
+          </select>
         </div>
       </div>
     </div>
-    <div class="table-responsive">
-      <div *ngIf="isLoading" class="text-center p-3">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-2">Chargement des crédits archivés...</p>
+
+    <div *ngIf="isLoading" class="text-center p-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
       </div>
-      
-      <div *ngIf="!isLoading && errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
-      </div>
-      
-      <table *ngIf="!isLoading" class="table table-striped table-hover">
+      <p class="mt-2">Chargement des crédits archivés...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="table table-striped table-hover">
         <thead>
           <tr>
-            <th>N° Contrat</th>
+            <th class="collante">N° Contrat</th>
             <th>Date Déclaration</th>
             <th>Situation</th>
             <th>Type</th>
@@ -42,7 +43,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let credit of creditsPagines" class="clickable-row">
+          <tr *ngFor="let credit of creditsPagines" 
+              class="clickable-row"
+              (click)="onCreditSelect(credit)"
+              [class.selected]="selectedCredit?.num_contrat_credit === credit.num_contrat_credit">
             <td class="collante">{{credit?.num_contrat_credit || 'N/A'}}</td>
             <td>{{credit?.date_declaration | date:'dd/MM/yyyy' || 'N/A'}}</td>
             <td>{{credit?.libelle_situation || 'N/A'}}</td>
@@ -55,12 +59,21 @@
         </tbody>
       </table>
     </div>
+
     <div class="pagination-container">
       <app-pagination
         [lignesTotales]="creditsFiltres.length"
         [pageActuelle]="pageActuelle"
-        (changeurPage)="changerPage($event)">
+        (changeurPage)="onPageChange($event)">
       </app-pagination>
     </div>
   </div>
-</div> 
+
+  <div class="details-panel" *ngIf="selectedCredit">
+    <app-pret-details 
+      [pret]="selectedCredit"
+      [fromCreditsList]="true"
+      (close)="onCloseDetails()">
+    </app-pret-details>
+  </div>
+</div>

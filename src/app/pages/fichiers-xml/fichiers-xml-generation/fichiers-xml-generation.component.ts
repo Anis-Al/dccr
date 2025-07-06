@@ -37,16 +37,16 @@ export class FichiersXmlGenerationComponent implements OnInit {
   
   chargerFichiersExcel(): void {
     this.isChargementFichiers = true;
-    this.excelService.actualiserMetadonnees()
+    this.excelService.getMetadonneesPourGenerationDeclarations()
       .subscribe({
         next: (fichiers) => {
           this.fichiersExcel = fichiers;
           this.isChargementFichiers = false;
         },
         error: (error) => {
-          console.error('Erreur lors du chargement des fichiers Excel', error);
+          console.error('Erreur lors du chargement des métadonnées pour la génération des déclarations', error);
           this.isChargementFichiers = false;
-          this.messageErreur = 'Impossible de charger la liste des fichiers Excel.';
+          this.messageErreur = 'Impossible de charger les métadonnées pour la génération des déclarations.';
         }
       });
   }

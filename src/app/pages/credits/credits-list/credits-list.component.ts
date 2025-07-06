@@ -73,7 +73,6 @@ export class CreditsListComponent implements OnInit {
   }
 
   filtrerParDate() {
-    // Reset to first page and update pagination
     this.pageActuelle = 1;
     this.updatePagination();
   }
@@ -125,7 +124,6 @@ export class CreditsListComponent implements OnInit {
       });
     }
 
-    // Apply excel file filter if selected
     if (this.selectedExcelFile?.id_fichier_excel) {
       filteredCredits = filteredCredits.filter((credit: CreditDto) => 
         credit.id_excel === this.selectedExcelFile.id_fichier_excel

@@ -1,42 +1,57 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { 
   ArchiveExcelMetadonneesDto, 
   ArchiveXmlDto, 
-  ArchiveCreditsListeDto 
+  ArchiveCreditsListeDto,
+  ArchiveCreditDetailResponse 
 } from '../dtos/archive-dtos';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ArchiveService {
-  private apiUrl = environment.apiBaseUrl;
+  private readonly apiUrl = environment.apiBaseUrl;
+  private readonly endpoints = environment.endpoints.archives;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  /**
-   * Récupère tous les fichiers Excel archivés
-   * @returns Observable contenant la liste des fichiers Excel archivés
-   */
   getFichiersExcelArchives(): Observable<ArchiveExcelMetadonneesDto[]> {
-    return this.http.get<ArchiveExcelMetadonneesDto[]>(`${this.apiUrl}${environment.endpoints.archives.fichiersExcel}`);
+    return this.http.get<ArchiveExcelMetadonneesDto[]>(
+      `${this.apiUrl}${this.endpoints.fichiersExcel}`
+    );
   }
 
-  /**
-   * Récupère tous les fichiers XML archivés
-   * @returns Observable contenant la liste des fichiers XML archivés
-   */
   getFichiersXmlArchives(): Observable<ArchiveXmlDto[]> {
-    return this.http.get<ArchiveXmlDto[]>(`${this.apiUrl}${environment.endpoints.archives.fichiersXml}`);
+    return this.http.get<ArchiveXmlDto[]>(
+      `${this.apiUrl}${this.endpoints.fichiersXml}`
+    );
   }
 
-  /**
-   * Récupère tous les crédits archivés
-   * @returns Observable contenant la liste des crédits archivés
-   */
   getCreditsArchives(): Observable<ArchiveCreditsListeDto[]> {
-    return this.http.get<ArchiveCreditsListeDto[]>(`${this.apiUrl}${environment.endpoints.archives.credits}`);
+    return this.http.get<ArchiveCreditsListeDto[]>(
+      `${this.apiUrl}${this.endpoints.credits}`
+    );
+  }
+
+  getDetailsCreditArchive(
+    numContrat: string | null = null, 
+    dateDeclaration: Date | null = null
+  ): Observable<ArchiveCreditDetailResponse> {
+    let params = new HttpParams();
+    
+    if (numContrat) params = params.append('numContrat', numContrat);
+    if (dateDeclaration) {
+      params = params.append('dateDeclaration', this.formatDate(dateDeclaration));
+    }
+    
+    return this.http.get<ArchiveCreditDetailResponse>(
+      `${this.apiUrl}${this.endpoints.creditDetails}`,
+      { params }
+    );
+  }
+
+  private formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 }

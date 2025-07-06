@@ -1,3 +1,5 @@
+import { CreditDto } from './Credits/credits';
+
 export interface ArchiveExcelMetadonneesDto {
   idFichierExcel: number;
   nomFichierExcel: string;
@@ -5,6 +7,7 @@ export interface ArchiveExcelMetadonneesDto {
   dateHeureIntegrationExcel: Date;
   integrateur: string;
 }
+
 export interface ArchiveXmlDto {
   idFichierXml: number;
   nomFichierCorrection: string;
@@ -23,3 +26,9 @@ export interface ArchiveCreditsListeDto {
   libelle_situation: string | null;
   id_excel: number | null;
 }
+
+export interface ArchiveCreditDetailDto extends CreditDto {
+
+}
+
+export type ArchiveCreditDetailResponse = ArchiveCreditDetailDto | null;

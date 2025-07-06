@@ -10,8 +10,10 @@ export const environment = {
       integrationPart2:'Excel/confirmer-integration',
       exportationErreurs: 'Excel/exporter-erreurs-excel', 
       tousLesFichiersExcelEnCours: 'Excel/get-tous-metadonnes-excel',
+      getMetadonneesPourGenerationDeclarations: 'Excel/get-metadonnes-pour-generation-declarations',
       telechargerModele:'',
       supprimerFichierExcel:'Excel/supprimer-fichier-excel',
+      exporterDonnees: 'Excel/exporter-donnees',
     },
     credits: {
       tousLesCreditsEnCours: 'credits',
@@ -43,7 +45,8 @@ export const environment = {
     archives: {
       fichiersExcel: 'archives/fichiers-excel',
       fichiersXml: 'archives/fichiers-xml',
-      credits: 'archives/credits'
+      credits: 'archives/credits',
+      creditDetails: 'archives/credit/details'
     }  
   }
 };

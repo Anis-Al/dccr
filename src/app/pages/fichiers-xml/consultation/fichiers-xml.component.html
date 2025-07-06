@@ -4,7 +4,7 @@
         <h1>Déclarations BA En Cours</h1>
         <div class="header-actions">
           <button class="btn btn-primary"         
-            *siRole="['generateurDeclarations','demo']"
+            *siRole="['generateurDeclarations']"
             (click)="naviguerVersGeneration()">
             <i class="fas fa-plus"></i>
             <span>Générer une déclaration</span>
@@ -39,7 +39,7 @@
               <th>Date Géneration</th>
               <th>Nb Crédits</th>
               <th>Générateur</th>
-              <th class="actions-header"  *siRole="['generateurDeclarations','demo']">Actions</th>
+              <th class="actions-header"  *siRole="['generateurDeclarations']">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -50,7 +50,7 @@
               <td>{{fichier?.dateHeureGenerationXml | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{fichier?.nbCredits || 'N/A'}}</td>
               <td>{{fichier?.nomUtilisateurGenerateur || 'N/A'}}</td>
-              <td class="actions-cell"  *siRole="['generateurDeclarations','demo']">
+              <td class="actions-cell"  *siRole="['generateurDeclarations']">
                 <div class="tooltip-container button-group">
                   <button 
                     (click)="telechargerLesFichiersDeCetteInstance(fichier)" 

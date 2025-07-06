@@ -131,7 +131,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
         };
       }
       return item;
-    }).filter(item => !item.children || item.children.length > 0); // Remove parent items with no visible children
+    }).filter(item => !item.children || item.children.length > 0); 
   }
 
   private configurerSuiviNavigation() {

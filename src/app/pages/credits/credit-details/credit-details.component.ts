@@ -4,7 +4,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CreditDto, CreditsListeDto } from '../../../core/dtos/Credits/credits';
 import { CreditStateService } from '../../../core/services/credits/credit-state.service';
 import { CreditsService } from '../../../core/services/credits/credits.service';
-import { catchError } from 'rxjs/operators';
+import { ArchiveService } from '../../../core/services/archive.service';
+import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SiRoleDirective } from '../../../core/directives/si-role.directive';
 import { DevisePipe } from '../devise.pipe';
@@ -28,12 +29,17 @@ export class CreditDetailsComponent implements OnInit {
   error: string | null = null;
   creditDetails: CreditDto | null = null;
 
+  private isArchiveView: boolean = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private creditStateService: CreditStateService,
-    private creditsService: CreditsService
-  ) {}
+    private creditsService: CreditsService,
+    private archiveService: ArchiveService
+  ) {
+    this.isArchiveView = this.router.url.includes('archives');
+  }
 
   ngOnInit() {
     if (this.pret?.num_contrat_credit && this.pret?.date_declaration) {
@@ -48,26 +54,38 @@ export class CreditDetailsComponent implements OnInit {
   private loadCreditDetails(numContrat: string, dateDeclaration: string): void {
     this.isLoading = true;
     this.error = null;
-    const formattedDate = formatDate(dateDeclaration, 'yyyy-MM-dd', 'en-US');
-    const date = new Date(formattedDate);
     
-    this.creditsService.getCreditDetails(numContrat, date)
-      .pipe(
-        catchError((error: any) => {
+    try {
+      const formattedDate = formatDate(dateDeclaration, 'yyyy-MM-dd', 'en-US');
+      const date = new Date(formattedDate);
+      
+      const loadDetails$ = this.isArchiveView 
+        ? this.archiveService.getDetailsCreditArchive(numContrat, date)
+        : this.creditsService.getCreditDetails(numContrat, date).pipe(
+            map((response: any) => Array.isArray(response) ? response[0] : response)
+          );
+      
+      loadDetails$.subscribe({
+        next: (response: any) => {
+          this.creditDetails = response || null;
+          
+          if (!this.creditDetails) {
+            this.error = 'Aucun détail de crédit trouvé';
+          }
+          
+          this.isLoading = false;
+        },
+        error: (error: any) => {
           this.error = 'Erreur lors du chargement des détails du crédit';
-          console.error('Error loading credit details:', error);
-          return of([]);
-        })
-      )
-      .subscribe((credits: any) => {
-        this.creditDetails = (Array.isArray(credits) && credits.length > 0) ? credits[0] : null;
-        
-        if (!this.creditDetails) {
-          this.error = 'Aucun détail de crédit trouvé';
+          console.error('Erreur lors du chargement des détails du crédit:', error);
+          this.isLoading = false;
         }
-        
-        this.isLoading = false;
       });
+    } catch (error) {
+      console.error('Erreur lors du formatage de la date:', error);
+      this.error = 'Format de date invalide';
+      this.isLoading = false;
+    }
   }
 
   onClose() {
